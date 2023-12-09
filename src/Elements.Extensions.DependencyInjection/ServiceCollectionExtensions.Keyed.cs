@@ -30,11 +30,12 @@ public static partial class ServiceCollectionExtensions
                 ?? typeof(void)))
             .DistinctBy(kvp => kvp.Key).ToArray;
         
-        return services.Add(new []{ new ServiceDescriptor(
+        services.Add(new ServiceDescriptor(
             typeof(IServiceKeyCollection<TService>),
             _ => new ServiceKeyCollection<TService>(serviceKeyFactory()),
             lifetime
-            ) });
-        
+            ));
+
+        return services;
     }
 }
