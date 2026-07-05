@@ -1,7 +1,7 @@
 using System.Collections;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Elements.Extensions.DependencyInjection.KeyedServices;
+namespace HedgeCraft.Elements.Extensions.DependencyInjection.KeyedServices;
 
 public sealed class KeyedServiceCollection<TService>: IKeyedServiceCollection<TService> where TService: notnull
 {

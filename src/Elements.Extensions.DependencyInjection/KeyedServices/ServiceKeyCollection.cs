@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace Elements.Extensions.DependencyInjection.KeyedServices;
+namespace HedgeCraft.Elements.Extensions.DependencyInjection.KeyedServices;
 
 public class ServiceKeyCollection<TService>(IReadOnlyCollection<KeyValuePair<object, Type>> keys)
     : IServiceKeyCollection<TService>

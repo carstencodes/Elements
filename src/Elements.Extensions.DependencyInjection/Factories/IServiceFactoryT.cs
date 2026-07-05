@@ -1,4 +1,4 @@
-namespace Elements.Extensions.DependencyInjection.Factories;
+namespace HedgeCraft.Elements.Extensions.DependencyInjection.Factories;
 
 public interface IServiceFactory<out TService, in T1>
 {

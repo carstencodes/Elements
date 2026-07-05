@@ -1,7 +1,7 @@
-using Elements.Extensions.DependencyInjection.Factories;
+using HedgeCraft.Elements.Extensions.DependencyInjection.Factories;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Elements.Extensions.DependencyInjection;
+namespace HedgeCraft.Elements.Extensions.DependencyInjection;
 
 public static partial class ServiceCollectionExtensions
 {

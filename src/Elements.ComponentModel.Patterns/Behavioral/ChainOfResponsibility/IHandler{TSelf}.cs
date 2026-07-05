@@ -1,4 +1,4 @@
-namespace Elements.ComponentModel.Patterns.Behavioral.ChainOfResponsibility;
+namespace HedgeCraft.Elements.ComponentModel.Patterns.Behavioral.ChainOfResponsibility;
 
 public interface IHandler<out TSelf> where TSelf: IHandler<TSelf>
 {

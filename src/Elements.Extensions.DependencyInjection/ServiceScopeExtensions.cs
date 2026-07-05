@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Elements.Extensions.DependencyInjection;
+namespace HedgeCraft.Elements.Extensions.DependencyInjection;
 
 public static class ServiceScopeExtensions
 {

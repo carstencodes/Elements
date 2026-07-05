@@ -1,8 +1,8 @@
-using Elements.Extensions.DependencyInjection.KeyedServices;
+using HedgeCraft.Elements.Extensions.DependencyInjection.KeyedServices;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Elements.Extensions.DependencyInjection;
+namespace HedgeCraft.Elements.Extensions.DependencyInjection;
 
 public static partial class ServiceCollectionExtensions
 {
