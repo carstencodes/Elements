@@ -1,8 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
-using Elements.Extensions.DependencyInjection.Factories;
+using HedgeCraft.Elements.Extensions.DependencyInjection.Factories;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Elements.Extensions.DependencyInjection;
+namespace HedgeCraft.Elements.Extensions.DependencyInjection;
 
 internal static class ServiceProviderExtensions
 {

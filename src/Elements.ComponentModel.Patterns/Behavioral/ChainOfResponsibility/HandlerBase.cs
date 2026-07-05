@@ -1,6 +1,7 @@
+using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace Elements.ComponentModel.Patterns.Behavioral.ChainOfResponsibility;
+namespace HedgeCraft.Elements.ComponentModel.Patterns.Behavioral.ChainOfResponsibility;
 
 public abstract class HandlerBase
 {

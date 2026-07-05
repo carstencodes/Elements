@@ -1,4 +1,6 @@
-namespace Elements.ComponentModel.Patterns.Behavioral.ChainOfResponsibility;
+using System;
+
+namespace HedgeCraft.Elements.ComponentModel.Patterns.Behavioral.ChainOfResponsibility;
 
 public readonly struct HandlerChainLink<TResult>: IHandler<HandlerChainLink<TResult>, TResult>, IEquatable<HandlerChainLink<TResult>> where TResult: notnull
 {

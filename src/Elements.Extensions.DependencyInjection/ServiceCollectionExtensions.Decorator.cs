@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace Elements.Extensions.DependencyInjection;
+namespace HedgeCraft.Elements.Extensions.DependencyInjection;
 
 public static partial class ServiceCollectionExtensions
 {

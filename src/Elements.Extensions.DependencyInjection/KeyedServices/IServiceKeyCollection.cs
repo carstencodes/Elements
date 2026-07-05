@@ -1,4 +1,4 @@
-namespace Elements.Extensions.DependencyInjection.KeyedServices;
+namespace HedgeCraft.Elements.Extensions.DependencyInjection.KeyedServices;
 
 public interface IServiceKeyCollection<in TService>: IReadOnlyCollection<object> where TService: notnull
 {

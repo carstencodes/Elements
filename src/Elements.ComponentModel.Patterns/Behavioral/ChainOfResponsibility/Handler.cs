@@ -1,4 +1,6 @@
-namespace Elements.ComponentModel.Patterns.Behavioral.ChainOfResponsibility;
+using System;
+
+namespace HedgeCraft.Elements.ComponentModel.Patterns.Behavioral.ChainOfResponsibility;
 
 public sealed class Handler: HandlerBase
 {
