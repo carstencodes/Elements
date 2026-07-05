@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <AssemblyName>HedgeCraft.$(MSBuildProjectName)</AssemblyName>
+    <PackageId>HedgeCraft.$(MSBuildProjectName)</PackageId>
+    <RootNamespace>HedgeCraft.$(MSBuildProjectName)</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TargetFrameworks>net10.0;net8.0</TargetFrameworks>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
