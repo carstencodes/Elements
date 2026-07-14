@@ -1,3 +1,5 @@
+using System;
+
 namespace HedgeCraft.Elements.Extensions.DependencyInjection.Factories;
 
 internal sealed class ServiceFactory<TService, T1>: IServiceFactory<TService, T1>

@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace HedgeCraft.Elements.Extensions.DependencyInjection.KeyedServices;
 
 public interface IKeyedServiceCollection<out TService>: IReadOnlyCollection<TService> where TService: notnull
