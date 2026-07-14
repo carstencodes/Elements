@@ -11,6 +11,10 @@ public abstract class HandlerBase
         public HandlerReachedEndOfChainException(string message) : base(message)
         {
         }
+
+        public HandlerReachedEndOfChainException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
     }
 
     [DoesNotReturn]
