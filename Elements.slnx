@@ -3,6 +3,7 @@
     <Project Path="src/Elements.CommandLine/Elements.CommandLine.csproj" />
   </Folder>
   <Project Path="src/Elements.ComponentModel.Patterns/Elements.ComponentModel.Patterns.csproj" />
+  <Project Path="src/Elements.Extensions.Configuration.CommandLine/Elements.Extensions.Configuration.CommandLine.csproj" />
   <Project Path="src/Elements.Extensions.DependencyInjection/Elements.Extensions.DependencyInjection.csproj" />
   <Project Path="src/Elements.IO.Compression/Elements.IO.Compression.csproj" />
   <Project Path="src/Elements.IO/Elements.IO.csproj" />
