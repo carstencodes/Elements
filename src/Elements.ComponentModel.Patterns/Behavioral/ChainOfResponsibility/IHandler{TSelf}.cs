@@ -1,3 +1,8 @@
+// SPDX-Identifier: MIT
+//
+// (C) 2023-2026 Carsten Igel.
+// Published under MIT License
+
 namespace HedgeCraft.Elements.ComponentModel.Patterns.Behavioral.ChainOfResponsibility;
 
 public interface IHandler<out TSelf> where TSelf : IHandler<TSelf>

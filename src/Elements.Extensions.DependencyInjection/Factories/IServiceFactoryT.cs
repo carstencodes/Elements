@@ -1,3 +1,8 @@
+// SPDX-Identifier: MIT
+//
+// (C) 2023-2026 Carsten Igel.
+// Published under MIT License
+
 namespace HedgeCraft.Elements.Extensions.DependencyInjection.Factories;
 
 public interface IServiceFactory<out TService, in T1>
