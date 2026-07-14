@@ -1,7 +1,6 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/Elements.CommandLine/Elements.CommandLine.csproj" />
-  </Folder>
+  <Project Path="gen/Elements.SourceGenerators.ToolShim/Elements.SourceGenerators.ToolShim.csproj" />
+  <Project Path="src/Elements.CommandLine/Elements.CommandLine.csproj" />
   <Project Path="src/Elements.ComponentModel.Patterns/Elements.ComponentModel.Patterns.csproj" />
   <Project Path="src/Elements.Extensions.Configuration.CommandLine/Elements.Extensions.Configuration.CommandLine.csproj" />
   <Project Path="src/Elements.Extensions.DependencyInjection/Elements.Extensions.DependencyInjection.csproj" />
