@@ -39,6 +39,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <AdditionalFiles Include="$(MsBuildThisFileDirectory)\build\BannedSymbols.txt" />
+    <AdditionalFiles Include="$(MsBuildProjectDirectory)\BannedSymbols.txt" Condition="Exists('$(MsBuildProjectDirectory)\BannedSymbols.txt')" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Include="$(MsBuildProjectDirectory)\ReadMe.md" Visible="false" Pack="true" PackagePath="$(PackageReadme)" Condition="Exists('$(MsBuildProjectDirectory)\ReadMe.md')" />
     <None Include="$(MsBuildThisFileDirectory)\ReadMe.md" Visible="false" Pack="true" PackagePath="$(PackageReadme)" Condition="!Exists('$(MsBuildProjectDirectory)\ReadMe.md')" />
   </ItemGroup>
