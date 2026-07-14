@@ -12,6 +12,7 @@
     <Company>HedgeCraft Elements OSS</Company>
     <Copyright>&#169; 2023-$([System.DateTime]::UtcNow.Year) Carsten Igel and the Elements Contributors</Copyright>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageIcon>ElementsIcon.png</PackageIcon>
     <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
     <PackageTags>HedgeCraft Elements</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -44,6 +45,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="$(MsBuildThisFileDirectory)resources\icons\icon_flat.png" Visible="false" Pack="true" PackagePath="$(PackageIcon)" />
     <None Include="$(MsBuildProjectDirectory)\ReadMe.md" Visible="false" Pack="true" PackagePath="$(PackageReadme)" Condition="Exists('$(MsBuildProjectDirectory)\ReadMe.md')" />
     <None Include="$(MsBuildThisFileDirectory)\ReadMe.md" Visible="false" Pack="true" PackagePath="$(PackageReadme)" Condition="!Exists('$(MsBuildProjectDirectory)\ReadMe.md')" />
   </ItemGroup>
