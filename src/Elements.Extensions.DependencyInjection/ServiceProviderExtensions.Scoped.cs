@@ -1,3 +1,8 @@
+// SPDX-Identifier: MIT
+//
+// (C) 2023-2026 Carsten Igel.
+// Published under MIT License
+
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
