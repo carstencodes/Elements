@@ -9,5 +9,21 @@ indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
 
+# Solution files
+[*.slnx]
+indent_size = 2
+
+# Visual Studio XML Project Files
+[*.{csproj,vbproj,vcxproj.filters,proj,projitems,shproj}]
+indent_size = 2
+
+# XML Configuration Files
+[*.{xml,config,props,targets,nuspec,resx,ruleset,vsixmanifest,vsct}]
+indent_size = 2
+
+# JSON Files
+[*.{json,json5,webmanifest}]
+indent_size = 2
+
 [*.cs]
 dotnet_public_api_analyzer.require_api_files = true
