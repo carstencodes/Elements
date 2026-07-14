@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="gen/Elements.SourceGenerators.Scriban/Elements.SourceGenerators.Scriban.csproj" />
   <Project Path="gen/Elements.SourceGenerators.ToolShim/Elements.SourceGenerators.ToolShim.csproj" />
   <Project Path="src/Elements.CommandLine/Elements.CommandLine.csproj" />
   <Project Path="src/Elements.ComponentModel.Patterns/Elements.ComponentModel.Patterns.csproj" />
