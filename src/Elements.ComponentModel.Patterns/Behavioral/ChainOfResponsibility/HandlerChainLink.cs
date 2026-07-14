@@ -69,21 +69,6 @@ public readonly struct HandlerChainLink : IHandler<HandlerChainLink>, IEquatable
         throw new NotSupportedException("This should never happen");
     }
 
-<<<<<<< TODO: Unmerged change from project 'Elements.ComponentModel.Patterns(net8.0)', Before:
-}
-=======
-    public static bool operator ==(HandlerChainLink left, HandlerChainLink right)
-    {
-        return left.Equals(right);
-    }
-
-    public static bool operator !=(HandlerChainLink left, HandlerChainLink right)
-    {
-        return !(left == right);
-    }
-}
->>>>>>> After
-
     public static bool operator ==(HandlerChainLink left, HandlerChainLink right)
     {
         return left.Equals(right);
