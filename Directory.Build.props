@@ -8,6 +8,15 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <Authors>Carsten Igel; Elements Contributors</Authors>
+    <Company>HedgeCraft Elements OSS</Company>
+    <Copyright>&#169; 2023-$([System.DateTime]::UtcNow.Year) Carsten Igel and the Elements Contributors</Copyright>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageTags>HedgeCraft Elements</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <TargetFrameworks>net10.0;net8.0</TargetFrameworks>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
