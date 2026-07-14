@@ -10,7 +10,7 @@ internal static class ServiceProviderExtensions
 {
     // based upon https://greatrexpectations.com/2018/10/25/decorators-in-net-core-with-dependency-injection
     // and https://blog.greatrexpectations.com/2018/11/07/composite-pattern-in-net-core-with-dependency-injection
-    
+
     internal static object CreateInstance(this IServiceProvider services, ServiceDescriptor descriptor)
     {
         if (descriptor.ImplementationInstance is not null)
@@ -25,7 +25,7 @@ internal static class ServiceProviderExtensions
 
         if (descriptor.ImplementationType is not null)
         {
-            return ActivatorUtilities.GetServiceOrCreateInstance(services, descriptor.ImplementationType);    
+            return ActivatorUtilities.GetServiceOrCreateInstance(services, descriptor.ImplementationType);
         }
 
         throw new InvalidOperationException("Specified service descriptor does not provide required information.");
@@ -44,7 +44,7 @@ internal static class ServiceProviderExtensions
         {
             return factoryClass.CreateInstance;
         }
-        
+
         return (_) => NoValidProviderRegistered<TService>(typeof(T1));
     }
     internal static Func<T1, T2, TService> FindRequiredServiceFactory<TService, T1, T2>(this IServiceProvider serviceProvider)
@@ -60,10 +60,10 @@ internal static class ServiceProviderExtensions
         {
             return factoryClass.CreateInstance;
         }
-        
+
         return (_, _) => NoValidProviderRegistered<TService>(typeof(T1), typeof(T2));
     }
-    
+
     internal static Func<T1, T2, T3, TService> FindRequiredServiceFactory<TService, T1, T2, T3>(this IServiceProvider serviceProvider)
     {
         Func<T1, T2, T3, TService>? factoryFunction = serviceProvider.GetService<Func<T1, T2, T3, TService>>();
@@ -77,10 +77,10 @@ internal static class ServiceProviderExtensions
         {
             return factoryClass.CreateInstance;
         }
-        
+
         return (_, _, _) => NoValidProviderRegistered<TService>(typeof(T1), typeof(T2), typeof(T3));
     }
-    
+
     internal static Func<T1, T2, T3, T4, TService> FindRequiredServiceFactory<TService, T1, T2, T3, T4>(this IServiceProvider serviceProvider)
     {
         Func<T1, T2, T3, T4, TService>? factoryFunction = serviceProvider.GetService<Func<T1, T2, T3, T4, TService>>();
@@ -94,10 +94,10 @@ internal static class ServiceProviderExtensions
         {
             return factoryClass.CreateInstance;
         }
-        
+
         return (_, _, _, _) => NoValidProviderRegistered<TService>(typeof(T1), typeof(T2), typeof(T3), typeof(T4));
     }
-    
+
     internal static Func<T1, T2, T3, T4, T5, TService> FindRequiredServiceFactory<TService, T1, T2, T3, T4, T5>(this IServiceProvider serviceProvider)
     {
         Func<T1, T2, T3, T4, T5, TService>? factoryFunction = serviceProvider.GetService<Func<T1, T2, T3, T4, T5, TService>>();
@@ -111,10 +111,10 @@ internal static class ServiceProviderExtensions
         {
             return factoryClass.CreateInstance;
         }
-        
+
         return (_, _, _, _, _) => NoValidProviderRegistered<TService>(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5));
     }
-    
+
     internal static Func<T1, T2, T3, T4, T5, T6, TService> FindRequiredServiceFactory<TService, T1, T2, T3, T4, T5, T6>(this IServiceProvider serviceProvider)
     {
         Func<T1, T2, T3, T4, T5, T6, TService>? factoryFunction = serviceProvider.GetService<Func<T1, T2, T3, T4, T5, T6, TService>>();
@@ -128,10 +128,10 @@ internal static class ServiceProviderExtensions
         {
             return factoryClass.CreateInstance;
         }
-        
+
         return (_, _, _, _, _, _) => NoValidProviderRegistered<TService>(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6));
     }
-    
+
     internal static Func<T1, T2, T3, T4, T5, T6, T7, TService> FindRequiredServiceFactory<TService, T1, T2, T3, T4, T5, T6, T7>(this IServiceProvider serviceProvider)
     {
         Func<T1, T2, T3, T4, T5, T6, T7, TService>? factoryFunction = serviceProvider.GetService<Func<T1, T2, T3, T4, T5, T6, T7, TService>>();
@@ -145,7 +145,7 @@ internal static class ServiceProviderExtensions
         {
             return factoryClass.CreateInstance;
         }
-        
+
         return (_, _, _, _, _, _, _) => NoValidProviderRegistered<TService>(typeof(T1), typeof(T2), typeof(T3), typeof(T4), typeof(T5), typeof(T6), typeof(T7));
     }
 

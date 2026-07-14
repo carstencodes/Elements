@@ -5,10 +5,16 @@ namespace HedgeCraft.Elements.ComponentModel.Patterns.Behavioral.ChainOfResponsi
 
 public abstract class HandlerBase
 {
-    private sealed class HandlerReachedEndOfChainException()
-        : Exception("The handler has no other handler in its chain");
-    
-    [DoesNotReturn]internal static void StopHandling()
+    public sealed class HandlerReachedEndOfChainException()
+        : Exception("The handler has no other handler in its chain")
+    {
+        public HandlerReachedEndOfChainException(string message) : base(message)
+        {
+        }
+    }
+
+    [DoesNotReturn]
+    internal static void StopHandling()
     {
         throw new HandlerReachedEndOfChainException();
     }

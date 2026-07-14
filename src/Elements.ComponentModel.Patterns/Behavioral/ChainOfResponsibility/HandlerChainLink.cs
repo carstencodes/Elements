@@ -2,24 +2,24 @@ using System;
 
 namespace HedgeCraft.Elements.ComponentModel.Patterns.Behavioral.ChainOfResponsibility;
 
-public readonly struct HandlerChainLink: IHandler<HandlerChainLink>, IEquatable<HandlerChainLink>
+public readonly struct HandlerChainLink : IHandler<HandlerChainLink>, IEquatable<HandlerChainLink>
 {
     private readonly Action handleRequest;
     private readonly Func<bool> canHandleRequest;
-    
+
     public static readonly HandlerChainLink None = new(Nothing, Never);
-    
-    public HandlerChainLink(Action handleRequest, Func<bool> canHandleRequest, HandlerChainLink next): this(handleRequest, canHandleRequest)
+
+    public HandlerChainLink(Action handleRequest, Func<bool> canHandleRequest, HandlerChainLink next) : this(handleRequest, canHandleRequest)
     {
         this.Next = next;
     }
-    
+
     public HandlerChainLink(Action handleRequest, Func<bool> canHandleRequest)
     {
         this.handleRequest = handleRequest;
         this.canHandleRequest = canHandleRequest;
     }
-    
+
     public bool CanHandleCurrentRequest()
     {
         return this.canHandleRequest();
@@ -46,17 +46,17 @@ public readonly struct HandlerChainLink: IHandler<HandlerChainLink>, IEquatable<
 
     bool IEquatable<HandlerChainLink>.Equals(HandlerChainLink other)
     {
-        return handleRequest.Equals(other.handleRequest) && canHandleRequest.Equals(other.canHandleRequest) && Next.Equals(other.Next);
+        return this.handleRequest.Equals(other.handleRequest) && this.canHandleRequest.Equals(other.canHandleRequest) && this.Next.Equals(other.Next);
     }
 
     public override bool Equals(object? obj)
     {
-        return obj is HandlerChainLink other && Equals(other);
+        return obj is HandlerChainLink other && this.Equals(other);
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(handleRequest, canHandleRequest, Next);
+        return HashCode.Combine(this.handleRequest, this.canHandleRequest, this.Next);
     }
 
     private static bool Never()
@@ -67,5 +67,30 @@ public readonly struct HandlerChainLink: IHandler<HandlerChainLink>, IEquatable<
     private static void Nothing()
     {
         throw new NotSupportedException("This should never happen");
+    }
+
+<<<<<<< TODO: Unmerged change from project 'Elements.ComponentModel.Patterns(net8.0)', Before:
+}
+=======
+    public static bool operator ==(HandlerChainLink left, HandlerChainLink right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(HandlerChainLink left, HandlerChainLink right)
+    {
+        return !(left == right);
+    }
+}
+>>>>>>> After
+
+    public static bool operator ==(HandlerChainLink left, HandlerChainLink right)
+    {
+        return left.Equals(right);
+    }
+
+    public static bool operator !=(HandlerChainLink left, HandlerChainLink right)
+    {
+        return !(left == right);
     }
 }

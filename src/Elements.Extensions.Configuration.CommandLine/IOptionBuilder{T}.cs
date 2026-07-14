@@ -6,7 +6,7 @@ using System.CommandLine.Parsing;
 
 namespace HedgeCraft.Elements.Extensions.Configuration.CommandLine;
 
-public interface IOptionBuilder<T> where T: notnull
+public interface IOptionBuilder<T> where T : notnull
 {
     IOptionBuilder<T> UsingValidFileNames();
 
@@ -33,7 +33,7 @@ public interface IOptionBuilder<T> where T: notnull
     IOptionBuilder<T> WithHelpText(string helpText);
 
     IOptionBuilder<T> AsHidden();
-    
+
     IOptionBuilder<T> AsNotHidden();
 
     IOptionBuilder<T> AsRequired();

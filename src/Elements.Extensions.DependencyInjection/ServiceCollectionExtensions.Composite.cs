@@ -18,10 +18,10 @@ public static partial class ServiceCollectionExtensions
         {
             return objectFactory(serviceProvider);
         }
-        
+
         services.AddComposite<TInterface, TComposite>(CreateFromServiceProvider);
     }
-    
+
     public static void AddComposite<TInterface, TComposite>(this IServiceCollection services, ObjectFactory<TComposite> objectFactory)
         where TInterface : notnull
         where TComposite : class, TInterface
@@ -40,8 +40,8 @@ public static partial class ServiceCollectionExtensions
         }
 
         Func<IServiceProvider, IReadOnlyCollection<ServiceDescriptor>, object[]> createReplacedInstances =
-            CreateAnonymousInstancesFromServiceDescriptors<TInterface>; 
-        
+            CreateAnonymousInstancesFromServiceDescriptors<TInterface>;
+
         ServiceDescriptor newServiceDescriptor = ServiceDescriptor.Describe(
             typeof(TInterface),
             sp => objectFactory(
@@ -49,7 +49,7 @@ public static partial class ServiceCollectionExtensions
                 createReplacedInstances(sp, replacedDescriptors)
                 ),
             selectedLifetime);
-        
+
         services.Add(newServiceDescriptor);
     }
 
@@ -68,9 +68,9 @@ public static partial class ServiceCollectionExtensions
     {
         return services.Where(s => s.ServiceType == typeof(TInterface)).ToArray();
     }
-    
+
     private static object[] CreateAnonymousInstancesFromServiceDescriptors<TInterface>(IServiceProvider serviceProvider, IReadOnlyCollection<ServiceDescriptor> serviceDescriptors)
-        where TInterface: notnull
+        where TInterface : notnull
     {
         object InstantiateFromServiceDescriptor(ServiceDescriptor descriptor)
         {
@@ -82,7 +82,7 @@ public static partial class ServiceCollectionExtensions
 
             return concreteInstance;
         }
-        
+
         return serviceDescriptors.Select(InstantiateFromServiceDescriptor).ToArray();
     }
 }

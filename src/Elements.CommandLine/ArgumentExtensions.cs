@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.CommandLine;
 
 namespace HedgeCraft.Elements.CommandLine;
@@ -10,7 +10,7 @@ public static class ArgumentExtensions
         return argument.Derive(name, converter, () => defaultValue);
     }
 
-    public static Argument<T> Derive<T>(this Argument<T> argument, string name , Func<T, T> converter, Func<T> defaultValueFactory) where T : notnull, IParsable<T>
+    public static Argument<T> Derive<T>(this Argument<T> argument, string name, Func<T, T> converter, Func<T> defaultValueFactory) where T : notnull, IParsable<T>
     {
         return new DerivedArgument<T, T>(name, argument, converter, defaultValueFactory);
     }

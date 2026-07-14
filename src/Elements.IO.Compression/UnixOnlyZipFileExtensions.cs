@@ -10,7 +10,7 @@ public static class UnixOnlyZipFileExtensions
     {
         return archive.CreateSymbolicLink(targetFile.FullName, entryName, currentEncoding, level);
     }
-    
+
     public static ZipArchiveEntry CreateSymbolicLink(this ZipArchive archive, string entryName, string targetFilePath, Encoding? currentEncoding = null, CompressionLevel level = default)
     {
         ZipArchiveEntry entry = archive.CreateEntry(entryName, level);

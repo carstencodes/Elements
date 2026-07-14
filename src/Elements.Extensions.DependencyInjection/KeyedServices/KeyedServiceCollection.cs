@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace HedgeCraft.Elements.Extensions.DependencyInjection.KeyedServices;
 
-public sealed class KeyedServiceCollection<TService>: IKeyedServiceCollection<TService> where TService: notnull
+public sealed class KeyedServiceCollection<TService> : IKeyedServiceCollection<TService> where TService : notnull
 {
     private readonly IKeyedServiceProvider provider;
     private readonly IServiceKeyCollection<TService> keys;
@@ -23,10 +23,16 @@ public sealed class KeyedServiceCollection<TService>: IKeyedServiceCollection<TS
 
     IEnumerator IEnumerable.GetEnumerator()
     {
-        return GetEnumerator();
+        return this.GetEnumerator();
     }
 
-    public int Count => this.keys.Count;
+    public int Count
+    {
+        get
+        {
+            return this.keys.Count;
+        }
+    }
 
     public IReadOnlyCollection<object> GetAllKeys()
     {

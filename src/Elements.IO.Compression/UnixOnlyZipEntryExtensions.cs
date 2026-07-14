@@ -9,7 +9,7 @@ public static class UnixOnlyZipEntryExtensions
 {
     private const int SymbolicLinkMarkerFlag = 0xA000;
     private const int ByteShiftToShort = 16;
-    
+
     public static bool IsSymbolicLink(this ZipArchiveEntry entry)
     {
         int attributes = entry.ExternalAttributes;
@@ -17,12 +17,12 @@ public static class UnixOnlyZipEntryExtensions
 
         return (attributes & SymbolicLinkMarkerFlag) == SymbolicLinkMarkerFlag;
     }
-    
+
     public static void MakeSymbolicLinkTo(this ZipArchiveEntry entry, FileInfo targetFile, Encoding? currentEncoding = null)
     {
         entry.MakeSymbolicLinkTo(targetFile.FullName, currentEncoding);
     }
-    
+
     public static void MakeSymbolicLinkTo(this ZipArchiveEntry entry, string targetFilePath, Encoding? currentEncoding = null)
     {
         UnixFileMode fileMode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute
