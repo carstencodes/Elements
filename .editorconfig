@@ -40,5 +40,136 @@ csharp_new_line_before_members_in_object_initializers = true
 csharp_new_line_before_members_in_anonymous_types = true
 csharp_new_line_between_query_expression_clauses = true
 
+# Spacing rules
+csharp_space_before_colon = false:error
+csharp_space_after_colon = true:warning
+
+# Where clause type constraints (e.g., where T : class)
+csharp_space_before_colon_in_where_clause = false:error
+
+# Type constraints after colon
+csharp_space_after_colon_in_where_clause = true:warning
+
+# Case labels (e.g., case 1:)
+csharp_space_before_colon_in_case_label = false:error
+
+# Null-coalescing and conditional expressions
+csharp_space_before_colon_in_conditional_expression = false:error
+csharp_space_after_colon_in_conditional_expression = true:warning
+
+# Label declarations (e.g., label:)
+csharp_space_before_colon_in_label_declaration = false:error
+
 # Braces
 csharp_style_prefer_braces_for_statements = true:error
+
+# ============================================================
+# Rule: 'this' or 'Me' qualifier required for member access
+# Description: Enforces explicit qualification of instance members
+# Documentation: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0004
+# ============================================================
+dotnet_style_qualification_for_field = true:warning
+dotnet_style_qualification_for_method = true:warning
+dotnet_style_qualification_for_property = true:warning
+dotnet_style_qualification_for_event = true:warning
+
+# ============================================================
+# Rule: Fields must not be prefixed with underscore
+# Description: Enforces naming convention without leading underscores
+# Documentation: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0100
+# Note: IDE0100 requires additional configuration below
+# ============================================================
+dotnet_naming_rule.fields_should_not_have_underscore_severity = warning
+dotnet_naming_style.fields_should_not_be_prefixed_with_underscore.required_prefix =
+dotnet_naming_style.fields_should_not_be_prefixed_with_underscore.suffixes =
+dotnet_naming_style.fields_should_not_be_prefixed_with_underscore.capitalization = camel_case
+dotnet_naming_rule.fields_should_not_have_underscore.styles = fields_should_not_be_prefixed_with_underscore
+
+# ============================================================
+# Rule: Constants must start with a capital letter (PascalCase)
+# Description: Enforces PascalCase naming convention for constants
+# Documentation: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0100
+# ============================================================
+dotnet_naming_rule.constants_must_be_pascal_case_severity = warning
+dotnet_naming_style.constants_must_be_pascal_case.capitalization = pascal_case
+dotnet_naming_rule.constants_must_be_pascal_case.styles = constants_must_be_pascal_case
+
+# ============================================================
+# Rule: Discourage expression-bodied members, prefer statement blocks
+# Description: Prefers { } block syntax over => expression syntax for members
+# Documentation: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0018
+# Note: Setting to 'false' discourages expression bodied members in favor of traditional blocks
+# ============================================================
+# Methods - prefer { } blocks over => for methods
+csharp_style_expression_bodied_methods = false:warning
+
+# Constructors - prefer { } blocks over => for constructors
+csharp_style_expression_bodied_constructors = false:warning
+
+# Operators - prefer { } blocks over => for operators
+csharp_style_expression_bodied_operators = false:warning
+
+# Properties - prefer { } blocks over => for properties
+csharp_style_expression_bodied_properties = false:warning
+
+# Indexers - prefer { } blocks over => for indexers
+csharp_style_expression_bodied_indexers = false:warning
+
+# ============================================================
+# Rule: Prefix interfaces with 'I'
+# Description: Enforces 'I' prefix for interface names
+# Documentation: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0100
+# ============================================================
+dotnet_naming_rule.interfaces_must_start_with_I_severity = warning
+dotnet_naming_style.interfaces_must_start_with_I.required_prefix = I
+dotnet_naming_style.interfaces_must_start_with_I.capitalization = pascal_case
+dotnet_naming_rule.interfaces_must_start_with_I.styles = interfaces_must_start_with_I
+
+# ============================================================
+# Rule: Prefix type parameters with 'T'
+# Description: Enforces 'T' prefix for generic type parameters
+# Documentation: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0100
+# ============================================================
+dotnet_naming_rule.type_parameters_must_start_with_T_severity = warning
+dotnet_naming_style.type_parameters_must_start_with_T.required_prefix = T
+dotnet_naming_style.type_parameters_must_start_with_T.capitalization = pascal_case
+dotnet_naming_rule.type_parameters_must_start_with_T.styles = type_parameters_must_start_with_T
+
+# ============================================================
+# Rule: File header comment must be present
+# Description: Requires a copyright/file header comment at the top of each file
+# Documentation: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0007
+# ============================================================
+file_header_template = \n SPDX-Identifier: MIT\n\n (C) 2023-2026 Carsten Igel.\n Published under MIT License \n
+dotnet_style_comment_header_required = true:warning
+
+# ============================================================
+# Rule: Discourage 'var', prefer explicit type declarations with new()
+# Description: Prefers [ExplicitType] variable = new ExplicitType() over var
+# Documentation: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0005
+# Note: Three settings cover all var usage scenarios
+# ============================================================
+# For built-in types (int, string, bool, etc.)
+csharp_style_var_for_builtin_types = false:warning
+
+# When type is apparent (e.g., new MyType())
+csharp_style_var_when_type_is_apparent = false:warning
+
+# When type is not apparent (complex scenarios)
+csharp_style_var_when_type_is_not_apparent = false:warning
+
+# ============================================================
+# Rule: Enforce target-typed new() (omit type after new keyword)
+# Description: Prefers `Type obj = new();` over `Type obj = new Type();`
+# Documentation: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0019
+# Note: Requires C# 9.0+ for target-typed new expressions
+# ============================================================
+csharp_style_prefer_target_typed_new = true:warning
+
+# ============================================================
+# Rule: Enforce file-scoped namespace declarations
+# Description: Prefers namespace declaration without braces (namespace Foo;)
+# Documentation: https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/style-rules/ide0130
+# Note: Requires C# 10+ (SDK-style projects recommended)
+# ============================================================
+csharp_style_namespace_declarations = file_scoped:warning
