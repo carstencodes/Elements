@@ -96,16 +96,6 @@ public sealed class PathInfo : FileSystemInfo
         return new(this.FullName);
     }
 
-<<<<<<< TODO: Unmerged change from project 'Elements.IO(net8.0)', Before:
-}
-=======
-    public static PathInfo Divide(PathInfo left, PathInfo right)
-    {
-        throw new System.NotImplementedException();
-    }
-}
->>>>>>> After
-
     public static PathInfo Divide(PathInfo left, PathInfo right)
     {
         throw new System.NotImplementedException();
