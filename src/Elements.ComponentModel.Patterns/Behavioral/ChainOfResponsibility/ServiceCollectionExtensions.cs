@@ -7,13 +7,13 @@ namespace Microsoft.Extensions.DependencyInjection;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection UseChainOfResponsibility<TService, TServiceHandlerImpl>(this IServiceCollection services, 
-        Func<TService, Action> handlerFunctionFactory, 
+    public static IServiceCollection UseChainOfResponsibility<TService, TServiceHandlerImpl>(this IServiceCollection services,
+        Func<TService, Action> handlerFunctionFactory,
         Func<TService, Func<bool>> canHandleFunctionFactory,
         Func<Handler, TServiceHandlerImpl> serviceFromHandlerFactory,
-        ServiceLifetime lifetime = ServiceLifetime.Transient) 
+        ServiceLifetime lifetime = ServiceLifetime.Transient)
             where TService : notnull
-            where TServiceHandlerImpl: TService
+            where TServiceHandlerImpl : TService
     {
         Handler HandlerFromServices(IEnumerable<TService> serviceInstances)
         {
@@ -38,20 +38,20 @@ public static class ServiceCollectionExtensions
         }
 
         Func<IServiceProvider, object> concreteFactory = sp => CreateNewService(sp);
-        
+
         services.Add(new ServiceDescriptor(typeof(TServiceHandlerImpl), concreteFactory, lifetime));
 
         return services;
     }
-    
-    public static IServiceCollection UseChainOfResponsibility<TService, TServiceHandlerImpl, TResult>(this IServiceCollection services, 
-        Func<TService, Func<TResult>> handlerFunctionFactory, 
+
+    public static IServiceCollection UseChainOfResponsibility<TService, TServiceHandlerImpl, TResult>(this IServiceCollection services,
+        Func<TService, Func<TResult>> handlerFunctionFactory,
         Func<TService, Func<bool>> canHandleFunctionFactory,
         Func<ResultedHandler<TResult>, TServiceHandlerImpl> serviceFromHandlerFactory,
-        ServiceLifetime lifetime = ServiceLifetime.Transient) 
+        ServiceLifetime lifetime = ServiceLifetime.Transient)
         where TService : notnull
-        where TServiceHandlerImpl: TService
-        where TResult: notnull
+        where TServiceHandlerImpl : TService
+        where TResult : notnull
     {
         ResultedHandler<TResult> HandlerFromServices(IEnumerable<TService> serviceInstances)
         {
@@ -76,7 +76,7 @@ public static class ServiceCollectionExtensions
         }
 
         Func<IServiceProvider, object> concreteFactory = sp => CreateNewService(sp);
-        
+
         services.Add(new ServiceDescriptor(typeof(TServiceHandlerImpl), concreteFactory, lifetime));
 
         return services;

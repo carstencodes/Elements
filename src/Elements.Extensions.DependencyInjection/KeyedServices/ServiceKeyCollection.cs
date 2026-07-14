@@ -21,8 +21,14 @@ public class ServiceKeyCollection<TService>(IReadOnlyCollection<KeyValuePair<obj
         return ((IEnumerable)this.keys).GetEnumerator();
     }
 
-    public int Count => this.keys.Count;
-    
+    public int Count
+    {
+        get
+        {
+            return this.keys.Count;
+        }
+    }
+
     public Type AffectedServiceType { get; } = typeof(TService);
     public bool HasType<TConcrete>() where TConcrete : TService
     {

@@ -2,7 +2,7 @@ using System;
 
 namespace HedgeCraft.Elements.ComponentModel.Patterns.Behavioral.ChainOfResponsibility;
 
-public sealed class Handler: HandlerBase
+public sealed class Handler : HandlerBase
 {
     private readonly HandlerChainLink handlerImplementation;
 
@@ -10,7 +10,7 @@ public sealed class Handler: HandlerBase
     {
         this.handlerImplementation = handlerImplementation;
     }
-    
+
     public void HandleRequest()
     {
         try

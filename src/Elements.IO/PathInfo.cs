@@ -3,7 +3,7 @@ using System.IO;
 
 namespace HedgeCraft.Elements.IO;
 
-public sealed class PathInfo: FileSystemInfo
+public sealed class PathInfo : FileSystemInfo
 {
     public PathInfo(string path)
     {
@@ -13,16 +13,16 @@ public sealed class PathInfo: FileSystemInfo
         {
             name = Path.GetDirectoryName(this.FullPath) ?? path;
         }
-        
+
         this.Name = name;
     }
-    
+
     public PathInfo(FileSystemInfo fileSystemEntry)
     {
         this.FullPath = fileSystemEntry.FullName;
         this.Name = fileSystemEntry.Name;
     }
-    
+
     public PathInfo(DriveInfo rootDrive)
     {
         this.FullPath = rootDrive.RootDirectory.FullName;
@@ -36,7 +36,7 @@ public sealed class PathInfo: FileSystemInfo
             return File.Exists(this.FullName);
         }
     }
-    
+
     public bool IsDirectory
     {
         get
@@ -54,7 +54,7 @@ public sealed class PathInfo: FileSystemInfo
     }
 
     public override string Name { get; }
-    
+
     public override void Delete()
     {
         if (this.Exists)
@@ -94,5 +94,20 @@ public sealed class PathInfo: FileSystemInfo
     public DirectoryInfo AsDirectory()
     {
         return new(this.FullName);
+    }
+
+<<<<<<< TODO: Unmerged change from project 'Elements.IO(net8.0)', Before:
+}
+=======
+    public static PathInfo Divide(PathInfo left, PathInfo right)
+    {
+        throw new System.NotImplementedException();
+    }
+}
+>>>>>>> After
+
+    public static PathInfo Divide(PathInfo left, PathInfo right)
+    {
+        throw new System.NotImplementedException();
     }
 }

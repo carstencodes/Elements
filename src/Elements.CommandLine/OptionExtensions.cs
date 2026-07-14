@@ -10,7 +10,7 @@ public static class OptionExtensions
         return option.Derive(name, converter, () => defaultValue);
     }
 
-    public static Option<T> Derive<T>(this Option<T> option, string name , Func<T, T> converter, Func<T> defaultValueFactory) where T : notnull, IParsable<T>
+    public static Option<T> Derive<T>(this Option<T> option, string name, Func<T, T> converter, Func<T> defaultValueFactory) where T : notnull, IParsable<T>
     {
         return new DerivedOption<T, T>(name, option, converter, defaultValueFactory);
     }

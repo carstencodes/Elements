@@ -5,9 +5,9 @@ using System.Globalization;
 
 namespace HedgeCraft.Elements.CommandLine;
 
-internal abstract class SymbolResultConverter<TSymbol, T, U>(TSymbol symbol, Func<T, U> converter, Func<U> defaultValueFactory) 
-    where U: notnull, IParsable<U>
-    where TSymbol: notnull, Symbol
+internal abstract class SymbolResultConverter<TSymbol, T, U>(TSymbol symbol, Func<T, U> converter, Func<U> defaultValueFactory)
+    where U : notnull, IParsable<U>
+    where TSymbol : notnull, Symbol
 {
     private readonly Func<T, U> converter = converter;
     private readonly Func<U> defaultValueFactory = defaultValueFactory;
@@ -15,7 +15,7 @@ internal abstract class SymbolResultConverter<TSymbol, T, U>(TSymbol symbol, Fun
     protected TSymbol Symbol { get; } = symbol;
 
     public IFormatProvider FormatProvider { get; set; } = CultureInfo.InvariantCulture;
-    
+
     public U ParseFromArgumentOrDefault(ArgumentResult result)
     {
         return this.ParseFromArgument(result) ?? this.GetDefaultValue();
@@ -35,7 +35,7 @@ internal abstract class SymbolResultConverter<TSymbol, T, U>(TSymbol symbol, Fun
                 return this.GetDefaultValue();
             }
         }
-        
+
         return this.ParseFromParentSymbol(this.Symbol, argumentResult);
     }
 

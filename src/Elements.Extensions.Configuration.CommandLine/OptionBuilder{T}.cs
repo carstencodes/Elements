@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace HedgeCraft.Elements.Extensions.Configuration.CommandLine;
 
-internal sealed class OptionBuilder<T>(string name): IOptionBuilder<T> where T: notnull
+internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T : notnull
 {
     private readonly List<Action<Option<T>>> configureOptions = new();
 
@@ -136,7 +136,7 @@ internal sealed class OptionBuilder<T>(string name): IOptionBuilder<T> where T: 
     {
         void ConfigureOption(Option<T> option)
         {
-            foreach(string alias in aliases)
+            foreach (string alias in aliases)
             {
                 option.Aliases.Add(alias);
             }

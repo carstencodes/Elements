@@ -9,7 +9,7 @@ namespace HedgeCraft.Elements.Extensions.DependencyInjection;
 public static partial class ServiceCollectionExtensions
 {
     // based upon https://greatrexpectations.com/2018/10/25/decorators-in-net-core-with-dependency-injection
-    
+
     public static void Decorate<TInterface, TDecorator>(
         this IServiceCollection services,
         Func<IServiceProvider, TDecorator> objectFactory)
@@ -20,7 +20,7 @@ public static partial class ServiceCollectionExtensions
         {
             return objectFactory(serviceProvider);
         }
-        
+
         services.Decorate<TInterface, TDecorator>(CreateInstanceOfDecorator);
     }
 
@@ -31,17 +31,17 @@ public static partial class ServiceCollectionExtensions
         where TDecorator : class, TInterface
     {
         ServiceDescriptor existingDescriptor = services.GetExistingServiceDescriptor<TInterface>();
-        
+
         services.Replace(ServiceDescriptor.Describe(
             typeof(TInterface),
-            sp => objectFactory(sp, new []
+            sp => objectFactory(sp, new[]
             {
                 sp.CreateInstance(existingDescriptor)
             }),
             existingDescriptor.Lifetime)
         );
     }
-    
+
     public static void Decorate<TInterface, TDecorator>(this IServiceCollection services)
         where TInterface : notnull
         where TDecorator : class, TInterface
@@ -56,13 +56,13 @@ public static partial class ServiceCollectionExtensions
     {
         if (!services.TryGetServiceDescriptor<TInterface>(out ServiceDescriptor? existingDescriptor))
         {
-            throw new InvalidOperationException($"{typeof(TInterface).Name} is not registered");    
+            throw new InvalidOperationException($"{typeof(TInterface).Name} is not registered");
         }
 
         return existingDescriptor;
     }
-    
-    private static bool TryGetServiceDescriptor<TInterface>(this IServiceCollection services, [NotNullWhen(true)]out ServiceDescriptor? descriptor)
+
+    private static bool TryGetServiceDescriptor<TInterface>(this IServiceCollection services, [NotNullWhen(true)] out ServiceDescriptor? descriptor)
     {
         ServiceDescriptor? wrappedDescriptor = services.FirstOrDefault(
             s => s.ServiceType == typeof(TInterface));
@@ -72,7 +72,7 @@ public static partial class ServiceCollectionExtensions
             descriptor = default;
             return false;
         }
-        
+
         descriptor = wrappedDescriptor;
         return true;
     }

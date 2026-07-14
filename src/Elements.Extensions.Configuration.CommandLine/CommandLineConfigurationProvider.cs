@@ -73,7 +73,7 @@ public sealed class CommandLineConfigurationProvider() : IConfigurationProvider
         this.changeToken.OnReload();
     }
 
-    public bool TryGet(string key, [NotNullWhen(true)]out string? value)
+    public bool TryGet(string key, [NotNullWhen(true)] out string? value)
     {
         return this.configurationValues.TryGetValue(key, out value);
     }
