@@ -1,10 +1,44 @@
 <Solution>
-  <Project Path="gen/Elements.SourceGenerators.Scriban/Elements.SourceGenerators.Scriban.csproj" />
-  <Project Path="gen/Elements.SourceGenerators.ToolShim/Elements.SourceGenerators.ToolShim.csproj" />
-  <Project Path="src/Elements.CommandLine/Elements.CommandLine.csproj" />
-  <Project Path="src/Elements.ComponentModel.Patterns/Elements.ComponentModel.Patterns.csproj" />
-  <Project Path="src/Elements.Extensions.Configuration.CommandLine/Elements.Extensions.Configuration.CommandLine.csproj" />
-  <Project Path="src/Elements.Extensions.DependencyInjection/Elements.Extensions.DependencyInjection.csproj" />
-  <Project Path="src/Elements.IO.Compression/Elements.IO.Compression.csproj" />
-  <Project Path="src/Elements.IO/Elements.IO.csproj" />
+  <Folder Name="/Build/">
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/Libraries/" />
+  <Folder Name="/Libraries/CommandLine/" />
+  <Folder Name="/Libraries/CommandLine/Configuration/">
+    <Project Path="src/Elements.Extensions.Configuration.CommandLine/Elements.Extensions.Configuration.CommandLine.csproj" />
+  </Folder>
+  <Folder Name="/Libraries/CommandLine/Parsing/">
+    <Project Path="src/Elements.CommandLine/Elements.CommandLine.csproj" />
+  </Folder>
+  <Folder Name="/Libraries/ComponentModel/" />
+  <Folder Name="/Libraries/ComponentModel/Patterns/">
+    <Project Path="src/Elements.ComponentModel.Patterns/Elements.ComponentModel.Patterns.csproj" />
+  </Folder>
+  <Folder Name="/Libraries/DependencyInjection/">
+    <Project Path="src/Elements.Extensions.DependencyInjection/Elements.Extensions.DependencyInjection.csproj" />
+  </Folder>
+  <Folder Name="/Libraries/IO/" />
+  <Folder Name="/Libraries/IO/Core/">
+    <Project Path="src/Elements.IO/Elements.IO.csproj" />
+  </Folder>
+  <Folder Name="/Libraries/IO/Compression/">
+    <Project Path="src/Elements.IO.Compression/Elements.IO.Compression.csproj" />
+  </Folder>
+  <Folder Name="/Misc/">
+    <File Path=".editorconfig" />
+    <File Path="ReadMe.md" />
+  </Folder>
+  <Folder Name="/SourceGenerators/">
+    <File Path="gen\Directory.Build.props" />
+  </Folder>
+  <Folder Name="/SourceGenerators/Templating/" />
+  <Folder Name="/SourceGenerators/Templating/Scriban/">
+    <Project Path="gen/Elements.SourceGenerators.Scriban/Elements.SourceGenerators.Scriban.csproj" />
+  </Folder>
+  <Folder Name="/SourceGenerators/ToolShim/">
+    <Project Path="gen/Elements.SourceGenerators.ToolShim/Elements.SourceGenerators.ToolShim.csproj" />
+  </Folder>
+  <Folder Name="/Tools/" />
 </Solution>
