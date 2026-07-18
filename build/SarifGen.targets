@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <ElementSolutionBuildDependsOn>
+      $(ElementSolutionBuildDependsOn);
+      GenerateCompleteSarifFromSarifFilesUsingDotnetTool
+    </ElementSolutionBuildDependsOn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ArtifactsPath Condition="'$(ArtifactsPath)' == ''">$(MSBuildThisFileDirectory)..\artifacts</ArtifactsPath>
+    <SarifResultsPath Condition="'$(SarifResultsPath)' == ''">$(ArtifactsPath)\results\</SarifResultsPath>
+  </PropertyGroup>
+
+  <Target Name="IsPipxCliInstalled">
+    <PropertyGroup>
+      <PipxCheckCommand Condition="'$(OS)' == 'Windows_NT'">where pipx</PipxCheckCommand>
+      <PipxCheckCommand Condition="'$(OS)' != 'Windows_NT'">which pipx</PipxCheckCommand>
+    </PropertyGroup>
+
+    <Exec Command="$(PipxCheckCommand)"
+      ContinueOnError="warnAndContinue"
+      ConsoleToMSBuild="true"
+      IgnoreStandardErrorWarningFormat="true">
+      <Output TaskParameter="ExitCode" PropertyName="PipxFoundExitCode" />
+      <Output TaskParameter="ConsoleOutput" PropertyName="PipxInstallLocation" />
+    </Exec>
+
+    <PropertyGroup>
+      <PipxInstalled />
+      <PipxInstalled Condition="'$(PipxFoundExitCode)' == '0'">True</PipxInstalled>
+      <PipxInstalled Condition="'$(PipxFoundExitCode)' != '0'">False</PipxInstalled>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="GenerateCompleteSarifFromSarifFilesUsingPipx" DependsOnTargets="IsPipxCliInstalled">
+    <PropertyGroup>
+      <_PipxExecCliArgs />
+      <_PipxExecCliArgs>$(_PipxExecCliArgs) run</_PipxExecCliArgs>
+      <_PipxExecCliArgs>$(_PipxExecCliArgs) --pip-args '-r &quot;$(MsBuildThisFileDirectory)/requirements.sarif.txt&quot;'</_PipxExecCliArgs>
+      <_PipxExecCliArgs>$(_PipxExecCliArgs) sarif-tools</_PipxExecCliArgs>
+      <_PipxExecCliArgs>$(_PipxExecCliArgs) copy</_PipxExecCliArgs>
+      <_PipxExecCliArgs>$(_PipxExecCliArgs) --output &quot;$(ArtifactsPath)/$(SolutionName).sarif&quot;</_PipxExecCliArgs>
+      <_PipxExecCliArgs>$(_PipxExecCliArgs) &quot;$(SarifResultsPath)&quot;</_PipxExecCliArgs>
+    </PropertyGroup>
+
+    <Exec Command="$(PipxInstallLocation) $(_PipxExecCliArgs)"
+      ContinueOnError="warnAndContinue"
+      ConsoleToMSBuild="true"
+      IgnoreStandardErrorWarningFormat="true"
+      Condition="'$(PipxInstalled)' == 'True'" />
+  </Target>
+
+  <Target Name="GenerateCompleteSarifFromSarifFilesUsingDotnetTool">
+    <ItemGroup>
+      <SarifResultsFile Include="$(SarifResultsPath)/*.sarif"/>
+    </ItemGroup>
+
+    <Delete Files="$(ArtifactsPath)/$(SolutionName).sarif" Condition="Exists('$(ArtifactsPath)/$(SolutionName).sarif')"/>
+
+    <PropertyGroup>
+      <_DotnetSarifToolCliArgs />
+      <_DotnetSarifToolCliArgs>$(_DotnetSarifToolCliArgs) tool</_DotnetSarifToolCliArgs>
+      <_DotnetSarifToolCliArgs>$(_DotnetSarifToolCliArgs) run</_DotnetSarifToolCliArgs>
+      <_DotnetSarifToolCliArgs>$(_DotnetSarifToolCliArgs) sarif</_DotnetSarifToolCliArgs>
+      <_DotnetSarifToolCliArgs>$(_DotnetSarifToolCliArgs) merge</_DotnetSarifToolCliArgs>
+      <_DotnetSarifToolCliArgs>$(_DotnetSarifToolCliArgs) --output-file &quot;$(ArtifactsPath)/$(SolutionName).sarif&quot;</_DotnetSarifToolCliArgs>
+      <_DotnetSarifToolCliArgs>$(_DotnetSarifToolCliArgs) &quot;@(SarifResultsFile, '&quot; &quot;')&quot;</_DotnetSarifToolCliArgs>
+    </PropertyGroup>
+
+    <Exec Command="dotnet $(_DotnetSarifToolCliArgs)"
+      ContinueOnError="warnAndContinue"
+      ConsoleToMSBuild="true"
+      IgnoreStandardErrorWarningFormat="true" />
+  </Target>
+</Project>
