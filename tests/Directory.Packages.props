@@ -7,12 +7,12 @@
   <Import Project="$(_ParentFile)" Condition="'$(_ParentFile)' != '' AND Exists('$(_ParentFile)')" />
 
   <ItemGroup>
-    <GlobalPackageReference Include="GitHubActionsTestLogger" Version="3.0.5" Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''" />
-    <GlobalPackageReference Include="xunit.v3" Version="3.2.2" />
-    <GlobalPackageReference Include="xunit.analyzers" Version="1.27.0" />
-    <GlobalPackageReference Include="xunit.v3.assert" Version="3.2.2" />
-    <GlobalPackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="2.3.2" />
-    <GlobalPackageReference Include="coverlet.collector" Version="10.0.1" />
-    <GlobalPackageReference Include="coverlet.MTP" Version="10.0.1" />
+    <PackageVersion Include="coverlet.MTP" Version="10.0.1" />
+    <PackageVersion Include="GitHubActionsTestLogger" Version="3.0.5" Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''" />
+    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.3.2" />
+    <PackageVersion Include="xunit.analyzers" Version="1.27.0" />
+    <PackageVersion Include="xunit.v3" Version="3.2.2" />
+    <PackageVersion Include="xunit.v3.assert" Version="3.2.2" />
+    <PackageVersion Include="xunit.v3.mtp-v2" Version="3.2.2" />
   </ItemGroup>
 </Project>
