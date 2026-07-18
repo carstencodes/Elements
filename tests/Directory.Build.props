@@ -8,36 +8,32 @@
 
   <PropertyGroup>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
-    <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+    <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <OutputType>Exe</OutputType>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="GitHubActionsTestLogger" Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''" />
+    <PackageReference Include="xunit.analyzers" PrivateAssets="all"/>
+    <PackageReference Include="xunit.v3.assert" />
+    <PackageReference Include="xunit.v3.mtp-v2" />
+    <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
+    <PackageReference Include="coverlet.MTP" />
+  </ItemGroup>
+
   <PropertyGroup>
-    <TestingPlatformCommandLineArguments>
-      $(TestingPlatformCommandLineArguments)
-      --info
-      --results-directory &quot;$(UnitTestsResultPaths)&quot;
-      --coverlet
-      --coverlet-output-format cobertura
-      --report-junit
-      --report-junit-filename &quot;{asm}_{tfm}_{arch}.junit.xml&quot;
-      --report-ctrf
-      --report-ctrf-filename &quot;{asm}_{tfm}_{arch}.ctrf.json&quot;
-    </TestingPlatformCommandLineArguments>
-    <TestingPlatformCommandLineArguments Condition="'$(CI)' == ''">
-      $(TestingPlatformCommandLineArguments)
-      --ansi
-      --progress
-    </TestingPlatformCommandLineArguments>
-    <TestingPlatformCommandLineArguments Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''">
-      $(TestingPlatformCommandLineArguments)
-      --report-github
-      --report-gh
-      --report-gh-groups on
-      --report-gh-annotations on
-      --report-gh-step-summary on
-      --report-gh-slow-test-notices on
-      --no-progress
-      --no-ansi
-    </TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --results-directory &quot;$(UnitTestsResultPaths)&quot;</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --coverlet --coverlet-output-format cobertura</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --report-junit</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --report-xunit</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --report-xunit-trx</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --report-ctrf</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments Condition="'$(CI)' == ''">$(TestingPlatformCommandLineArguments) --ansi auto --progress auto</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''">$(TestingPlatformCommandLineArguments) --report-github</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''">$(TestingPlatformCommandLineArguments) --report-gh --report-gh-groups on --report-gh-annotations on --report-gh-step-summary on --report-gh-slow-test-notices on</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''">$(TestingPlatformCommandLineArguments) --progress off --ansi off</TestingPlatformCommandLineArguments>
   </PropertyGroup>
 </Project>
