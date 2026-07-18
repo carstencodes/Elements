@@ -11,6 +11,7 @@
 
   <Target Name="EnsureSarifResultsPath">
     <MakeDir Directories="$(ArtifactsPath)" Condition="!Exists('$(ArtifactsPath)')" />
+    <MakeDir Directories="$(ResultsPath)" Condition="!Exists('$(ResultsPath)')" />
     <MakeDir Directories="$(SarifResultsPath)" Condition="!Exists('$(SarifResultsPath)')" />
   </Target>
 

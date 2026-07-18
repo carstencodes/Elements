@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
+  <Import Project="$(MsBuildThisFileDirectory)\Directory.SharedDefs.props" />
+
   <PropertyGroup>
     <IsPackable>true</IsPackable>
     <AssemblyName>HedgeCraft.$(MSBuildProjectName)</AssemblyName>
@@ -27,7 +29,6 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseArtifactsOutput>true</UseArtifactsOutput>
-    <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
     <WarningLevel>4</WarningLevel>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
@@ -36,6 +37,7 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisMode>All</AnalysisMode>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <ErrorLog>$(SarifResultsPath)$(MSBuildProjectName).sarif;version=2.1</ErrorLog>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -54,9 +56,4 @@
     <None Include="$(MsBuildProjectDirectory)\ReadMe.md" Visible="false" Pack="true" PackagePath="$(PackageReadme)" Condition="Exists('$(MsBuildProjectDirectory)\ReadMe.md')" />
     <None Include="$(MsBuildThisFileDirectory)\ReadMe.md" Visible="false" Pack="true" PackagePath="$(PackageReadme)" Condition="!Exists('$(MsBuildProjectDirectory)\ReadMe.md')" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <SarifResultsPath>$(ArtifactsPath)\results\</SarifResultsPath>
-    <ErrorLog>$(SarifResultsPath)$(MSBuildProjectName).sarif;version=2.1</ErrorLog>
-  </PropertyGroup>
 </Project>
