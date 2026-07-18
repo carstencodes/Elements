@@ -1,4 +1,3 @@
-@run-test.rsp
 --report-github
 --report-gh
 --report-gh-groups on
