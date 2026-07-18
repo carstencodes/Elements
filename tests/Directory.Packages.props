@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <_ParentFile>$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFile)', '$(MSBuildThisFileDirectory)../'))</_ParentFile>
+  </PropertyGroup>
+
+  <Import Project="$(_ParentFile)" Condition="'$(_ParentFile)' != '' AND Exists('$(_ParentFile)')" />
+
+  <ItemGroup>
+    <GlobalPackageReference Include="GitHubActionsTestLogger" Version="3.0.5" Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''" />
+  </ItemGroup>
+</Project>
