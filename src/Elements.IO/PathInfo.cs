@@ -88,7 +88,7 @@ public sealed class PathInfo : FileSystemInfo
 
     public static PathInfo operator /(PathInfo path, string child)
     {
-        return path.Combine(child);
+        return Divide(path, child);
     }
 
     public FileInfo AsFile()
@@ -101,8 +101,8 @@ public sealed class PathInfo : FileSystemInfo
         return new(this.FullName);
     }
 
-    public static PathInfo Divide(PathInfo left, PathInfo right)
+    public static PathInfo Divide(PathInfo path, string child)
     {
-        throw new System.NotImplementedException();
+        return path.Combine(child);
     }
 }
