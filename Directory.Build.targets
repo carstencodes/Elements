@@ -2,17 +2,19 @@
 <Project>
   <PropertyGroup>
     <CoreBuildDependsOn>
-      EnsureSarifResultsPath;
+      EnsureResultsPath;
       $(CoreBuildDependsOn)
     </CoreBuildDependsOn>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)/build/PackageReleaseNotes.targets" />
 
-  <Target Name="EnsureSarifResultsPath">
+  <Target Name="EnsureResultsPath">
     <MakeDir Directories="$(ArtifactsPath)" Condition="!Exists('$(ArtifactsPath)')" />
     <MakeDir Directories="$(ResultsPath)" Condition="!Exists('$(ResultsPath)')" />
     <MakeDir Directories="$(SarifResultsPath)" Condition="!Exists('$(SarifResultsPath)')" />
+    <MakeDir Directories="$(UnitTestsResultPaths)" Condition="!Exists('$(UnitTestsResultPaths)')" />
+    <MakeDir Directories="$(CodeCoverageResultPaths)" Condition="!Exists('$(CodeCoverageResultPaths)')" />
   </Target>
 
 </Project>

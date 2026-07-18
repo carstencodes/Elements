@@ -4,5 +4,7 @@
     <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
     <ResultsPath>$(ArtifactsPath)/results/</ResultsPath>
     <SarifResultsPath>$(ResultsPath)/sarif/</SarifResultsPath>
+    <UnitTestsResultPaths>$(ResultsPath)/unit-tests/</UnitTestsResultPaths>
+    <CodeCoverageResultPaths>$(ResultsPath)/coverage/</CodeCoverageResultPaths>
   </PropertyGroup>
 </Project>
