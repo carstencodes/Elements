@@ -25,6 +25,10 @@ indent_size = 2
 [*.{json,json5,webmanifest}]
 indent_size = 2
 
+# yaml Files
+[*.{yml,yaml}]
+indent_size = 2
+
 [*.cs]
 dotnet_public_api_analyzer.require_api_files = true
 indent_style = space
