@@ -21,7 +21,7 @@ jobs:
         with:
           configuration: Release
       - name: Run tests
-        run: dotnet test @tests/.config/run-test.rsp @tests/.config/run-test.gh.rsp
+        run: dotnet test --no-restore --no-build --configuration Release
       - name: ReportGenerator
         uses: danielpalme/ReportGenerator-GitHub-Action@5.5.10
         with:
