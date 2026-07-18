@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <ElementSolutionBuildDependsOn/>
+  </PropertyGroup>
+
+  <Import Project="$(MsBuildThisFileDirectory)/build/SarifGen.targets" />
+
+  <Target Name="ElementSolutionBuild" AfterTargets="Build" DependsOnTargets="$(ElementSolutionBuildDependsOn)" />
+</Project>
