@@ -1,67 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
-    <GenerateNuSpecDependsOn>
-      $(GenerateNuSpecDependsOn);
-      FetchPackageReleaseNotesFromGitLog
-    </GenerateNuSpecDependsOn>
+    <CoreBuildDependsOn>
+      EnsureSarifResultsPath;
+      $(CoreBuildDependsOn)
+    </CoreBuildDependsOn>
   </PropertyGroup>
 
-  <Target Name="IsGitCliInstalled">
-    <PropertyGroup>
-      <GitCheckCommand Condition="'$(OS)' == 'Windows_NT'">where git</GitCheckCommand>
-      <GitCheckCommand Condition="'$(OS)' != 'Windows_NT'">which git</GitCheckCommand>
-    </PropertyGroup>
+  <Import Project="$(MSBuildThisFileDirectory)/build/PackageReleaseNotes.targets" />
 
-    <Exec Command="$(GitCheckCommand)" 
-      ContinueOnError="warnAndContinue" 
-      ConsoleToMSBuild="true"
-      IgnoreStandardErrorWarningFormat="true">
-      <Output TaskParameter="ExitCode" PropertyName="GitFoundExitCode" />
-      <Output TaskParameter="ConsoleOutput" PropertyName="GitInstallLocation" />
-    </Exec>
-
-    <PropertyGroup>
-      <GitInstalled />
-      <GitInstalled Condition="'$(GitFoundExitCode)' == '0'">True</GitInstalled>
-      <GitInstalled Condition="'$(GitFoundExitCode)' != '0'">False</GitInstalled>
-    </PropertyGroup>
-  </Target>
-
-  <Target Name="FetchPackageReleaseNotesFromGitLog" DependsOnTargets="IsGitCliInstalled">
-    <PropertyGroup>
-      <_LastGitTag />
-    </PropertyGroup>
-
-    <Exec Command="$(GitInstallLocation) describe --abbrev=0 --tags" 
-      ContinueOnError="warnAndContinue" 
-      ConsoleToMSBuild="true"
-      IgnoreStandardErrorWarningFormat="true"
-      Condition="'$(GitInstalled)' == 'True'">
-      <Output TaskParameter="ConsoleOutput" PropertyName="_LastGitTag" />
-    </Exec>
-
-    <PropertyGroup>
-      <_GitLogCliArgs />
-      <_GitLogCliArgs>$(_GitLogCliArgs) --use-mailmap</_GitLogCliArgs>
-      <_GitLogCliArgs>$(_GitLogCliArgs) --date-order</_GitLogCliArgs>
-      <_GitLogCliArgs>$(_GitLogCliArgs) --pretty=&quot; * %s (%aN, %h)%n&quot;</_GitLogCliArgs>
-      <_GitLogCliArgs>$(_GitLogCliArgs) $(_LastGitTag)..HEAD</_GitLogCliArgs>
-      <_GitLogCliArgs>$(_GitLogCliArgs) -- $(MsBuildProjectDirectory)</_GitLogCliArgs>
-    </PropertyGroup>
-
-    <Exec Command="$(GitInstallLocation) log $(_GitLogCliArgs)" 
-      ContinueOnError="warnAndContinue" 
-      ConsoleToMSBuild="true"
-      IgnoreStandardErrorWarningFormat="true"
-      Condition="'$(GitInstalled)' == 'True'">
-      <Output TaskParameter="ConsoleOutput" PropertyName="GitPackageReleaseNotes" />
-    </Exec>
-
-    <PropertyGroup>
-      <PackageReleaseNotes />
-      <PackageReleaseNotes># $(MsBuildProjectName)$([System.Environment]::NewLine)$([System.Environment]::NewLine)$([System.String]::Copy('$(GitPackageReleaseNotes)').Replace(';', '$([System.Environment]::NewLine)'))</PackageReleaseNotes>
-    </PropertyGroup>
+  <Target Name="EnsureSarifResultsPath">
+    <MakeDir Directories="$(ArtifactsPath)" Condition="!Exists('$(ArtifactsPath)')" />
+    <MakeDir Directories="$(SarifResultsPath)" Condition="!Exists('$(SarifResultsPath)')" />
   </Target>
 
 </Project>
