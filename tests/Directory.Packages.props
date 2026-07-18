@@ -11,5 +11,8 @@
     <GlobalPackageReference Include="xunit.v3" Version="3.2.2" />
     <GlobalPackageReference Include="xunit.analyzers" Version="1.27.0" />
     <GlobalPackageReference Include="xunit.v3.assert" Version="3.2.2" />
+    <GlobalPackageReference Include="Microsoft.Testing.Platform.MSBuild" Version="2.3.2" />
+    <GlobalPackageReference Include="coverlet.collector" Version="10.0.1" />
+    <GlobalPackageReference Include="coverlet.MTP" Version="10.0.1" />
   </ItemGroup>
 </Project>

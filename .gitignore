@@ -98,6 +98,10 @@ StyleCopReport.xml
 *.svclog
 *.scc
 
+# Setup text RSP for testing
+!tests/.config/run-test.rsp
+!tests/.config/run-test.gh.rsp
+
 # Chutzpah Test files
 _Chutzpah*
 

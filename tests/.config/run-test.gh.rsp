@@ -1,0 +1,9 @@
+@run-test.rsp
+--report-github
+--report-gh
+--report-gh-groups on
+--report-gh-annotations on
+--report-gh-step-summary on
+--report-gh-slow-test-notices on
+--no-progress
+--no-ansi
