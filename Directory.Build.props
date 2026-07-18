@@ -16,6 +16,9 @@
     <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
     <PackageTags>HedgeCraft Elements</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <GenerateSBOM>true</GenerateSBOM>
+    <SbomGenerationNamespaceBaseUri>https://carstencodes.github.io/Elements/spdx/$(PackageId)</SbomGenerationNamespaceBaseUri>
+    <SbomGenerationManifestInfo>SPDX:3.0</SbomGenerationManifestInfo>
   </PropertyGroup>
 
   <PropertyGroup>
