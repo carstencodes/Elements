@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <ArtifactsPath>$(MSBuildThisFileDirectory)artifacts</ArtifactsPath>
+    <ResultsPath>$(ArtifactsPath)/results/</ResultsPath>
+    <SarifResultsPath>$(ResultsPath)/sarif/</SarifResultsPath>
+  </PropertyGroup>
+</Project>

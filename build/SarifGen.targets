@@ -7,11 +7,6 @@
     </ElementSolutionBuildDependsOn>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <ArtifactsPath Condition="'$(ArtifactsPath)' == ''">$(MSBuildThisFileDirectory)..\artifacts</ArtifactsPath>
-    <SarifResultsPath Condition="'$(SarifResultsPath)' == ''">$(ArtifactsPath)\results\</SarifResultsPath>
-  </PropertyGroup>
-
   <Target Name="IsPipxCliInstalled">
     <PropertyGroup>
       <PipxCheckCommand Condition="'$(OS)' == 'Windows_NT'">where pipx</PipxCheckCommand>
