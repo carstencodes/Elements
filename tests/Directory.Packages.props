@@ -8,5 +8,8 @@
 
   <ItemGroup>
     <GlobalPackageReference Include="GitHubActionsTestLogger" Version="3.0.5" Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''" />
+    <GlobalPackageReference Include="xunit.v3" Version="3.2.2" />
+    <GlobalPackageReference Include="xunit.analyzers" Version="1.27.0" />
+    <GlobalPackageReference Include="xunit.v3.assert" Version="3.2.2" />
   </ItemGroup>
 </Project>
