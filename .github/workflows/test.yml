@@ -1,0 +1,30 @@
+name: Test projects
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Test projects
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@7
+      - name: Build
+        uses: ./.github/actions/build
+        with:
+          configuration: Release
+      - name: Run tests
+        run: dotnet test @tests/.config/run-test.rsp @tests/.config/run-test.gh.rsp
+      - name: ReportGenerator
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.10
+        with:
+          reports: artifacts/results/coverage/*.xml
+          targetdir: artifacts/
+          reporttypes: Cobertura;MarkdownSummaryGithub

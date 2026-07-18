@@ -1,0 +1,28 @@
+name: Build projects
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Restore and Build projects
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        configuration: [ 'Debug', 'Release' ]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@7
+      - name: Build
+        uses: ./.github/actions/build
+        with:
+          configuration: ${{ matrix.configuration }}
+      - uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: artifacts/Elements.sarif
