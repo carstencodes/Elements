@@ -1,0 +1,90 @@
+<Project Sdk="Microsoft.Build.NoTargets">
+  <PropertyGroup>
+    <CoreCompileDependsOn>
+      $(CoreCompileDependsOn);
+      RunDockerBasedCargoCrossBuild
+    </CoreCompileDependsOn>
+    <NoWarn>$(NoWarn);MSB3245</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <RustSourceFile Include="src/**/*.rs" />
+    <RustBuildFile Include="build.rs" Link="build/build.rs" />
+    <RustBuildFile Include="Cargo.toml" Link="build/Cargo.toml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <BuildIdentifiers Include="Linux/amd64" DotnetRuntimeIdentifier="linux-x64" CargoRustTarget="x86_64-unknown-linux-gnu" DyLibExtension=".so" Visible="false" />
+    <BuildIdentifiers Include="Linux/arm64" DotnetRuntimeIdentifier="linux-arm64" CargoRustTarget="aarch64-unknown-linux-gnu" DyLibExtension=".so" Visible="false" />
+    <BuildIdentifiers Include="MacOsX/amd64" DotnetRuntimeIdentifier="osx-x64" CargoRustTarget="x86_64-apple-darwin" DyLibExtension=".dylib" Visible="false" />
+    <BuildIdentifiers Include="MaxOsX/arm64" DotnetRuntimeIdentifier="osx-arm64" CargoRustTarget="aarch64-apple-darwin" DyLibExtension=".dylib" Visible="false" />
+  </ItemGroup>
+
+  <Target Name="RunDockerBasedCargoCrossBuild" Returns="@(TargetPathWithTargetPlatformMoniker)">
+    <MsBuild  BuildInParallel="false"
+              SkipNonexistentTargets="false"
+              StopOnFirstFailure="false"
+              Properties="Configuration=$(Configuration);TargetRuntimeIdentifier=%(BuildIdentifiers.DotnetRuntimeIdentifier);CargoBuildTarget=%(BuildIdentifiers.CargoRustTarget);CargoLibExtension=%(BuildIdentifiers.DyLibExtension)"
+              Targets="RunCargoBuildInDocker"
+              Projects="$(MSBuildProjectFullPath)"
+              >
+      <Output TaskParameter="TargetOutputs" ItemName="BuiltFiles" />
+    </MsBuild>
+
+    <ItemGroup>
+      <TargetPathWithTargetPlatformMoniker Include="@(BuiltFiles)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ResolveBindingFiles" Returns="@(GeneratedBindingFiles)">
+    <ItemGroup>
+      <GeneratedBindingFiles Include="$(MsBuildThisFileDirectory)bindings/*.g.cs" />
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup>
+    <RunDockerWithArgumentsDependsOn>
+      $(RunDockerWithArgumentsDependsOn);
+      PrepareDockerBuildContainerArgs
+    </RunDockerWithArgumentsDependsOn>
+  </PropertyGroup>
+
+  <Target Name="PrepareDockerBuildContainerArgs">
+    <ItemGroup>
+      <DockerBuildContainerArgs Include="sh" />
+      <DockerBuildContainerArgs Include="-c" />
+      <DockerBuildContainerArgs Include="&quot;cargo build $(DockerBuildContainerCargoConfiguration) --target $(CargoBuildTarget)&quot;" />
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup>
+    <DockerBuildContainerCargoConfiguration />
+    <DockerBuildContainerCargoConfiguration Condition="'$(Configuration)' == 'Release'">--release</DockerBuildContainerCargoConfiguration>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <DockerBuildContainerMountTargetDir>/root/src</DockerBuildContainerMountTargetDir>
+    <DockerBuildImageId>joseluisq/rust-linux-darwin-builder:2.0.0-beta.1</DockerBuildImageId>
+  </PropertyGroup>
+
+  <Target Name="RunCargoBuildInDocker" DependsOnTargets="RunDockerWithArguments" Returns="@(CreatedFilesByCargoBuild)">
+    <PropertyGroup>
+      <ConfigurationOutputFolder>$(Configuration.ToLowerInvariant())</ConfigurationOutputFolder>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <CreatedFilesByCargoBuild Include="$(MsBuildThisFileDirectory)/target/$(CargoBuildTarget)/$(ConfigurationOutputFolder)/lib*$(CargoLibExtension)">
+        <TargetFrameworkIdentifier>native</TargetFrameworkIdentifier>
+        <TargetPlatformMoniker>native</TargetPlatformMoniker>
+        <TargetPlatformIdentifier>$(TargetRuntimeIdentifier)</TargetPlatformIdentifier>
+        <CopyUpToDateMarker />
+        <TargetFrameworkVersion />
+        <ReferenceAssembly />
+        <RuntimeIdentifier>$(TargetRuntimeIdentifier)</RuntimeIdentifier>
+        <Configuration>$(Configuration)</Configuration>
+      </CreatedFilesByCargoBuild>
+    </ItemGroup>
+  </Target>
+
+  <Import Project="$(MsBuildThisFileDirectory)../../build/DockerBuildTools.targets" />
+</Project>
