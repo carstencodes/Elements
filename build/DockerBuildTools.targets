@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <Target Name="IsDockerCliInstalled">
+    <PropertyGroup>
+      <DockerCheckCommand Condition="'$(OS)' == 'Windows_NT'">where docker</DockerCheckCommand>
+      <DockerCheckCommand Condition="'$(OS)' != 'Windows_NT'">which docker</DockerCheckCommand>
+    </PropertyGroup>
+
+    <Exec Command="$(DockerCheckCommand)"
+      ContinueOnError="warnAndContinue"
+      ConsoleToMSBuild="true"
+      IgnoreStandardErrorWarningFormat="true">
+      <Output TaskParameter="ExitCode" PropertyName="DockerFoundExitCode" />
+      <Output TaskParameter="ConsoleOutput" PropertyName="DockerInstallLocation" />
+    </Exec>
+
+    <PropertyGroup>
+      <DockerInstalled />
+      <DockerInstalled Condition="'$(DockerFoundExitCode)' == '0'">True</DockerInstalled>
+      <DockerInstalled Condition="'$(DockerFoundExitCode)' != '0'">False</DockerInstalled>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="GetCurrentUserIdForDockerRun" Condition="'$(OS)' != 'Windows_NT'">
+    <Exec Command="id -u"
+      ContinueOnError="warnAndContinue"
+      ConsoleToMSBuild="true"
+      IgnoreStandardErrorWarningFormat="true">
+      <Output TaskParameter="ExitCode" PropertyName="UserIdQueryExitCode" />
+      <Output TaskParameter="ConsoleOutput" PropertyName="UserIdQueryOutput" />
+    </Exec>
+
+    <PropertyGroup>
+      <DockerMountUserId />
+      <DockerMountUserId Condition="'$(DockerFoundExitCode)' == '0'">$(UserIdQueryOutput)</DockerMountUserId>
+    </PropertyGroup>
+  </Target>
+
+  <Target Name="RunDockerWithArguments" DependsOnTargets="GetCurrentUserIdForDockerRun;IsDockerCliInstalled;$(RunDockerWithArgumentsDependsOn)" Condition="'$(DockerBuildImageId)' != ''">
+    <PropertyGroup>
+      <DockerBuildContainerName Condition="'$(DockerBuildContainerName)' == ''">build_container_$([System.String]::Copy('$(MSBuildProjectName)').Replace('.', '_'))</DockerBuildContainerName>
+      <DockerBuildContainerArgsList Condition="@(DockerBuildContainerArgs->Count()) &gt; 0">@(DockerBuildContainerArgs->'%(Identity)',' ')</DockerBuildContainerArgsList>
+      <DockerBuildContainerMountTargetDir Condition="'$(DockerBuildContainerMountTargetDir)' == ''">/data</DockerBuildContainerMountTargetDir>
+      <DockerBuildContainerEntryPoint Condition="'$(DockerBuildContainerEntryPoint)' != ''">--entrypoint $(DockerBuildContainerEntryPoint)</DockerBuildContainerEntryPoint>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <_DockerExecCliArgs />
+      <_DockerExecCliArgs>$(_DockerExecCliArgs) run</_DockerExecCliArgs>
+      <_DockerExecCliArgs>$(_DockerExecCliArgs) --rm</_DockerExecCliArgs>
+      <_DockerExecCliArgs>$(_DockerExecCliArgs) --name $(DockerBuildContainerName)</_DockerExecCliArgs>
+      <_DockerExecCliArgs>$(_DockerExecCliArgs) --workdir $(DockerBuildContainerMountTargetDir)</_DockerExecCliArgs>
+      <_DockerExecCliArgs Condition="'$(OS)' != 'Windows_NT' AND '$(DockerMountUserId)' != ''">$(_DockerExecCliArgs) --user $(DockerMountUserId)</_DockerExecCliArgs>
+      <_DockerExecCliArgs>$(_DockerExecCliArgs) -v "$(MSBuildProjectDirectory)":$(DockerBuildContainerMountTargetDir)</_DockerExecCliArgs>
+      <_DockerExecCliArgs>$(_DockerExecCliArgs) $(DockerBuildContainerEntryPoint)</_DockerExecCliArgs>
+      <_DockerExecCliArgs>$(_DockerExecCliArgs) $(DockerBuildImageId)</_DockerExecCliArgs>
+      <_DockerExecCliArgs>$(_DockerExecCliArgs) $(DockerBuildContainerArgsList)</_DockerExecCliArgs>
+    </PropertyGroup>
+
+    <Exec Command="$(DockerInstallLocation) $(_DockerExecCliArgs)"
+      ContinueOnError="warnAndContinue"
+      ConsoleToMSBuild="true"
+      IgnoreStandardErrorWarningFormat="true"
+      IgnoreExitCode="false"
+      Condition="'$(DockerInstalled)' == 'True'" />
+  </Target>
+</Project>
