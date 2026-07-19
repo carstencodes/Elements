@@ -26,6 +26,10 @@
   <Folder Name="/Libraries/IO/Compression/">
     <Project Path="src/Elements.IO.Compression/Elements.IO.Compression.csproj" />
   </Folder>
+  <Folder Name="/Libraries/IO/Posix/">
+    <Project Path="src/Elements.IO.Posix.native-assets/Elements.IO.Posix.native-assets.msbuildproj" Type="2f08bc15-189b-4804-b644-653f34c968a8" />
+    <Project Path="src/Elements.IO.Posix/Elements.IO.Posix.csproj" />
+  </Folder>
   <Folder Name="/Misc/">
     <File Path=".editorconfig" />
     <File Path="ReadMe.md" />
