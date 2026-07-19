@@ -75,4 +75,8 @@
     <None Include="$(MsBuildProjectDirectory)\ReadMe.md" Visible="false" Pack="true" PackagePath="$(PackageReadme)" Condition="Exists('$(MsBuildProjectDirectory)\ReadMe.md')" />
     <None Include="$(MsBuildThisFileDirectory)\ReadMe.md" Visible="false" Pack="true" PackagePath="$(PackageReadme)" Condition="!Exists('$(MsBuildProjectDirectory)\ReadMe.md')" />
   </ItemGroup>
+
+  <PropertyGroup Condition="'$(MsBuildProjectFileExtension)' == '.msbuildproj'">
+    <DefaultProjectTypeGuid>{2F08BC15-189B-4804-B644-653F34C968A8}</DefaultProjectTypeGuid>
+  </PropertyGroup>
 </Project>
