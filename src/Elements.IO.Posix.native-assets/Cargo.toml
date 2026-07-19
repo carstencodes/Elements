@@ -1,0 +1,17 @@
+[package]
+name = "posixioelements"
+version = "0.0.2"
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+opt-level = 's'  # Optimize for size.
+lto = true # Link Time Optimization (LTO)
+
+[dependencies]
+rustix = "1.1.4"
+
+[build-dependencies]
+csbindgen = "1.9.6"
