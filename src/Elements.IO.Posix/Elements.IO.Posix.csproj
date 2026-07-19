@@ -1,0 +1,67 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <NativeAssetReference Include="..\Elements.IO.Posix.native-assets\Elements.IO.Posix.native-assets.msbuildproj" Visible="false" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <CoreCompileDependsOn>
+      $(CoreCompileDependsOn);
+      ResolveBindingsFromNativeAssetProjects
+    </CoreCompileDependsOn>
+    <ResolveAssetsDependsOn>
+      $(ResolveAssetsDependsOn);
+      ResolveAssetsFromNativeAssetProjects
+    </ResolveAssetsDependsOn>
+    <BuildDependsOn>
+      $(BuildDependsOn);
+      BuildNativeAssetProjects
+    </BuildDependsOn>
+    <GenerateNuSpecDependsOn>
+      $(GenerateNuSpec);
+      IncludeReferencedNativeAssets
+    </GenerateNuSpecDependsOn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <Target Name="ResolveBindingsFromNativeAssetProjects" DependsOnTargets="ResolveAssetsFromNativeAssetProjects">
+    <MSBuild
+          Projects="@(NativeAssetReference)"
+          Targets="ResolveBindingFiles"
+          Properties="Configuration=$(Configuration)"
+          SkipNonexistentTargets="false"
+          StopOnFirstFailure="false">
+      <Output TaskParameter="TargetOutputs" ItemName="BindingFilesToCompile" />
+    </MSBuild>
+
+    <ItemGroup>
+      <Compile Include="@(BindingFilesToCompile)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="ResolveAssetsFromNativeAssetProjects" Condition="@(NativeAssetReference->Count()) &gt; 0">
+    <Error
+          Code="NAC0001"
+          Text="Unable to collect files from non-existing Native Assets Project '%(NativeAssetReference.Identity)'"
+          Condition="!Exists('%(NativeAssetReference.Identity)')"/>
+  </Target>
+  <Target Name="BuildNativeAssetProjects" DependsOnTargets="ResolveAssetsFromNativeAssetProjects">
+    <MSBuild
+          Projects="@(NativeAssetReference)"
+          Targets="Build"
+          Properties="Configuration=$(Configuration)"
+          SkipNonexistentTargets="false"
+          StopOnFirstFailure="false">
+      <Output TaskParameter="TargetOutputs" ItemName="ReferencedNativeAssetsFiles" />
+    </MSBuild>
+  </Target>
+  <Target Name="IncludeReferencedNativeAssets" DependsOnTargets="BuildNativeAssetProjects">
+    <ItemGroup>
+      <None
+          Include="@(ReferencedNativeAssetsFiles)"
+          Pack="true"
+          Visible="false">
+        <PackagePath>runtimes/%(ReferencedNativeAssetsFiles.TargetPlatformIdentifier)/%(ReferencedNativeAssetsFiles.TargetPlatformMoniker)/%(ReferencedNativeAssetsFiles.FileName)%(ReferencedNativeAssetsFiles.Extension)</PackagePath>
+      </None>
+    </ItemGroup>
+  </Target>
+</Project>
