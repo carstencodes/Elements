@@ -7,7 +7,7 @@
     </CoreBuildDependsOn>
   </PropertyGroup>
 
-  <Import Project="$(MSBuildThisFileDirectory)/build/PackageReleaseNotes.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)/build/local/PackageReleaseNotes.targets" />
 
   <Target Name="EnsureResultsPath">
     <MakeDir Directories="$(ArtifactsPath)" Condition="!Exists('$(ArtifactsPath)')" />
