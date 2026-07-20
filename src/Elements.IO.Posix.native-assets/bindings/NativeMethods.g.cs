@@ -24,6 +24,12 @@ namespace Elements.IO.Posix.Internal
         [DllImport(__DllName, EntryPoint = "fs_owning_user_name", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
         internal static extern ushort fs_owning_user_name();
 
+        /// <summary>
+        ///  External
+        /// </summary>
+        [DllImport(__DllName, EntryPoint = "proc_get_process_ids", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+        internal static extern ushort proc_get_process_ids(uint* p_uid, uint* p_gid, uint* p_euid, uint* p_egid);
+
 
     }
 
