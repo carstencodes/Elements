@@ -4,7 +4,7 @@
     <ElementSolutionBuildDependsOn/>
   </PropertyGroup>
 
-  <Import Project="$(MsBuildThisFileDirectory)/build/SarifGen.targets" />
+  <Import Project="$(MsBuildThisFileDirectory)/build/local/SarifGen.targets" />
 
   <Target Name="ElementSolutionBuild" AfterTargets="Build" DependsOnTargets="$(ElementSolutionBuildDependsOn)" />
 </Project>
