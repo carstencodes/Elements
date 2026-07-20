@@ -5,6 +5,7 @@
       RunDockerBasedCargoCrossBuild
     </CoreCompileDependsOn>
     <NoWarn>$(NoWarn);MSB3245</NoWarn>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
