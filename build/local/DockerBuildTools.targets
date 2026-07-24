@@ -21,7 +21,16 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="GetCurrentUserIdForDockerRun" Condition="'$(OS)' != 'Windows_NT'">
+  <Target Name="PullDockerBuildImage" AfterTargets="Restore" Condition="'$(DockerBuildImageId)' != '' AND '$(DockerPullOnRestore)' != 'false'" DependsOnTargets="IsDockerCliInstalled">
+    <Exec Command="$(DockerInstallLocation) pull $(DockerBuildImageId)"
+          ContinueOnError="false"
+          ConsoleToMSBuild="true"
+          IgnoreStandardErrorWarningFormat="true"
+          IgnoreExitCode="false"
+          Condition="'$(DockerInstalled)' == 'True'" />
+  </Target>
+
+  <Target Name="GetCurrentUserIdForDockerRun" Condition="'$(OS)' != 'Windows_NT' AND '$(DockerKeepUserId)' != 'false'">
     <Exec Command="id -u"
       ContinueOnError="warnAndContinue"
       ConsoleToMSBuild="true"
@@ -32,15 +41,34 @@
 
     <PropertyGroup>
       <DockerMountUserId />
-      <DockerMountUserId Condition="'$(DockerFoundExitCode)' == '0'">$(UserIdQueryOutput)</DockerMountUserId>
+      <DockerMountUserId Condition="'$(UserIdQueryExitCode)' == '0'">$(UserIdQueryOutput)</DockerMountUserId>
     </PropertyGroup>
   </Target>
 
-  <Target Name="RunDockerWithArguments" DependsOnTargets="GetCurrentUserIdForDockerRun;IsDockerCliInstalled;$(RunDockerWithArgumentsDependsOn)" Condition="'$(DockerBuildImageId)' != ''">
+  <Target Name="GetDockerEnvironmentArgsAsEnvFile">
     <PropertyGroup>
-      <DockerBuildContainerName Condition="'$(DockerBuildContainerName)' == ''">build_container_$([System.String]::Copy('$(MSBuildProjectName)').Replace('.', '_'))</DockerBuildContainerName>
+      <DockerEnvFileFullPath>$(IntermediateOutputPath)docker.env</DockerEnvFileFullPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <DockerFileLines Include="@(DockerEnvironmentVariables->'%(Identity)=%(Value)')"/>
+    </ItemGroup>
+
+    <WriteLinesToFile File="$(DockerEnvFileFullPath)" Lines="@(DockerFileLines)" Overwrite="true" WriteOnlyWhenDifferent="true" Condition="@(DockerEnvironmentVariables->Count()) &gt; 0" />
+    <Delete Files="$(DockerEnvFileFullPath)" Condition="@(DockerEnvironmentVariables->Count()) == 0" />
+  </Target>
+
+  <Target Name="RunDockerWithArguments"
+          DependsOnTargets="GetCurrentUserIdForDockerRun;IsDockerCliInstalled;$(RunDockerWithArgumentsDependsOn);GetDockerEnvironmentArgsAsEnvFile"
+          Condition="'$(DockerBuildImageId)' != ''"
+          Inputs="@(DockerRunInputFiles)"
+          Outputs="@(DockerRunOutputFiles)">
+    <PropertyGroup>
+      <DockerBuildContainerName Condition="'$(DockerBuildContainerName)' == ''">build_container_$([System.String]::Copy('$(MSBuildProjectName)').Replace('.', '_'))_$([System.String]::Copy('$(TargetFramework)').Replace('.', '_'))</DockerBuildContainerName>
       <DockerBuildContainerArgsList Condition="@(DockerBuildContainerArgs->Count()) &gt; 0">@(DockerBuildContainerArgs->'%(Identity)',' ')</DockerBuildContainerArgsList>
       <DockerBuildContainerMountTargetDir Condition="'$(DockerBuildContainerMountTargetDir)' == ''">/data</DockerBuildContainerMountTargetDir>
+      <DockerBuildContainerMountSourceDir Condition="'$(DockerBuildContainerMountSourceDir)' == ''">$(MsBuildProjectDirectory)</DockerBuildContainerMountSourceDir>
+      <DockerBuildContainerWorkingDir Condition="'$(DockerBuildContainerWorkingDir)' == ''">$(DockerBuildContainerMountTargetDir)</DockerBuildContainerWorkingDir>
       <DockerBuildContainerEntryPoint Condition="'$(DockerBuildContainerEntryPoint)' != ''">--entrypoint $(DockerBuildContainerEntryPoint)</DockerBuildContainerEntryPoint>
     </PropertyGroup>
 
@@ -49,19 +77,20 @@
       <_DockerExecCliArgs>$(_DockerExecCliArgs) run</_DockerExecCliArgs>
       <_DockerExecCliArgs>$(_DockerExecCliArgs) --rm</_DockerExecCliArgs>
       <_DockerExecCliArgs>$(_DockerExecCliArgs) --name $(DockerBuildContainerName)</_DockerExecCliArgs>
-      <_DockerExecCliArgs>$(_DockerExecCliArgs) --workdir $(DockerBuildContainerMountTargetDir)</_DockerExecCliArgs>
+      <_DockerExecCliArgs>$(_DockerExecCliArgs) --workdir $(DockerBuildContainerWorkingDir)</_DockerExecCliArgs>
       <_DockerExecCliArgs Condition="'$(OS)' != 'Windows_NT' AND '$(DockerMountUserId)' != ''">$(_DockerExecCliArgs) --user $(DockerMountUserId)</_DockerExecCliArgs>
-      <_DockerExecCliArgs>$(_DockerExecCliArgs) -v "$(MSBuildProjectDirectory)":$(DockerBuildContainerMountTargetDir)</_DockerExecCliArgs>
+      <_DockerExecCliArgs Condition="'$(DockerEnvFileFullPath)' != '' AND Exists('$(DockerEnvFileFullPath)')">$(_DockerExecCliArgs) --env-file &quot;$(DockerEnvFileFullPath)&quot;</_DockerExecCliArgs>
+      <_DockerExecCliArgs>$(_DockerExecCliArgs) -v "$(DockerBuildContainerMountSourceDir)":$(DockerBuildContainerMountTargetDir)</_DockerExecCliArgs>
       <_DockerExecCliArgs>$(_DockerExecCliArgs) $(DockerBuildContainerEntryPoint)</_DockerExecCliArgs>
       <_DockerExecCliArgs>$(_DockerExecCliArgs) $(DockerBuildImageId)</_DockerExecCliArgs>
       <_DockerExecCliArgs>$(_DockerExecCliArgs) $(DockerBuildContainerArgsList)</_DockerExecCliArgs>
     </PropertyGroup>
 
     <Exec Command="$(DockerInstallLocation) $(_DockerExecCliArgs)"
-      ContinueOnError="warnAndContinue"
-      ConsoleToMSBuild="true"
-      IgnoreStandardErrorWarningFormat="true"
-      IgnoreExitCode="false"
-      Condition="'$(DockerInstalled)' == 'True'" />
+          ContinueOnError="false"
+          ConsoleToMSBuild="true"
+          IgnoreStandardErrorWarningFormat="true"
+          IgnoreExitCode="false"
+          Condition="'$(DockerInstalled)' == 'True'" />
   </Target>
 </Project>
