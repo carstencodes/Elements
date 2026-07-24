@@ -20,6 +20,16 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Cache cargo registry and build
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('deps/cargo-tools.ini') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
     - name: Setup dotnet
       uses: actions/setup-dotnet@v6
       with:
