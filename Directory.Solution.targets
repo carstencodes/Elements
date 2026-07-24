@@ -6,5 +6,8 @@
 
   <Import Project="$(MsBuildThisFileDirectory)/build/local/SarifGen.targets" />
 
+  <Import Project="$(MsBuildThisFileDirectory)/build/local/CargoEdit.targets" />
+
+  <Target Name="ElementSolutionPreBuild" BeforeTargets="Build" DependsOnTargets="$(ElementSolutionPreBuildDependsOn)" />
   <Target Name="ElementSolutionBuild" AfterTargets="Build" DependsOnTargets="$(ElementSolutionBuildDependsOn)" />
 </Project>
