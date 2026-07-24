@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
   <PropertyGroup>
-    <ElementSolutionPreBuildDependsOn>
+    <ElementSolutionPreBuildDependsOn Condition="'$(SkipCargoSetVersion)' != 'true'">
       $(ElementSolutionPreBuildDependsOn);
       CargoEditVersionWithMinVer
     </ElementSolutionPreBuildDependsOn>
