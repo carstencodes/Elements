@@ -6,6 +6,7 @@
 #:property EnableNETAnalyzers=false
 #:property SkipCargoSetVersion=true
 #:property SkipNuGetLicense=true
+#:property GenerateCycloneDxSbom=false
 
 #pragma warning disable MA0029
 #pragma warning disable MA0042
