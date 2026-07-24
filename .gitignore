@@ -405,3 +405,8 @@ FodyWeavers.xsd
 .qodo/
 .vscode/
 .idea/
+
+
+# Added by cargo
+
+/target

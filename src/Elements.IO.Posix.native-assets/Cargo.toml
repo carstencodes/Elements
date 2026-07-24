@@ -1,17 +1,16 @@
 [package]
 name = "posixioelements"
-version = "0.0.2"
+version = { workspace = true }
+authors = { workspace = true }
+description = { workspace = true }
+documentation = { workspace = true }
 edition = "2024"
 
 [lib]
 crate-type = ["cdylib"]
 
-[profile.release]
-opt-level = 's'  # Optimize for size.
-lto = true # Link Time Optimization (LTO)
-
 [dependencies]
-rustix = { version = "1.1.4", features=["fs", "process"] }
+rustix = { workspace = true }
 
 [build-dependencies]
-csbindgen = "1.9.6"
+csbindgen = { workspace = true }
