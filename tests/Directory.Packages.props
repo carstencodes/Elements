@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageVersion Include="coverlet.MTP" Version="10.0.1" />
-    <PackageVersion Include="GitHubActionsTestLogger" Version="3.0.5" Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''" />
+    <PackageVersion Include="GitHubActionsTestLogger" Version="3.0.4" Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.3.2" />
     <PackageVersion Include="xunit.analyzers" Version="1.27.0" />
     <PackageVersion Include="xunit.v3" Version="3.2.2" />
