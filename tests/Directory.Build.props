@@ -7,6 +7,10 @@
   <Import Project="$(_ParentFile)" Condition="'$(_ParentFile)' != '' AND Exists('$(_ParentFile)')" />
 
   <PropertyGroup>
+    <GenerateCycloneDxSbom>false</GenerateCycloneDxSbom>
+  </PropertyGroup>
+
+  <PropertyGroup>
     <UseMicrosoftTestingPlatformRunner>true</UseMicrosoftTestingPlatformRunner>
     <TestingPlatformDotnetTestSupport>false</TestingPlatformDotnetTestSupport>
     <IsPackable>false</IsPackable>
