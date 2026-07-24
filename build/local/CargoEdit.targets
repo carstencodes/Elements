@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <ElementSolutionPreBuildDependsOn>
+      $(ElementSolutionPreBuildDependsOn);
+      CargoEditVersionWithMinVer
+    </ElementSolutionPreBuildDependsOn>
+  </PropertyGroup>
+
+  <Target Name="CargoEditVersionWithMinVer">
+    <Exec Command="dotnet tool run minver -t v -p preview.0"
+      ContinueOnError="warnAndContinue"
+      ConsoleToMSBuild="true"
+      IgnoreExitCode="true"
+      IgnoreStandardErrorWarningFormat="true">
+      <Output TaskParameter="ExitCode" PropertyName="MinVerExitCode" />
+      <Output TaskParameter="ConsoleOutput" ItemName="MinVerVersion" />
+    </Exec>
+
+    <ItemGroup>
+        <MinVerVersion Remove="@(MinVerVersion)" Condition="$([System.String]::Copy('%(MinVerVersion.Identity)').StartsWith('MinVer:'))" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <MinVerVersion>@(MinVerVersion)</MinVerVersion>
+    </PropertyGroup>
+
+    <Exec Command="cargo set-version &quot;$(MinVerVersion)&quot;"
+      ContinueOnError="warnAndContinue"
+      ConsoleToMSBuild="true"
+      IgnoreStandardErrorWarningFormat="true" 
+      Condition="'$(MinVerExitCode)' == 0"/>
+  </Target>
+</Project>
