@@ -28,6 +28,10 @@ runs:
       shell: sh
       if: ${{ inputs.tool_restore }}
       run: dotnet tool restore
+    - name: Restore cargo tools using CargoTools PS
+      shell: sh
+      if: ${{ inputs.tool_restore }}
+      run: dotnet run deps/CargoTools.cs
     - name: Restore packages
       shell: sh
       run: dotnet restore --no-http-cache --force --use-lock-file --locked-mode
