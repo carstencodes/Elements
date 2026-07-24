@@ -5,4 +5,70 @@
   </PropertyGroup>
 
   <Import Project="$(_ParentFile)" Condition="'$(_ParentFile)' != '' AND Exists('$(_ParentFile)')" />
+
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <CoreCompileDependsOn>
+      $(CoreCompileDependsOn);
+      ResolveBindingsFromNativeAssetProjects
+    </CoreCompileDependsOn>
+    <TargetsForTfmSpecificContentInPackage>
+      $(TargetsForTfmSpecificContentInPackage);
+      PostCargoBuildAddNativeAssetToPackage
+    </TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <Target Name="ResolveBindingsFromNativeAssetProjects">
+    <MSBuild
+          Projects="@(ProjectReference->WithMetadataValue('Extension', '.msbuildproj'))"
+          Targets="ResolveBindingFiles"
+          Properties="Configuration=$(Configuration)"
+          SkipNonexistentTargets="true"
+          StopOnFirstFailure="false">
+      <Output TaskParameter="TargetOutputs" ItemName="BindingFilesToCompile" />
+    </MSBuild>
+
+    <ItemGroup>
+      <Compile Include="@(BindingFilesToCompile)" />
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup>
+    <CurrentMsBuildRid Condition="$([System.OperatingSystem]::IsWindows())">win</CurrentMsBuildRid>
+    <CurrentMsBuildRid Condition="$([System.OperatingSystem]::IsLinux())">linux</CurrentMsBuildRid>
+    <CurrentMsBuildRid Condition="$([System.OperatingSystem]::IsMacOS())">osx</CurrentMsBuildRid>
+    <CurrentProcessArchitecture />
+    <CurrentProcessArchitecture Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X86'">x86</CurrentProcessArchitecture>
+    <CurrentProcessArchitecture Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64'">x64</CurrentProcessArchitecture>
+    <CurrentProcessArchitecture Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'ARM64'">arm64</CurrentProcessArchitecture>
+    <CurrentMsBuildRid Condition="'$(CurrentProcessArchitecture)' != ''">$(CurrentMsBuildRid)-$(CurrentProcessArchitecture)</CurrentMsBuildRid>
+  </PropertyGroup>
+
+  <Target Name="PostCargoBuildAddNativeAssetToOutput" AfterTargets="ResolveProjectReferences" BeforeTargets="AssignTargetPaths">
+    <ItemGroup>
+      <None Include="@(NativeAssetReference)"
+            Visible="false"
+            Pack="true"
+            Link="%(Filename)%(Extension)">
+        <PackagePath>runtimes/%(NativeAssetReference.TargetPlatformIdentifier)/native/%(NativeAssetReference.FileName)%(NativeAssetReference.Extension)</PackagePath>
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+        <CopyToOutputDirectory Condition="'%(NativeAssetReference.TargetPlatformIdentifier)' == '$(CurrentMsBuildRid)'">PreserveNewest</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="PostCargoBuildAddNativeAssetToPackage" Condition="'$(TargetFramework)' == '$(LatestTargetFramework)'">
+    <ItemGroup>
+      <TfmSpecificPackageFile Include="@(NativeAssetReference)" Condition="'%(NativeAssetReference.AssetType)' != 'Content'">
+        <AdditionalProperties />
+        <SetTargetFramework />
+        <TargetFrameworkIdentifier />
+        <PackagePath>runtimes/%(NativeAssetReference.TargetPlatformIdentifier)/native/%(NativeAssetReference.FileName)%(NativeAssetReference.Extension)</PackagePath>
+      </TfmSpecificPackageFile>
+      <TfmSpecificPackageFile Include="@(NativeAssetReference)" Condition="'%(NativeAssetReference.AssetType)' == 'Content'">
+        <PackagePath>sbom/%(NativeAssetReference.FileName).native%(NativeAssetReference.Extension)</PackagePath>
+      </TfmSpecificPackageFile>
+    </ItemGroup>
+  </Target>
+
 </Project>
