@@ -17,6 +17,7 @@
     <PackageIcon>ElementsIcon.png</PackageIcon>
     <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
     <PackageTags>HedgeCraft Elements</PackageTags>
+    <PackageProjectUrl>https://carstencodes.github.io/Elements</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
