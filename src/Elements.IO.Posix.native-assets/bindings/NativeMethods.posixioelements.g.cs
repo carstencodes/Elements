@@ -8,7 +8,7 @@ using System;
 using System.Runtime.InteropServices;
 
 
-namespace Elements.IO.Posix.Internal
+namespace HedgeCraft.Elements.IO.Posix.Internal
 {
     internal static unsafe partial class NativeMethods
     {
