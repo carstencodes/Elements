@@ -22,6 +22,7 @@
   <Folder Name="/Libraries/IO/" />
   <Folder Name="/Libraries/IO/Core/">
     <Project Path="src/Elements.IO/Elements.IO.csproj" />
+    <Project Path="tests/Elements.IO.Tests/Elements.IO.Tests.csproj" />
   </Folder>
   <Folder Name="/Libraries/IO/Compression/">
     <Project Path="src/Elements.IO.Compression/Elements.IO.Compression.csproj" />
