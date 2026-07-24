@@ -21,7 +21,7 @@ runs:
   using: "composite"
   steps:
     - name: Cache cargo registry and build
-      uses: actions/cache@v3
+      uses: actions/cache@v6
       with:
         path: |
           ~/.cargo/registry
