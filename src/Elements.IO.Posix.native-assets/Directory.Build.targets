@@ -4,6 +4,254 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <RustSourceFile Include="src/**/*.rs" />
+    <RustBuildFile Include="build.rs" Link="build/build.rs" />
+    <RustBuildFile Include="Cargo.toml" Link="build/Cargo.toml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <BuildIdentifiers Include="Linux/amd64"
+                      DotnetRuntimeIdentifier="linux-x64"
+                      CargoRustTarget="x86_64-unknown-linux-gnu"
+                      DyLibExtension=".so"
+                      DyLibFilePrefix="lib"
+                      Visible="false" />
+    <BuildIdentifiers Include="Linux/arm64"
+                      DotnetRuntimeIdentifier="linux-arm64"
+                      CargoRustTarget="aarch64-unknown-linux-gnu"
+                      DyLibExtension=".so"
+                      DyLibFilePrefix="lib"
+                      Visible="false" />
+    <BuildIdentifiers Include="MacOsX/amd64"
+                      DotnetRuntimeIdentifier="osx-x64"
+                      CargoRustTarget="x86_64-apple-darwin"
+                      DyLibExtension=".dylib"
+                      DyLibFilePrefix="lib"
+                      Visible="false" />
+    <BuildIdentifiers Include="MaxOsX/arm64"
+                      DotnetRuntimeIdentifier="osx-arm64"
+                      CargoRustTarget="aarch64-apple-darwin"
+                      DyLibExtension=".dylib"
+                      DyLibFilePrefix="lib"
+                      Visible="false" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <SetCargoEnvironmentVariablesDependsOn Condition="'$(CargoTargetOperation)' != 'Restore'">
+      $(SetCargoEnvironmentVariablesDependsOn);
+      InitializeSourceControlInformation;
+      MinVer
+    </SetCargoEnvironmentVariablesDependsOn>
+  </PropertyGroup>
+
+  <Target Name="SetCargoEnvironmentVariablesFromMinVer" DependsOnTargets="$(SetCargoEnvironmentVariablesDependsOn)">
+    <PropertyGroup>
+      <_DockerTargetRelativePath>$([MSBuild]::MakeRelative('$(SolutionDir)', '$(IntermediateOutputPath)'))</_DockerTargetRelativePath>
+      <_DockerTargetRelativePath>$([System.String]::Copy('$(_DockerTargetRelativePath)').Replace('\\', '/'))</_DockerTargetRelativePath>
+    </PropertyGroup>
+    <ItemGroup>
+      <CargoBuildEnvironmentVariables Include="CARGO_PKG_VERSION" Value="$(MinVerVersion)" />
+      <CargoBuildEnvironmentVariables Include="CARGO_PKG_VERSION_MAJOR" Value="$(MinVerMajor)" />
+      <CargoBuildEnvironmentVariables Include="CARGO_PKG_VERSION_MINOR" Value="$(MinVerMinor)" />
+      <CargoBuildEnvironmentVariables Include="CARGO_PKG_VERSION_PATCH" Value="$(MinVerPatch)" />
+      <CargoBuildEnvironmentVariables Include="CARGO_PKG_VERSION_PRE" Value="$(MinVerPreRelease)" />
+      <CargoBuildEnvironmentVariables Include="CARGO_PKG_AUTHORS" Value="$(Authors)" />
+      <CargoBuildEnvironmentVariables Include="CARGO_PKG_DESCRIPTION" Value="$(Description)" />
+      <CargoBuildEnvironmentVariables Include="CARGO_PKG_LICENSE_FILE" Value="$(PackageReadmeFile)" />
+      <CargoBuildEnvironmentVariables Include="CARGO_PKG_HOMEPAGE" Value="$(PackageProjectUrl)" />
+      <CargoBuildEnvironmentVariables Include="CARGO_PKG_REPOSITORY" Value="$(ScmRepositoryUrl)" />
+      <CargoBuildEnvironmentVariables Include="CARGO_TARGET_DIR" Value="$(DockerBuildContainerMountTargetDir)/$(_DockerTargetRelativePath)/target" />
+      <CargoBuildEnvironmentVariables Include="CARGO_BUILD_BUILD_DIR" Value="$(DockerBuildContainerMountTargetDir)/$(_DockerTargetRelativePath)/cache" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <DockerEnvironmentVariables Remove="@(DockerEnvironmentVariables)" />
+      <DockerEnvironmentVariables Include="@(CargoBuildEnvironmentVariables)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RunDockerBasedCargoCrossBuild" Returns="@(TargetPathWithTargetPlatformMoniker)">
+    <MsBuild  BuildInParallel="false"
+              SkipNonexistentTargets="false"
+              StopOnFirstFailure="false"
+              Properties="
+                CargoTargetOperation=Build;
+                Configuration=$(Configuration);
+                RustCrateLibName=$(RustCrateLibName);
+                TargetRuntimeIdentifier=%(BuildIdentifiers.DotnetRuntimeIdentifier);
+                CargoBuildTarget=%(BuildIdentifiers.CargoRustTarget);
+                CargoLibExtension=%(BuildIdentifiers.DyLibExtension);
+                CargoLibFilePrefix=%(BuildIdentifiers.DyLibFilePrefix)"
+              Targets="RunCargoBuildInDocker"
+              Projects="$(MSBuildProjectFullPath)"
+              >
+      <Output TaskParameter="TargetOutputs" ItemName="BuiltFiles" />
+    </MsBuild>
+    <MsBuild BuildInParallel="false"
+             SkipNonexistentTargets="false"
+             StopOnFirstFailure="false"
+             Properties="
+              CargoTargetOperation=CycloneDx;
+              Configuration=$(Configuration);
+              RustCrateLibName=$(RustCrateLibName)"
+            Targets="GenerateCycloneDxSbom"
+            Projects="$(MSBuildProjectFullPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="SbomFiles" />
+    </MsBuild>
+
+    <ItemGroup>
+      <TargetPathWithTargetPlatformMoniker Include="@(BuiltFiles)" />
+      <TargetPathWithTargetPlatformMoniker Include="@(SbomFiles)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RunDockerBasedCargoCrossRestore" AfterTargets="PullDockerBuildImage">
+    <MsBuild  BuildInParallel="false"
+              SkipNonexistentTargets="false"
+              StopOnFirstFailure="false"
+              Properties="
+                CargoTargetOperation=Restore;
+                Configuration=$(Configuration);
+                RustCrateLibName=$(RustCrateLibName);
+                TargetRuntimeIdentifier=%(BuildIdentifiers.DotnetRuntimeIdentifier);
+                CargoBuildTarget=%(BuildIdentifiers.CargoRustTarget);
+                CargoLibExtension=%(BuildIdentifiers.DyLibExtension);
+                CargoLibFilePrefix=%(BuildIdentifiers.DyLibFilePrefix)"
+              Targets="RunCargoBuildInDocker"
+              Projects="$(MSBuildProjectFullPath)"
+              />
+  </Target>
+
+  <Target Name="RunDockerBasedCargoCrossClean" DependsOnTargets="PullDockerBuildImage">
+    <MsBuild  BuildInParallel="false"
+              SkipNonexistentTargets="false"
+              StopOnFirstFailure="false"
+              Properties="
+                CargoTargetOperation=Clean;
+                Configuration=$(Configuration);
+                RustCrateLibName=$(RustCrateLibName);
+                TargetRuntimeIdentifier=%(BuildIdentifiers.DotnetRuntimeIdentifier);
+                CargoBuildTarget=%(BuildIdentifiers.CargoRustTarget);
+                CargoLibExtension=%(BuildIdentifiers.DyLibExtension);
+                CargoLibFilePrefix=%(BuildIdentifiers.DyLibFilePrefix)"
+              Targets="RunCargoBuildInDocker"
+              Projects="$(MSBuildProjectFullPath)"
+              />
+  </Target>
+
+  <Target Name="ResolveBindingFiles" Returns="@(GeneratedBindingFiles)">
+    <ItemGroup>
+      <GeneratedBindingFiles Include="$(MsBuildThisFileDirectory)bindings/*.g.cs" />
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup>
+    <RunDockerWithArgumentsDependsOn>
+      $(RunDockerWithArgumentsDependsOn);
+      SetCargoEnvironmentVariablesFromMinVer;
+    </RunDockerWithArgumentsDependsOn>
+    <RunDockerWithArgumentsDependsOn Condition="'$(CargoTargetOperation)' == 'Build'">
+      $(RunDockerWithArgumentsDependsOn);
+      PrepareDockerBuildContainerArgs;
+      CargoSetInputOutputFile
+    </RunDockerWithArgumentsDependsOn>
+    <RunDockerWithArgumentsDependsOn Condition="'$(CargoTargetOperation)' == 'Restore'">
+      $(RunDockerWithArgumentsDependsOn);
+      PrepareDockerRestoreContainerArgs
+    </RunDockerWithArgumentsDependsOn>
+    <RunDockerWithArgumentsDependsOn Condition="'$(CargoTargetOperation)' == 'Clean'">
+      $(RunDockerWithArgumentsDependsOn);
+      PrepareDockerCleanContainerArgs
+    </RunDockerWithArgumentsDependsOn>
+    <CoreCleanDependsOn>
+      $(CoreCleanDependsOn);
+      RunDockerBasedCargoCrossClean
+    </CoreCleanDependsOn>
+    <DockerKeepUserId>false</DockerKeepUserId>
+  </PropertyGroup>
+
+  <Target Name="PrepareDockerBuildContainerArgs">
+    <ItemGroup>
+      <DockerBuildContainerArgs Include="sh" />
+      <DockerBuildContainerArgs Include="-c" />
+      <DockerBuildContainerArgs Include="&quot;umask 000 &amp;&amp; cargo build $(DockerBuildContainerCargoConfiguration) --target $(CargoBuildTarget)&quot;" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="PrepareDockerRestoreContainerArgs">
+    <ItemGroup>
+      <DockerBuildContainerArgs Include="sh" />
+      <DockerBuildContainerArgs Include="-c" />
+      <DockerBuildContainerArgs Include="&quot;cargo fetch --target $(CargoBuildTarget)&quot;" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="PrepareDockerCleanContainerArgs">
+    <ItemGroup>
+      <DockerBuildContainerArgs Include="sh" />
+      <DockerBuildContainerArgs Include="-c" />
+      <DockerBuildContainerArgs Include="&quot;cargo clean $(DockerBuildContainerCargoConfiguration) --target $(CargoBuildTarget)&quot;" />
+    </ItemGroup>
+  </Target>
+
+  <PropertyGroup>
+    <DockerBuildContainerCargoConfiguration />
+    <DockerBuildContainerCargoConfiguration Condition="'$(Configuration)' == 'Release'">--release</DockerBuildContainerCargoConfiguration>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <_DockerProjectRelativePath>$([MSBuild]::MakeRelative('$(SolutionDir)', '$(MsBuildProjectDirectory)'))</_DockerProjectRelativePath>
+    <_DockerProjectRelativePath>$([System.String]::Copy('$(_DockerProjectRelativePath)').Replace('\\', '/'))</_DockerProjectRelativePath>
+    <DockerBuildContainerMountSourceDir>$(SolutionDir)</DockerBuildContainerMountSourceDir>
+    <DockerBuildContainerMountTargetDir>/root/src</DockerBuildContainerMountTargetDir>
+    <DockerBuildContainerWorkingDir>$(DockerBuildContainerMountTargetDir)/$(_DockerProjectRelativePath)</DockerBuildContainerWorkingDir>
+    <DockerBuildImageId>$(CargoLinuxMacDockerImage)</DockerBuildImageId>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ConfigurationOutputFolder>$(Configuration.ToLowerInvariant())</ConfigurationOutputFolder>
+  </PropertyGroup>
+
+  <Target Name="CargoSetInputOutputFile">
+    <PropertyGroup>
+      <CargoTargetFile>$(IntermediateOutputPath)/target/$(CargoBuildTarget)/$(ConfigurationOutputFolder)/$(CargoLibFilePrefix)$(RustCrateLibName)$(CargoLibExtension)</CargoTargetFile>
+      <CargoSbomTargetFile>$(IntermediateOutputPath)/$(CycloneDxOutputFilename).$(CycloneDxOutputFormat)</CargoSbomTargetFile>
+    </PropertyGroup>
+    <ItemGroup>
+      <DockerRunInputFiles Include="@(RustSourceFile)" />
+      <DockerRunInputFiles Include="@(RustBuildFile)" />
+      <DockerRunOutputFiles Include="$(CargoTargetFile)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RunCargoRestoreInDocker" DependsOnTargets="RunDockerWithArguments" Returns="@(CreatedFilesByCargoBuild)" />
+
+  <Target Name="RunCargoCleanInDocker" DependsOnTargets="RunDockerWithArguments" Returns="@(CreatedFilesByCargoBuild)" />
+
+  <Target Name="RunCargoBuildInDocker" DependsOnTargets="RunDockerWithArguments" Returns="@(CreatedFilesByCargoBuild)">
+    <ItemGroup>
+      <CreatedFilesByCargoBuild Include="$(CargoTargetFile)">
+        <TargetFrameworkIdentifier>$(TargetFramework)</TargetFrameworkIdentifier>
+        <TargetPlatformMoniker>$(TargetRuntimeIdentifier)</TargetPlatformMoniker>
+        <TargetPlatformIdentifier>$(TargetRuntimeIdentifier)</TargetPlatformIdentifier>
+        <CopyUpToDateMarker />
+        <TargetFrameworkVersion />
+        <ReferenceAssembly />
+        <RuntimeIdentifier>$(TargetRuntimeIdentifier)</RuntimeIdentifier>
+        <Configuration>$(Configuration)</Configuration>
+      </CreatedFilesByCargoBuild>
+    </ItemGroup>
+  </Target>
+
+  <Import Project="$(MsBuildThisFileDirectory)../../build/local/DockerBuildTools.targets" />
+
+  <PropertyGroup>
+    <TargetsTriggeredByCompilation>
+      $(TargetsTriggeredByCompilation);
+      RunDockerBasedCargoCrossBuild
+    </TargetsTriggeredByCompilation>
+  </PropertyGroup>
 
   <PropertyGroup>
     <_ParentFile>$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFile)', '$(MSBuildThisFileDirectory)../'))</_ParentFile>
@@ -11,4 +259,7 @@
 
   <Import Project="$(_ParentFile)" Condition="'$(_ParentFile)' != '' AND Exists('$(_ParentFile)')" />
 
+  <Target
+      Name="GenerateCycloneDxSbom"
+      AfterTargets="Build" />
 </Project>
