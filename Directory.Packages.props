@@ -20,4 +20,5 @@
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.10" />
     <PackageVersion Include="System.CommandLine" Version="2.0.10" />
   </ItemGroup>
+  <Import Project="$(MsBuildThisFileDirectory)/deps/Docker.Images.props" />
 </Project>
