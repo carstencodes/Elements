@@ -28,7 +28,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <TargetFrameworks>net10.0;net8.0</TargetFrameworks>
+    <LatestTargetFramework>net10.0</LatestTargetFramework>
+    <TargetFrameworks>$(LatestTargetFramework);net8.0</TargetFrameworks>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <UseArtifactsOutput>true</UseArtifactsOutput>
