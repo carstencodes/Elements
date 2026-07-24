@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <!-- renovate: datasource=docker depName=Rust-Linux-Darwin-Builder -->
+    <CargoLinuxMacDockerImage>joseluisq/rust-linux-darwin-builder:2.0.0-beta.1</CargoLinuxMacDockerImage>
+  </PropertyGroup>
+</Project>
