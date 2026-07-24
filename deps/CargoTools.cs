@@ -4,6 +4,8 @@
 #:property PublishAot=false
 #:property GenerateDocumentationFile=false
 #:property EnableNETAnalyzers=false
+#:property SkipCargoSetVersion=true
+#:property SkipNuGetLicense=true
 
 #pragma warning disable MA0029
 #pragma warning disable MA0042
