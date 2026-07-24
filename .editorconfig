@@ -8,6 +8,8 @@ indent_style = space
 indent_size = 4
 insert_final_newline = true
 trim_trailing_whitespace = true
+spelling_language = en-US
+tab_width = 4
 
 # Solution files
 [*.slnx]
