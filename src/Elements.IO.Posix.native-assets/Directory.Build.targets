@@ -261,5 +261,39 @@
 
   <Target
       Name="GenerateCycloneDxSbom"
-      AfterTargets="Build" />
+      AfterTargets="Build" 
+      DependsOnTargets="CargoSetInputOutputFile;SetCargoEnvironmentVariablesFromMinVer"
+      Inputs="@(RustBuildFile)"
+      Outputs="$(CargoSbomTargetFile)" 
+      Returns="@(SbomFilesByCargoBuild)">
+
+    <ItemGroup>
+      <CycloneDxExportEnvVars Include="@(CargoBuildEnvironmentVariables->'%(Identity)=%(Value))')" />
+    </ItemGroup>
+
+    <Exec Command="cargo cyclonedx --manifest-path '$(MSBuildProjectDirectory)/Cargo.toml' --format '$(CycloneDxOutputFormat)' --all-features --all --spec-version '1.5' --override-filename '$(CycloneDxOutputFilename)'"
+      ContinueOnError="warnAndContinue"
+      ConsoleToMSBuild="true"
+      EnvironmentVariables="@(CycloneDxExportEnvVars)"
+      IgnoreStandardErrorWarningFormat="true" />
+    <Move SourceFiles="$(MSBuildProjectDirectory)/$(CycloneDxOutputFilename).$(CycloneDxOutputFormat)"
+          DestinationFolder="$(IntermediateOutputPath)" />
+    <PropertyGroup>
+      <CycloneDxOutputPath>$(CargoSbomTargetFile)</CycloneDxOutputPath>
+    </PropertyGroup>
+    <ItemGroup>
+      <SbomFilesByCargoBuild Include="$(CargoSbomTargetFile)">
+        <TargetFrameworkIdentifier />
+        <TargetPlatformMoniker />
+        <TargetPlatformIdentifier />
+        <CopyUpToDateMarker />
+        <TargetFrameworkVersion />
+        <ReferenceAssembly />
+        <RuntimeIdentifier />
+        <Configuration />
+        <AssetType>Content</AssetType>
+      </SbomFilesByCargoBuild>
+    </ItemGroup>
+  </Target>
+
 </Project>
