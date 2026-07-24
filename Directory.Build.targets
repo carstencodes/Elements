@@ -5,6 +5,14 @@
       EnsureResultsPath;
       $(CoreBuildDependsOn)
     </CoreBuildDependsOn>
+    <BeforePack>
+      $(BeforePack);
+      EnsureCycloneDxSbomVersion;
+      ValidateCycloneDxConfiguration;
+      GenerateCycloneDxMetadata;
+      GenerateCycloneDxSbom;
+      IncludeCycloneDxSbomInPackage
+    </BeforePack>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)/build/local/PackageReleaseNotes.targets" />
