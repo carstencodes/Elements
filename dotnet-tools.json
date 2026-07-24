@@ -16,6 +16,13 @@
       ],
       "rollForward": false
     },
+    "nuget-license": {
+      "version": "4.0.15",
+      "commands": [
+        "nuget-license"
+      ],
+      "rollForward": false
+    },
     "minver-cli": {
       "version": "7.0.0",
       "commands": [
