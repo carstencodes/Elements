@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)/build/local/PackageReleaseNotes.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)/build/local/NuGetLicense.targets" />
 
   <Target Name="EnsureResultsPath">
     <MakeDir Directories="$(ArtifactsPath)" Condition="!Exists('$(ArtifactsPath)')" />
