@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <PropertyGroup>
+        <BuildDependsOn>
+            $(BuildDependsOn);
+            GenerateNuGetLicenseOutputFile
+        </BuildDependsOn>    
+    </PropertyGroup>
+    <Target Name="GenerateNuGetLicenseOutputFile" Condition="'$(TargetFramework)' != ''">
+        <PropertyGroup>
+            <NuGetLicenseOutputFile>$(IntermediateOutputPath)\ThirdPartyInformation.txt</NuGetLicenseOutputFile>
+        </PropertyGroup>
+        <Exec 
+            Command="dotnet tool run nuget-license -i &quot;$(MsBuildProjectFullPath)&quot; -t -isp -o Table -fo &quot;$(NuGetLicenseOutputFile)&quot;"
+            ContinueOnError="false"
+            ConsoleToMSBuild="true"
+            IgnoreStandardErrorWarningFormat="true"
+            IgnoreExitCode="false" />
+        <ItemGroup>
+            <None Include="$(NuGetLicenseOutputFile)" Visible="false" Pack="true" PackagePath="sbon/ThirdPartyInformation.$(TargetFramework).txt" />
+        </ItemGroup>
+    </Target>
+</Project>
