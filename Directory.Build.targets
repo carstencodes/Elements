@@ -17,4 +17,6 @@
     <MakeDir Directories="$(CodeCoverageResultPaths)" Condition="!Exists('$(CodeCoverageResultPaths)')" />
   </Target>
 
+  <Target Name="EnsureCycloneDxToolInstalled" />
+
 </Project>

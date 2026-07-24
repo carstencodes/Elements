@@ -65,6 +65,19 @@
     <MinVerMinimumMajorMinor>0.0</MinVerMinimumMajorMinor>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <SolutionDir Condition="'$(SolutionDir)' == ''">$(MsBuildThisFileDirectory)</SolutionDir>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <CycloneDxContinueOnError>false</CycloneDxContinueOnError>
+    <CycloneDxOutputFormat>json</CycloneDxOutputFormat>
+    <CycloneDxOutputFilename>package-bom</CycloneDxOutputFilename>
+    <CycloneDxEnableGitHubLicenses>false</CycloneDxEnableGitHubLicenses>
+    <_CycloneDxConfigDir>$(SolutionDir)</_CycloneDxConfigDir>
+    <CycloneDxValidateSbom>false</CycloneDxValidateSbom>
+  </PropertyGroup>
+
   <ItemGroup>
     <AdditionalFiles Include="$(MsBuildThisFileDirectory)\build\BannedSymbols.txt" />
     <AdditionalFiles Include="$(MsBuildProjectDirectory)\BannedSymbols.txt" Condition="Exists('$(MsBuildProjectDirectory)\BannedSymbols.txt')" />
