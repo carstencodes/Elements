@@ -17,6 +17,16 @@
       "matchStrings": [
         "<!-- renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))? -->\\s+<[^>]+>(?<packageName>[^:]+?):(?<currentValue>\\d+(\\.\\d+)*(-[0-9a-zA-z\\.]+)?)</[^>]+>"
       ]
+    },
+    {
+      "customType": "regex",
+      "description": "Update cargo tools",
+      "managerFilePatterns": [
+        "deps/cargo-tools.ini"
+      ],
+      "matchStrings": [
+        "; renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))?\\s+(?<packageName>[^=\\s]+?)\\s*=\\s*(?<currentValue>\\d+(\\.\\d+)*?)"
+      ]
     }
   ],
   "packageRules": [
