@@ -80,7 +80,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="$(MsBuildThisFileDirectory)\build\BannedSymbols.txt" />
+    <AdditionalFiles Include="$(MsBuildThisFileDirectory)\build\local\BannedSymbols.txt" />
     <AdditionalFiles Include="$(MsBuildProjectDirectory)\BannedSymbols.txt" Condition="Exists('$(MsBuildProjectDirectory)\BannedSymbols.txt')" />
   </ItemGroup>
 
