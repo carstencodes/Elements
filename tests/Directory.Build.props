@@ -36,8 +36,7 @@
     <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --report-xunit-trx</TestingPlatformCommandLineArguments>
     <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --report-ctrf</TestingPlatformCommandLineArguments>
     <TestingPlatformCommandLineArguments Condition="'$(CI)' == ''">$(TestingPlatformCommandLineArguments) --ansi auto --progress auto</TestingPlatformCommandLineArguments>
-    <TestingPlatformCommandLineArguments Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''">$(TestingPlatformCommandLineArguments) --report-github</TestingPlatformCommandLineArguments>
-    <TestingPlatformCommandLineArguments Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''">$(TestingPlatformCommandLineArguments) --report-gh --report-gh-groups on --report-gh-annotations on --report-gh-step-summary on --report-gh-slow-test-notices on</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''">$(TestingPlatformCommandLineArguments) --report-github --report-github-annotations-title '@test (@framework)' --report-github-annotations-message '@error\n@trace '</TestingPlatformCommandLineArguments>
     <TestingPlatformCommandLineArguments Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''">$(TestingPlatformCommandLineArguments) --progress off --ansi off</TestingPlatformCommandLineArguments>
   </PropertyGroup>
 </Project>
