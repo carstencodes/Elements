@@ -20,7 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GitHubActionsTestLogger" Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''" />
+    <PackageReference Include="GitHubActionsTestLogger" />
     <PackageReference Include="xunit.analyzers" PrivateAssets="all"/>
     <PackageReference Include="xunit.v3.assert" />
     <PackageReference Include="xunit.v3.mtp-v2" />
