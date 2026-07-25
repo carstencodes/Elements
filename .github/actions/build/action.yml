@@ -44,7 +44,7 @@ runs:
       run: dotnet run deps/CargoTools.cs deps/cargo-tools.ini
     - name: Restore packages
       shell: sh
-      run: dotnet restore --no-http-cache --force --use-lock-file
+      run: dotnet restore --no-http-cache --force --use-lock-file --locked-mode
     - name: Build project
       shell: sh
       run: dotnet build --no-restore --configuration ${{ inputs.configuration }}
