@@ -29,6 +29,9 @@
       ]
     }
   ],
+  "nuget": {
+    "managerFilePatterns": ["/\\.msbuildproj$/"]
+  },
   "packageRules": [
     {
       "matchManagers": [
@@ -37,17 +40,6 @@
       "postUpdateOptions": [
         "nugetUpdateLockFiles"
       ]
-    },
-    {
-      "matchManagers": ["nuget"],
-      "matchFileNames": ["**/*.msbuildproj"],
-      "postUpgradeTasks": {
-        "commands": [
-          "dotnet restore {{{packageFileDir}}} --force --use-lock-file --force-evaluate"
-        ],
-        "fileFilters": ["**/packages.lock.json"],
-        "executionMode": "update"
-      }
     },
     {
       "matchManagers": ["nuget"],
