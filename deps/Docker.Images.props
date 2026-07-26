@@ -2,6 +2,14 @@
 <Project>
   <PropertyGroup>
     <!-- renovate: datasource=docker depName=Rust-Linux-Darwin-Builder -->
-    <CargoLinuxMacDockerImage>joseluisq/rust-linux-darwin-builder:2.0.0-beta.1</CargoLinuxMacDockerImage>
+    <CargoLinuxMacBaseDockerImage>joseluisq/rust-linux-darwin-builder:2.0.0-beta.1</CargoLinuxMacBaseDockerImage>
+    <CargoLinuxMacDockerImage>carstencodes/elements/cargo-build-cross:ci</CargoLinuxMacDockerImage>
   </PropertyGroup>
+
+  <ItemGroup>
+    <DockerImagesToBuild Include="$(CargoLinuxMacDockerImage)"
+                         BasedOn="$(CargoLinuxMacBaseDockerImage)"
+                         UsingDockerFile="$(MsBuildThisFileDirectory)../build/local/docker/cargo/Dockerfile"
+                         BuildArgs="--build-arg BASE_IMAGE=$(CargoLinuxMacBaseDockerImage)" />
+  </ItemGroup>
 </Project>
