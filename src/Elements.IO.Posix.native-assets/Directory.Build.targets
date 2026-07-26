@@ -40,7 +40,9 @@
   <PropertyGroup>
     <SetCargoEnvironmentVariablesDependsOn Condition="'$(CargoTargetOperation)' != 'Restore'">
       $(SetCargoEnvironmentVariablesDependsOn);
-      InitializeSourceControlInformation
+      InitializeSourceControlInformation;
+      GetCurrentUserIdForDockerRun;
+      GetCurrentGroupIdForDockerRun
     </SetCargoEnvironmentVariablesDependsOn>
   </PropertyGroup>
 
@@ -147,6 +149,7 @@
     </RunDockerWithArgumentsDependsOn>
     <RunDockerWithArgumentsDependsOn Condition="'$(CargoTargetOperation)' == 'Build'">
       $(RunDockerWithArgumentsDependsOn);
+      GenerateCycloneDxSbom;
       PrepareDockerBuildContainerArgs;
       CargoSetInputOutputFile
     </RunDockerWithArgumentsDependsOn>
@@ -162,7 +165,6 @@
       $(CoreCleanDependsOn);
       RunDockerBasedCargoCrossClean
     </CoreCleanDependsOn>
-    <DockerKeepUserId>false</DockerKeepUserId>
   </PropertyGroup>
 
   <Target Name="PrepareDockerBuildContainerArgs">
@@ -242,7 +244,6 @@
 
   <PropertyGroup>
     <TargetsTriggeredByCompilation>
-      GenerateCycloneDxSbom;
       $(TargetsTriggeredByCompilation);
       RunDockerBasedCargoCrossBuild
     </TargetsTriggeredByCompilation>
