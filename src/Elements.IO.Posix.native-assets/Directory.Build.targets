@@ -71,36 +71,19 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="RunDockerBasedCargoCrossBuild" Returns="@(TargetPathWithTargetPlatformMoniker)">
-    <MsBuild  BuildInParallel="false"
-              SkipNonexistentTargets="false"
-              StopOnFirstFailure="false"
-              Properties="
-                CargoTargetOperation=Build;
-                Configuration=$(Configuration);
-                RustCrateLibName=$(RustCrateLibName);
-                TargetRuntimeIdentifier=%(BuildIdentifiers.DotnetRuntimeIdentifier);
-                CargoBuildTarget=%(BuildIdentifiers.CargoRustTarget);
-                CargoLibExtension=%(BuildIdentifiers.DyLibExtension);
-                CargoLibFilePrefix=%(BuildIdentifiers.DyLibFilePrefix)"
-              Targets="RunCargoBuildInDocker"
-              Projects="$(MSBuildProjectFullPath)"
-              >
-      <Output TaskParameter="TargetOutputs" ItemName="BuiltFiles" />
-    </MsBuild>
-    <MsBuild BuildInParallel="false"
-             SkipNonexistentTargets="false"
-             StopOnFirstFailure="false"
-             Properties="
-              CargoTargetOperation=CycloneDx;
-              Configuration=$(Configuration);
-              RustCrateLibName=$(RustCrateLibName)"
-            Targets="GenerateCycloneDxSbom"
-            Projects="$(MSBuildProjectFullPath)">
-      <Output TaskParameter="TargetOutputs" ItemName="SbomFiles" />
-    </MsBuild>
+  <Target Name="CargoCreateSarifFileWithClippy">
+    <PropertyGroup>
+      <ClippyChecks />
+      <ClippyChecks>$(ClippyChecks) -D clippy::correctness</ClippyChecks>
+      <ClippyChecks>$(ClippyChecks) -W clippy::correctness</ClippyChecks>
+      <ClippyChecks>$(ClippyChecks) -W clippy::suspicious</ClippyChecks>
+      <ClippyChecks>$(ClippyChecks) -W clippy::style</ClippyChecks>
+      <ClippyChecks>$(ClippyChecks) -W clippy::complexity</ClippyChecks>
+      <ClippyChecks>$(ClippyChecks) -W clippy::perf</ClippyChecks>
+      <ClippyChecks>$(ClippyChecks) -W clippy::pedantic</ClippyChecks>
+    </PropertyGroup>
 
-    <Exec Command="cargo clippy --all-targets --all-features --message-format=json -- -D clippy::correctness -W clippy::correctness -W clippy::suspicious -W clippy::style -W clippy::complexity -W clippy::perf -W clippy::pedantic"
+    <Exec Command="cargo clippy --all-targets --all-features --message-format=json -- $(ClippyChecks)"
           ContinueOnError="warnAndContinue"
           ConsoleToMSBuild="true"
           IgnoreStandardErrorWarningFormat="true"
@@ -131,6 +114,36 @@
       <Output TaskParameter="ExitCode" PropertyName="CargoClippyExitCode" />
       <Output TaskParameter="ConsoleOutput" ItemName="CargoClippyConsoleOutput" />
     </Exec>
+  </Target>
+
+  <Target Name="RunDockerBasedCargoCrossBuild" DependsOnTargets="CargoCreateSarifFileWithClippy" Returns="@(TargetPathWithTargetPlatformMoniker)">
+    <MsBuild  BuildInParallel="false"
+              SkipNonexistentTargets="false"
+              StopOnFirstFailure="false"
+              Properties="
+                CargoTargetOperation=Build;
+                Configuration=$(Configuration);
+                RustCrateLibName=$(RustCrateLibName);
+                TargetRuntimeIdentifier=%(BuildIdentifiers.DotnetRuntimeIdentifier);
+                CargoBuildTarget=%(BuildIdentifiers.CargoRustTarget);
+                CargoLibExtension=%(BuildIdentifiers.DyLibExtension);
+                CargoLibFilePrefix=%(BuildIdentifiers.DyLibFilePrefix)"
+              Targets="RunCargoBuildInDocker"
+              Projects="$(MSBuildProjectFullPath)"
+              >
+      <Output TaskParameter="TargetOutputs" ItemName="BuiltFiles" />
+    </MsBuild>
+    <MsBuild BuildInParallel="false"
+             SkipNonexistentTargets="false"
+             StopOnFirstFailure="false"
+             Properties="
+              CargoTargetOperation=CycloneDx;
+              Configuration=$(Configuration);
+              RustCrateLibName=$(RustCrateLibName)"
+            Targets="GenerateCycloneDxSbom"
+            Projects="$(MSBuildProjectFullPath)">
+      <Output TaskParameter="TargetOutputs" ItemName="SbomFiles" />
+    </MsBuild>
 
     <ItemGroup>
       <TargetPathWithTargetPlatformMoniker Include="@(BuiltFiles)" />
