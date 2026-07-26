@@ -82,6 +82,21 @@
     </PropertyGroup>
   </Target>
 
+  <Target Name="GetCurrentGroupIdForDockerRun" Condition="'$(OS)' != 'Windows_NT' AND '$(DockerKeepGroupId)' != 'false'">
+    <Exec Command="id -g"
+      ContinueOnError="warnAndContinue"
+      ConsoleToMSBuild="true"
+      IgnoreStandardErrorWarningFormat="true">
+      <Output TaskParameter="ExitCode" PropertyName="GroupIdQueryExitCode" />
+      <Output TaskParameter="ConsoleOutput" PropertyName="GroupIdQueryOutput" />
+    </Exec>
+
+    <PropertyGroup>
+      <DockerMountGroupId />
+      <DockerMountGroupId Condition="'$(GroupIdQueryExitCode)' == '0'">$(GroupIdQueryOutput)</DockerMountGroupId>
+    </PropertyGroup>
+  </Target>
+
   <Target Name="GetDockerEnvironmentArgsAsEnvFile">
     <PropertyGroup>
       <DockerEnvFileFullPath>$(IntermediateOutputPath)docker.env</DockerEnvFileFullPath>
@@ -115,7 +130,6 @@
       <_DockerExecCliArgs>$(_DockerExecCliArgs) --rm</_DockerExecCliArgs>
       <_DockerExecCliArgs>$(_DockerExecCliArgs) --name $(DockerBuildContainerName)</_DockerExecCliArgs>
       <_DockerExecCliArgs>$(_DockerExecCliArgs) --workdir $(DockerBuildContainerWorkingDir)</_DockerExecCliArgs>
-      <_DockerExecCliArgs Condition="'$(OS)' != 'Windows_NT' AND '$(DockerMountUserId)' != ''">$(_DockerExecCliArgs) --user $(DockerMountUserId)</_DockerExecCliArgs>
       <_DockerExecCliArgs Condition="'$(DockerEnvFileFullPath)' != '' AND Exists('$(DockerEnvFileFullPath)')">$(_DockerExecCliArgs) --env-file &quot;$(DockerEnvFileFullPath)&quot;</_DockerExecCliArgs>
       <_DockerExecCliArgs>$(_DockerExecCliArgs) -v "$(DockerBuildContainerMountSourceDir)":$(DockerBuildContainerMountTargetDir)</_DockerExecCliArgs>
       <_DockerExecCliArgs>$(_DockerExecCliArgs) $(DockerBuildContainerEntryPoint)</_DockerExecCliArgs>
