@@ -1,0 +1,18 @@
+name: Create cachable docker image
+description: Pre-build the images required for building rust based parts
+inputs: {}
+
+runs:
+  using: "composite"
+  steps:
+      - name: Setup docker image builder
+        uses: docker/setup-buildx-action@v4
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          push: ${{ github.event_name != 'pull_request' }}
+          file: build/local/docker/cargo/Dockerfile
+          tags: carstencodes/elements/cargo-build-cross:ci
+          platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
