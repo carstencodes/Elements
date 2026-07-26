@@ -33,7 +33,13 @@
           ConsoleToMSBuild="true"
           IgnoreStandardErrorWarningFormat="true"
           IgnoreExitCode="false"
-          Condition="'$(DockerInstalled)' == 'True'" />
+          Condition="'$(DockerInstalled)' == 'True'" >
+      <Output TaskParameter="ExitCode" PropertyName="DockerPullExitCode" />
+      <Output TaskParameter="ConsoleOutput" PropertyName="DockerPullConsoleOutput" />
+    </Exec>
+
+    <Message Importance="Normal" Text="$(DockerPullConsoleOutput)" Condition="'$(DockerPullExitCode)' == '0'" />
+    <Error Text="$(DockerPullConsoleOutput)" Condition="'$(DockerPullExitCode)' != '0'" />
   </Target>
 
   <Target Name="DockerBuildImageIfRequired" DependsOnTargets="IsDockerCliInstalled;DockerGetImagesToBuild"  Condition="'$(DockerBuildImageId)' != '' AND @(DockerImagesToBeBuildForProject->Count()) &gt; 0">
@@ -46,7 +52,13 @@
           ConsoleToMSBuild="true"
           IgnoreStandardErrorWarningFormat="true"
           IgnoreExitCode="false"
-          Condition="'$(DockerInstalled)' == 'True'" />
+          Condition="'$(DockerInstalled)' == 'True'">
+      <Output TaskParameter="ExitCode" PropertyName="DockerPullExitCode" />
+      <Output TaskParameter="ConsoleOutput" PropertyName="DockerPullConsoleOutput" />
+    </Exec>
+
+    <Message Importance="Normal" Text="$(DockerPullConsoleOutput)" Condition="'$(DockerInstalled)' == 'True' AND '$(DockerPullExitCode)' == '0'" />
+    <Error Text="$(DockerPullConsoleOutput)" Condition="'$(DockerInstalled)' == 'True' AND '$(DockerPullExitCode)' != '0'" />
 
     <Exec Command="$(DockerInstallLocation) image ls -q %(DockerImagesToBeBuildForProject.Identity)"
           ContinueOnError="false"
@@ -62,7 +74,13 @@
           ConsoleToMSBuild="true"
           IgnoreStandardErrorWarningFormat="true"
           IgnoreExitCode="false"
-          Condition="'$(DockerInstalled)' == 'True' AND '$(DockerBuildImageHashExisting)' == ''" />
+          Condition="'$(DockerInstalled)' == 'True' AND '$(DockerBuildImageHashExisting)' == ''">
+      <Output TaskParameter="ExitCode" PropertyName="DockerBuildExitCode" />
+      <Output TaskParameter="ConsoleOutput" PropertyName="DockerBuildConsoleOutput" />
+    </Exec>
+
+    <Message Importance="Normal" Text="$(DockerBuildConsoleOutput)" Condition="'$(DockerInstalled)' == 'True' AND '$(DockerBuildImageHashExisting)' == '' AND '$(DockerBuildExitCode)' == '0'" />
+    <Error Text="$(DockerBuildConsoleOutput)" Condition="'$(DockerInstalled)' == 'True' AND '$(DockerBuildImageHashExisting)' == '' AND '$(DockerBuildExitCode)' != '0'" />
   </Target>
 
   <Target Name="PullDockerBuildImage" AfterTargets="Restore" Condition="'$(DockerPullOnRestore)' != 'false'" DependsOnTargets="DockerGetImagesToBuild;IsDockerCliInstalled;DockerPullImageIfRequired;DockerBuildImageIfRequired" />
@@ -142,6 +160,12 @@
           ConsoleToMSBuild="true"
           IgnoreStandardErrorWarningFormat="true"
           IgnoreExitCode="false"
-          Condition="'$(DockerInstalled)' == 'True'" />
+          Condition="'$(DockerInstalled)' == 'True'">
+      <Output TaskParameter="ExitCode" PropertyName="DockerRunExitCode" />
+      <Output TaskParameter="ConsoleOutput" PropertyName="DockerRunConsoleOutput" />
+    </Exec>
+
+    <Message Importance="Normal" Text="$(DockerRunConsoleOutput)" Condition="'$(DockerInstalled)' == 'True' AND '$(DockerRunExitCode)' == '0'" />
+    <Error Text="$(DockerRunConsoleOutput)" Condition="'$(DockerInstalled)' == 'True' AND '$(DockerRunExitCode)' != '0'" />
   </Target>
 </Project>
