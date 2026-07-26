@@ -24,8 +24,7 @@ runs:
       uses: actions/cache@v6
       with:
         path: |
-          ~/.cargo/registry
-          ~/.cargo/git
+          ~/.cargo/bin
           target
         key: ${{ runner.os }}-cargo-${{ hashFiles('deps/cargo-tools.ini') }}
         restore-keys: |
