@@ -173,25 +173,33 @@
 
   <Target Name="PrepareDockerBuildContainerArgs">
     <ItemGroup>
-      <DockerBuildContainerArgs Include="sh" />
-      <DockerBuildContainerArgs Include="-c" />
-      <DockerBuildContainerArgs Include="&quot;umask 000 &amp;&amp; cargo build $(DockerBuildContainerCargoConfiguration) --target $(CargoBuildTarget)&quot;" />
+      <DockerBuildContainerArgs Include="cbuild" />
+      <DockerBuildContainerArgs Include="cargo" />
+      <DockerBuildContainerArgs Include="build" />
+      <DockerBuildContainerArgs Include="$(DockerBuildContainerCargoConfiguration)" Condition="'$(DockerBuildContainerCargoConfiguration)' != ''"/>
+      <DockerBuildContainerArgs Include="--target" />
+      <DockerBuildContainerArgs Include="$(CargoBuildTarget)" />
     </ItemGroup>
   </Target>
 
   <Target Name="PrepareDockerRestoreContainerArgs">
     <ItemGroup>
-      <DockerBuildContainerArgs Include="sh" />
-      <DockerBuildContainerArgs Include="-c" />
-      <DockerBuildContainerArgs Include="&quot;cargo fetch --target $(CargoBuildTarget)&quot;" />
+      <DockerBuildContainerArgs Include="cbuild" />
+      <DockerBuildContainerArgs Include="cargo" />
+      <DockerBuildContainerArgs Include="fetch" />
+      <DockerBuildContainerArgs Include="--target" />
+      <DockerBuildContainerArgs Include="$(CargoBuildTarget)" />
     </ItemGroup>
   </Target>
 
   <Target Name="PrepareDockerCleanContainerArgs">
     <ItemGroup>
-      <DockerBuildContainerArgs Include="sh" />
-      <DockerBuildContainerArgs Include="-c" />
-      <DockerBuildContainerArgs Include="&quot;cargo clean $(DockerBuildContainerCargoConfiguration) --target $(CargoBuildTarget)&quot;" />
+      <DockerBuildContainerArgs Include="cbuild" />
+      <DockerBuildContainerArgs Include="cargo" />
+      <DockerBuildContainerArgs Include="clean" />
+      <DockerBuildContainerArgs Include="$(DockerBuildContainerCargoConfiguration)" Condition="'$(DockerBuildContainerCargoConfiguration)' != ''"/>
+      <DockerBuildContainerArgs Include="--target" />
+      <DockerBuildContainerArgs Include="$(CargoBuildTarget)" />
     </ItemGroup>
   </Target>
 
