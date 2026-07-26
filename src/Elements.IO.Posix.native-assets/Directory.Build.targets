@@ -40,22 +40,16 @@
   <PropertyGroup>
     <SetCargoEnvironmentVariablesDependsOn Condition="'$(CargoTargetOperation)' != 'Restore'">
       $(SetCargoEnvironmentVariablesDependsOn);
-      InitializeSourceControlInformation;
-      MinVer
+      InitializeSourceControlInformation
     </SetCargoEnvironmentVariablesDependsOn>
   </PropertyGroup>
 
-  <Target Name="SetCargoEnvironmentVariablesFromMinVer" DependsOnTargets="$(SetCargoEnvironmentVariablesDependsOn)">
+  <Target Name="SetCargoEnvironmentVariables" DependsOnTargets="$(SetCargoEnvironmentVariablesDependsOn)">
     <PropertyGroup>
       <_DockerTargetRelativePath>$([MSBuild]::MakeRelative('$(SolutionDir)', '$(IntermediateOutputPath)'))</_DockerTargetRelativePath>
       <_DockerTargetRelativePath>$([System.String]::Copy('$(_DockerTargetRelativePath)').Replace('\\', '/'))</_DockerTargetRelativePath>
     </PropertyGroup>
     <ItemGroup>
-      <CargoBuildEnvironmentVariables Include="CARGO_PKG_VERSION" Value="$(MinVerVersion)" />
-      <CargoBuildEnvironmentVariables Include="CARGO_PKG_VERSION_MAJOR" Value="$(MinVerMajor)" />
-      <CargoBuildEnvironmentVariables Include="CARGO_PKG_VERSION_MINOR" Value="$(MinVerMinor)" />
-      <CargoBuildEnvironmentVariables Include="CARGO_PKG_VERSION_PATCH" Value="$(MinVerPatch)" />
-      <CargoBuildEnvironmentVariables Include="CARGO_PKG_VERSION_PRE" Value="$(MinVerPreRelease)" />
       <CargoBuildEnvironmentVariables Include="CARGO_PKG_AUTHORS" Value="$(Authors)" />
       <CargoBuildEnvironmentVariables Include="CARGO_PKG_DESCRIPTION" Value="$(Description)" />
       <CargoBuildEnvironmentVariables Include="CARGO_PKG_LICENSE_FILE" Value="$(PackageReadmeFile)" />
@@ -149,7 +143,7 @@
   <PropertyGroup>
     <RunDockerWithArgumentsDependsOn>
       $(RunDockerWithArgumentsDependsOn);
-      SetCargoEnvironmentVariablesFromMinVer;
+      SetCargoEnvironmentVariables;
     </RunDockerWithArgumentsDependsOn>
     <RunDockerWithArgumentsDependsOn Condition="'$(CargoTargetOperation)' == 'Build'">
       $(RunDockerWithArgumentsDependsOn);
@@ -261,10 +255,10 @@
 
   <Target
       Name="GenerateCycloneDxSbom"
-      AfterTargets="Build" 
-      DependsOnTargets="CargoSetInputOutputFile;SetCargoEnvironmentVariablesFromMinVer"
+      AfterTargets="Build"
+      DependsOnTargets="CargoSetInputOutputFile;SetCargoEnvironmentVariables"
       Inputs="@(RustBuildFile)"
-      Outputs="$(CargoSbomTargetFile)" 
+      Outputs="$(CargoSbomTargetFile)"
       Returns="@(SbomFilesByCargoBuild)">
 
     <ItemGroup>
