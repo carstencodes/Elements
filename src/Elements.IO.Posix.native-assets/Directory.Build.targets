@@ -100,6 +100,38 @@
       <Output TaskParameter="TargetOutputs" ItemName="SbomFiles" />
     </MsBuild>
 
+    <Exec Command="cargo clippy --all-targets --all-features --message-format=json -- -D clippy::correctness -W clippy::correctness -W clippy::suspicious -W clippy::style -W clippy::complexity -W clippy::perf -W clippy::pedantic"
+          ContinueOnError="warnAndContinue"
+          ConsoleToMSBuild="true"
+          IgnoreStandardErrorWarningFormat="true"
+          IgnoreExitCode="false"
+          Condition="'$(ErrorLog)' != ''">
+      <Output TaskParameter="ExitCode" PropertyName="CargoClippyExitCode" />
+      <Output TaskParameter="ConsoleOutput" ItemName="CargoClippyConsoleOutput" />
+    </Exec>
+
+    <WriteLinesToFile File="$(IntermediateOutputPath)/cargo.clippy.output.json"
+                      Lines="@(CargoClippyConsoleOutput)"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true"
+                      Condition="'$(ErrorLog)' != ''" />
+
+    <PropertyGroup>
+      <LastSemicolonIndexInErrorLog>$([System.String]::Copy('$(ErrorLog)').LastIndexOf(';'))</LastSemicolonIndexInErrorLog>
+      <CargoErrorLog>$(ErrorLog)</CargoErrorLog>
+      <CargoErrorLog Condition="$(LastSemicolonIndexInErrorLog) &gt; 0">$([System.String]::Copy('$(ErrorLog)').Substring(0, $(LastSemicolonIndexInErrorLog)))</CargoErrorLog>
+    </PropertyGroup>
+
+    <Exec Command="clippy-sarif -i &quot;$(IntermediateOutputPath)/cargo.clippy.output.json&quot; -o &quot;$(CargoErrorLog)&quot;"
+          ContinueOnError="warnAndContinue"
+          ConsoleToMSBuild="true"
+          IgnoreStandardErrorWarningFormat="true"
+          IgnoreExitCode="false"
+          Condition="'$(ErrorLog)' != ''">
+      <Output TaskParameter="ExitCode" PropertyName="CargoClippyExitCode" />
+      <Output TaskParameter="ConsoleOutput" ItemName="CargoClippyConsoleOutput" />
+    </Exec>
+
     <ItemGroup>
       <TargetPathWithTargetPlatformMoniker Include="@(BuiltFiles)" />
       <TargetPathWithTargetPlatformMoniker Include="@(SbomFiles)" />
