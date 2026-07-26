@@ -242,6 +242,7 @@
 
   <PropertyGroup>
     <TargetsTriggeredByCompilation>
+      GenerateCycloneDxSbom;
       $(TargetsTriggeredByCompilation);
       RunDockerBasedCargoCrossBuild
     </TargetsTriggeredByCompilation>
@@ -252,6 +253,11 @@
   </PropertyGroup>
 
   <Import Project="$(_ParentFile)" Condition="'$(_ParentFile)' != '' AND Exists('$(_ParentFile)')" />
+
+  <Target Name="EnsureCycloneDxSbomVersion" />
+  <Target Name="ValidateCycloneDxConfiguration" />
+  <Target Name="GenerateCycloneDxMetadata" />
+  <Target Name="IncludeCycloneDxSbomInPackage" />
 
   <Target
       Name="GenerateCycloneDxSbom"
