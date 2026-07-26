@@ -21,7 +21,13 @@
     </PropertyGroup>
   </Target>
 
-  <Target Name="PullDockerBuildImage" AfterTargets="Restore" Condition="'$(DockerBuildImageId)' != '' AND '$(DockerPullOnRestore)' != 'false'" DependsOnTargets="IsDockerCliInstalled">
+  <Target Name="DockerGetImagesToBuild" Condition="'$(DockerBuildImageId)' != ''">
+    <ItemGroup>
+      <DockerImagesToBeBuildForProject Include="@(DockerImagesToBuild->WithMetadataValue('Identity', '$(DockerBuildImageId)'))" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="DockerPullImageIfRequired" DependsOnTargets="IsDockerCliInstalled;DockerGetImagesToBuild" Condition="'$(DockerBuildImageId)' != '' AND @(DockerImagesToBeBuildForProject->Count()) == 0">
     <Exec Command="$(DockerInstallLocation) pull $(DockerBuildImageId)"
           ContinueOnError="false"
           ConsoleToMSBuild="true"
@@ -29,6 +35,37 @@
           IgnoreExitCode="false"
           Condition="'$(DockerInstalled)' == 'True'" />
   </Target>
+
+  <Target Name="DockerBuildImageIfRequired" DependsOnTargets="IsDockerCliInstalled;DockerGetImagesToBuild"  Condition="'$(DockerBuildImageId)' != '' AND @(DockerImagesToBeBuildForProject->Count()) &gt; 0">
+    <PropertyGroup>
+      <DockerBuildContext Condition="'$(DockerBuildContext)' == ''">$(SolutionDir)</DockerBuildContext>
+    </PropertyGroup>
+
+    <Exec Command="$(DockerInstallLocation) pull %(DockerImagesToBeBuildForProject.BasedOn)"
+          ContinueOnError="false"
+          ConsoleToMSBuild="true"
+          IgnoreStandardErrorWarningFormat="true"
+          IgnoreExitCode="false"
+          Condition="'$(DockerInstalled)' == 'True'" />
+
+    <Exec Command="$(DockerInstallLocation) image ls -q %(DockerImagesToBeBuildForProject.Identity)"
+          ContinueOnError="false"
+          ConsoleToMSBuild="true"
+          IgnoreStandardErrorWarningFormat="true"
+          IgnoreExitCode="false"
+          Condition="'$(DockerInstalled)' == 'True'">
+      <Output TaskParameter="ConsoleOutput" PropertyName="DockerBuildImageHashExisting" />
+    </Exec>
+
+    <Exec Command="$(DockerInstallLocation) build %(DockerImagesToBeBuildForProject.BuildArgs) -f %(DockerImagesToBeBuildForProject.UsingDockerFile) -t %(DockerImagesToBeBuildForProject.Identity) &quot;$(DockerBuildContext)&quot;"
+          ContinueOnError="false"
+          ConsoleToMSBuild="true"
+          IgnoreStandardErrorWarningFormat="true"
+          IgnoreExitCode="false"
+          Condition="'$(DockerInstalled)' == 'True' AND '$(DockerBuildImageHashExisting)' == ''" />
+  </Target>
+
+  <Target Name="PullDockerBuildImage" AfterTargets="Restore" Condition="'$(DockerPullOnRestore)' != 'false'" DependsOnTargets="DockerGetImagesToBuild;IsDockerCliInstalled;DockerPullImageIfRequired;DockerBuildImageIfRequired" />
 
   <Target Name="GetCurrentUserIdForDockerRun" Condition="'$(OS)' != 'Windows_NT' AND '$(DockerKeepUserId)' != 'false'">
     <Exec Command="id -u"
