@@ -35,6 +35,9 @@
     <File Path=".editorconfig" />
     <File Path="ReadMe.md" />
   </Folder>
+  <Folder Name="/shared/">
+    <Project Path="shared/Elements.Testing/Elements.Testing.shproj" />
+  </Folder>
   <Folder Name="/SourceGenerators/">
     <File Path="gen\Directory.Build.props" />
   </Folder>
