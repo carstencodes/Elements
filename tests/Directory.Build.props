@@ -40,4 +40,6 @@
     <TestingPlatformCommandLineArguments Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''">$(TestingPlatformCommandLineArguments) --report-gh --report-gh-groups on --report-gh-annotations on --report-gh-step-summary on</TestingPlatformCommandLineArguments>
     <TestingPlatformCommandLineArguments Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''">$(TestingPlatformCommandLineArguments) --progress off --ansi off</TestingPlatformCommandLineArguments>
   </PropertyGroup>
+
+  <Import Project="$(MsBuildThisFileDirectory)../shared/Elements.Testing/Elements.Testing.projitems" Label="Shared" />
 </Project>
