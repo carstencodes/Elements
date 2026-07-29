@@ -7,12 +7,13 @@
   <Import Project="$(_ParentFile)" Condition="'$(_ParentFile)' != '' AND Exists('$(_ParentFile)')" />
 
   <ItemGroup>
-    <PackageVersion Include="coverlet.MTP" Version="10.0.1" />
-    <PackageVersion Include="GitHubActionsTestLogger" Version="3.0.5" />
-    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.3.2" />
-    <PackageVersion Include="xunit.analyzers" Version="1.27.0" />
-    <PackageVersion Include="xunit.v3" Version="3.2.2" />
-    <PackageVersion Include="xunit.v3.assert" Version="3.2.2" />
-    <PackageVersion Include="xunit.v3.mtp-v2" Version="3.2.2" />
+    <PackageVersion Include="Coverlet.MTP" Version="10.0.1" />
+    <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.3.3" />
+    <PackageVersion Include="TUnit" Version="1.62.0" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="2.3.3" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.CtrfReport" Version="1.0.0-alpha.26377.5" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.JUnitReport" Version="1.0.0-alpha.26377.5" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.TrxReport" Version="2.3.3" />
+    <PackageVersion Include="Microsoft.Testing.Extensions.GitHubActionsReport" Version="1.0.0-alpha.26377.5" />
   </ItemGroup>
 </Project>
