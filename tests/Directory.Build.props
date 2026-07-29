@@ -20,23 +20,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GitHubActionsTestLogger" />
-    <PackageReference Include="xunit.analyzers" PrivateAssets="all"/>
-    <PackageReference Include="xunit.v3.assert" />
-    <PackageReference Include="xunit.v3.mtp-v2" />
+    <PackageReference Include="TUnit" />
     <PackageReference Include="Microsoft.Testing.Platform.MSBuild" />
-    <PackageReference Include="coverlet.MTP" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CrashDump" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CtrfReport" />
+    <PackageReference Include="Microsoft.Testing.Extensions.JUnitReport" />
+    <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" />
+    <PackageReference Include="Microsoft.Testing.Extensions.GitHubActionsReport" />
+    <PackageReference Include="Coverlet.MTP" />
   </ItemGroup>
 
   <PropertyGroup>
     <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --results-directory &quot;$(UnitTestsResultPaths)&quot;</TestingPlatformCommandLineArguments>
     <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --coverlet --coverlet-output-format cobertura</TestingPlatformCommandLineArguments>
     <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --report-junit</TestingPlatformCommandLineArguments>
-    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --report-xunit</TestingPlatformCommandLineArguments>
-    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --report-xunit-trx</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --report-trx</TestingPlatformCommandLineArguments>
     <TestingPlatformCommandLineArguments>$(TestingPlatformCommandLineArguments) --report-ctrf</TestingPlatformCommandLineArguments>
     <TestingPlatformCommandLineArguments Condition="'$(CI)' == ''">$(TestingPlatformCommandLineArguments) --ansi auto --progress auto</TestingPlatformCommandLineArguments>
-    <TestingPlatformCommandLineArguments Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''">$(TestingPlatformCommandLineArguments) --report-github</TestingPlatformCommandLineArguments>
+    <TestingPlatformCommandLineArguments Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''">$(TestingPlatformCommandLineArguments) --report-gh --report-gh-groups on --report-gh-annotations on --report-gh-step-summary on</TestingPlatformCommandLineArguments>
     <TestingPlatformCommandLineArguments Condition="'$(CI)' == 'true' AND '$(GITHUB_ACTION)' != ''">$(TestingPlatformCommandLineArguments) --progress off --ansi off</TestingPlatformCommandLineArguments>
   </PropertyGroup>
 </Project>
