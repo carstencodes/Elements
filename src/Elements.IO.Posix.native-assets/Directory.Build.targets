@@ -347,13 +347,20 @@
       <CycloneDxExportEnvVars Include="@(CargoBuildEnvironmentVariables->'%(Identity)=%(Value))')" />
     </ItemGroup>
 
-    <Exec Command="cargo cyclonedx --manifest-path '$(MSBuildProjectDirectory)/Cargo.toml' --format '$(CycloneDxOutputFormat)' --all-features --all --spec-version '1.5' --override-filename '$(CycloneDxOutputFilename)'"
+    <!-- Write SBOM directly into the project directory so the subsequent Move finds it reliably -->
+    <Exec
+      Command="cargo cyclonedx --manifest-path '$(MSBuildProjectDirectory)/Cargo.toml' --format '$(CycloneDxOutputFormat)' --all-features --all --spec-version '1.5' --override-filename '$(CycloneDxOutputFilename)' --output '$(MSBuildProjectDirectory)/$(CycloneDxOutputFilename).$(CycloneDxOutputFormat)'"
       ContinueOnError="warnAndContinue"
       ConsoleToMSBuild="true"
       EnvironmentVariables="@(CycloneDxExportEnvVars)"
       IgnoreStandardErrorWarningFormat="true" />
-    <Move SourceFiles="$(MSBuildProjectDirectory)/$(CycloneDxOutputFilename).$(CycloneDxOutputFormat)"
-          DestinationFolder="$(IntermediateOutputPath)" />
+
+    <!-- Only move the SBOM into IntermediateOutputPath when the file exists -->
+    <Move
+      SourceFiles="$(MSBuildProjectDirectory)/$(CycloneDxOutputFilename).$(CycloneDxOutputFormat)"
+      DestinationFolder="$(IntermediateOutputPath)"
+      Condition="Exists('$(MSBuildProjectDirectory)/$(CycloneDxOutputFilename).$(CycloneDxOutputFormat)')" />
+
     <PropertyGroup>
       <CycloneDxOutputPath>$(CargoSbomTargetFile)</CycloneDxOutputPath>
     </PropertyGroup>
