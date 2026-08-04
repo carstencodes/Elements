@@ -10,13 +10,10 @@ fn main() {
         .generate_csharp_file(bindings_file);
 
     match build {
-        Ok(_) => {
-            0
-        },
+        Ok(_) => 0,
         Err(ref e) => {
             eprintln!("Error during build: {:?}", e);
             1
-        },
+        }
     };
-
 }
