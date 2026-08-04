@@ -1,0 +1,23 @@
+repos:
+  - repo: local
+    hooks:
+      - id: conventional-commit
+        name: conventional commit
+        entry: python build/local/pre-commit/check_commit_message.py
+        language: system
+        stages: [commit-msg]
+        pass_filenames: true
+
+  - repo: local
+    hooks:
+      - id: dotnet-format
+        name: dotnet format
+        entry: dotnet format whitespace --verify-no-changes --verbosity minimal
+        language: system
+        pass_filenames: false
+        files: \.(cs|csproj|props|targets|slnx|vb|fs|fsproj)$
+
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 3.8.0
+    hooks:
+      - id: editorconfig-checker
