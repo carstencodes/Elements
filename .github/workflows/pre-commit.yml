@@ -19,4 +19,5 @@ jobs:
     - uses: actions/setup-dotnet@v4
       with:
         global-json-file: global.json
+    - uses: dtolnay/rust-toolchain@stable
     - uses: pre-commit/action@v3.0.1

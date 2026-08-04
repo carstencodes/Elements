@@ -17,6 +17,20 @@ repos:
         pass_filenames: false
         files: \.(cs|csproj|props|targets|slnx|vb|fs|fsproj)$
 
+      - id: rustfmt
+        name: rustfmt
+        entry: cargo fmt --all -- --check
+        language: system
+        pass_filenames: false
+        files: \.(rs|toml)$
+
+      - id: clippy
+        name: clippy
+        entry: cargo clippy --all-targets --all-features -- -D warnings
+        language: system
+        pass_filenames: false
+        files: \.(rs|toml)$
+
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
     rev: 3.8.0
     hooks:
