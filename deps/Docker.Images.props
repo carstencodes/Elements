@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <DockerImagesToBuild Include="$(CargoLinuxMacDockerImage)"
-                         BasedOn="$(CargoLinuxMacBaseDockerImage)"
-                         UsingDockerFile="$(MsBuildThisFileDirectory)../build/local/docker/cargo/Dockerfile"
-                         BuildArgs="--build-arg BASE_IMAGE=$(CargoLinuxMacBaseDockerImage)" />
+      BasedOn="$(CargoLinuxMacBaseDockerImage)"
+      UsingDockerFile="$(MsBuildThisFileDirectory)../build/local/docker/cargo/Dockerfile"
+      BuildArgs="--build-arg BASE_IMAGE=$(CargoLinuxMacBaseDockerImage)" />
   </ItemGroup>
 </Project>
