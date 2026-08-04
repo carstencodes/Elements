@@ -20,4 +20,5 @@ jobs:
       with:
         global-json-file: global.json
     - uses: dtolnay/rust-toolchain@stable
+    - run: cargo install --locked cargo-clippy cargo-fmt
     - uses: pre-commit/action@v3.0.1
