@@ -23,5 +23,7 @@ jobs:
       with:
         global-json-file: global.json
     - uses: dtolnay/rust-toolchain@stable
-    - run: cargo install --locked cargo-clippy cargo-fmt
+      with:
+        targets: x86_64-unknown-linux-gnu,x86_64-apple-darwin,aarch64-apple-darwin,aarch64-unknown-linux-gnu
+        components: rustfmt,clippy
     - uses: pre-commit/action@v3.0.1
