@@ -13,7 +13,7 @@ public abstract class HandlerBase
     public sealed class HandlerReachedEndOfChainException(Exception innerException)
         : Exception("The handler has no other handler in its chain", innerException)
     {
-        public HandlerReachedEndOfChainException(): this(null!)
+        public HandlerReachedEndOfChainException() : this(null!)
         {
         }
     }

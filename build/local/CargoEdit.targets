@@ -28,7 +28,7 @@
     <Exec Command="cargo set-version &quot;$(MinVerVersion)&quot;"
       ContinueOnError="warnAndContinue"
       ConsoleToMSBuild="true"
-      IgnoreStandardErrorWarningFormat="true" 
+      IgnoreStandardErrorWarningFormat="true"
       Condition="'$(MinVerExitCode)' == 0"/>
   </Target>
 </Project>

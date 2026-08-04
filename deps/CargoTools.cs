@@ -22,24 +22,24 @@ using System.Linq;
 void PrintUsage()
 {
     Console.WriteLine("""
-        Usage: dotnet run CargoTools.cs <path-to-ini-file>
+    Usage: dotnet run CargoTools.cs <path-to-ini-file>
 
-        Reads a cargo-tools style .ini file and runs `cargo install --locked <pkg@version>`
-        for every entry, skipping section headers (lines starting with '[') and
-        comments (lines starting with ';').
+    Reads a cargo-tools style .ini file and runs `cargo install --locked <pkg@version>`
+    for every entry, skipping section headers (lines starting with '[') and
+    comments (lines starting with ';').
 
-        Example ini format:
-            [tools]
-            ripgrep=14.1.0
-            fd-find=10.2.0
-            ;this-is-commented-out=1.0.0
+    Example ini format:
+        [tools]
+        ripgrep=14.1.0
+        fd-find=10.2.0
+        ;this-is-commented-out=1.0.0
 
-        Arguments:
-          <path-to-ini-file>   Path to the ini file listing packages to install.
+    Arguments:
+        <path-to-ini-file>   Path to the ini file listing packages to install.
 
-        Options:
-          -h, --help           Show this usage text and exit.
-        """);
+    Options:
+        -h, --help           Show this usage text and exit.
+    """);
 }
 
 if (args.Length == 0 || args[0] is "-h" or "--help")
@@ -75,7 +75,7 @@ foreach (string entry in entries)
 
     ProcessStartInfo psi = new("cargo")
     {
-        UseShellExecute = false,
+    UseShellExecute = false,
     };
     psi.ArgumentList.Add("install");
     psi.ArgumentList.Add("--locked");
@@ -84,16 +84,16 @@ foreach (string entry in entries)
     using Process? process = Process.Start(psi);
     if (process is not  null)
     {
-        process!.WaitForExit();
+    process!.WaitForExit();
 
-        if (process.ExitCode != 0)
-        {
-            Console.Error.WriteLine($"cargo install failed for '{entry}' (exit code {process.ExitCode})");
-        }
+    if (process.ExitCode != 0)
+    {
+        Console.Error.WriteLine($"cargo install failed for '{entry}' (exit code {process.ExitCode})");
+    }
     }
     else
     {
-        Console.Error.WriteLine($"Failed to start 'cargo install --locked {entry}'");
+    Console.Error.WriteLine($"Failed to start 'cargo install --locked {entry}'");
     }
 }
 

@@ -122,14 +122,14 @@
 
   <Target Name="CargoCreateCycloneDxFile">
     <MsBuild BuildInParallel="false"
-             SkipNonexistentTargets="false"
-             StopOnFirstFailure="false"
-             Properties="
-              CargoTargetOperation=CycloneDx;
-              Configuration=$(Configuration);
-              RustCrateLibName=$(RustCrateLibName)"
-            Targets="GenerateCycloneDxSbom"
-            Projects="$(MSBuildProjectFullPath)">
+      SkipNonexistentTargets="false"
+      StopOnFirstFailure="false"
+      Properties="
+        CargoTargetOperation=CycloneDx;
+        Configuration=$(Configuration);
+        RustCrateLibName=$(RustCrateLibName)"
+      Targets="GenerateCycloneDxSbom"
+      Projects="$(MSBuildProjectFullPath)">
       <Output TaskParameter="TargetOutputs" ItemName="SbomFiles" />
     </MsBuild>
 
