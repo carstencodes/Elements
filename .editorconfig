@@ -27,6 +27,10 @@ indent_size = 2
 [*.{json,json5,webmanifest}]
 indent_size = 2
 
+# NuGet packages lock file: do not enforce a final newline (Renovate creates this file without one)
+[**/packages.lock.json]
+insert_final_newline = false
+
 # yaml Files
 [*.{yml,yaml}]
 indent_size = 2
