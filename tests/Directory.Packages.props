@@ -9,7 +9,7 @@
   <ItemGroup>
     <PackageVersion Include="Coverlet.MTP" Version="10.0.1" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.3.3" />
-    <PackageVersion Include="TUnit" Version="1.63.0" />
+    <PackageVersion Include="TUnit" Version="1.63.25" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="2.3.3" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CtrfReport" Version="1.0.0-alpha.26377.5" />
     <PackageVersion Include="Microsoft.Testing.Extensions.JUnitReport" Version="1.0.0-alpha.26377.5" />
