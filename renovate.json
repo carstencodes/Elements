@@ -54,7 +54,7 @@
       "matchDatasources": ["dotnet-version"],
       "matchPackageNames": ["dotnet-sdk"],
       "matchFileNames": ["**/global.json"],
-      "allowedVersions": "/^\\d*[02468]\\.0\\.(0|100)$/",
+      "allowedVersions": "/^([1-9]?[0-9]*[02468]{1})\\.(0)\\.(0|100)$/",
       "enabled": true
     }
   ]
