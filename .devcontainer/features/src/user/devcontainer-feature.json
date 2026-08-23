@@ -1,0 +1,31 @@
+{
+    "id": "user",
+    "version": "1.0.0",
+    "name": "UserId",
+    "documentationURL": "https://github.com/carstencodes/Elements/tree/main/.devcontainer/features/src/user",
+    "description": "Add a user to the container with the same UID and GID as the host user, and set it as the default user for the container.",
+    "options": {
+        "username": {
+            "type": "string",
+            "proposals": [
+              "developer"
+            ],
+            "default": "developer",
+            "description": "Set the username for the user to be created in the container."
+        },
+        "uid": {
+            "type": "string",
+            "default": "1000",
+            "description": "Set the UID for the user to be created in the container."
+        },
+        "gid": {
+            "type": "string",
+            "default": "1000",
+            "description": "Set the GID for the user to be created in the container."
+          }
+    },
+    "init": true,
+    "installsAfter": [
+        "ghcr.io/devcontainers/features/common-utils"
+    ]
+}
