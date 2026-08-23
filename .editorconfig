@@ -31,6 +31,9 @@ indent_size = 2
 [**/packages.lock.json]
 insert_final_newline = false
 
+[**/devcontainer-lock.json]
+insert_final_newline = false
+
 # yaml Files
 [*.{yml,yaml}]
 indent_size = 2
