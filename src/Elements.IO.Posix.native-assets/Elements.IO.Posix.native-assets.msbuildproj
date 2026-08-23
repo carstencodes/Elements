@@ -2,5 +2,7 @@
   <PropertyGroup>
     <RustCrateLibName>posixioelements</RustCrateLibName>
     <NoWarn>$(NoWarn);MSB3245</NoWarn>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
   </PropertyGroup>
 </Project>

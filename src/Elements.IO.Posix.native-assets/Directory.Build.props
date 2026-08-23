@@ -1,0 +1,48 @@
+<Project>
+  <ItemGroup>
+    <BuildIdentifiers Include="Linux/amd64"
+                      DotnetRuntimeIdentifier="linux-x64"
+                      CargoRustTarget="x86_64-unknown-linux-gnu"
+                      DyLibExtension=".so"
+                      DyLibFilePrefix="lib"
+                      Visible="false" />
+    <BuildIdentifiers Include="Linux/arm64"
+                      DotnetRuntimeIdentifier="linux-arm64"
+                      CargoRustTarget="aarch64-unknown-linux-gnu"
+                      DyLibExtension=".so"
+                      DyLibFilePrefix="lib"
+                      Visible="false" />
+    <BuildIdentifiers Include="MacOsX/amd64"
+                      DotnetRuntimeIdentifier="osx-x64"
+                      CargoRustTarget="x86_64-apple-darwin"
+                      DyLibExtension=".dylib"
+                      DyLibFilePrefix="lib"
+                      Visible="false" />
+    <BuildIdentifiers Include="MaxOsX/arm64"
+                      DotnetRuntimeIdentifier="osx-arm64"
+                      CargoRustTarget="aarch64-apple-darwin"
+                      DyLibExtension=".dylib"
+                      DyLibFilePrefix="lib"
+                      Visible="false" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <_ParentFile>$([MSBuild]::GetPathOfFileAbove('$(MSBuildThisFile)', '$(MSBuildThisFileDirectory)../'))</_ParentFile>
+  </PropertyGroup>
+
+  <Import Project="$(_ParentFile)" Condition="'$(_ParentFile)' != '' AND Exists('$(_ParentFile)')" />
+
+  <ItemGroup>
+    <_SelectedTargetFrameworkIdentifiers Include="$(ElementTargetFrameworksToUse)" />
+    <_SelectedRuntimeIdentifiers Include="@(BuildIdentifiers->%(DotnetRuntimeIdentifier))" />
+    <_SelectedTargetFrameworkAndRuntimeIdentifiers Include="@(_SelectedTargetFrameworkIdentifiers)">
+      <TargetFrameworkIdentifiers>%(_SelectedTargetFrameworkIdentifiers.Identity)-%(_SelectedRuntimeIdentifiers.Identity)</TargetFrameworkIdentifiers>
+    </_SelectedTargetFrameworkAndRuntimeIdentifiers>
+    <_SelectedTargetFrameworksWithRuntimeIdentifiers Include="$(ElementTargetFrameworksToUse)" />
+    <_SelectedTargetFrameworksWithRuntimeIdentifiers Include="@(_SelectedTargetFrameworkAndRuntimeIdentifiers->TargetFrameworkIdentifiers)" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFrameworkIdentifiers>@(_SelectedTargetFrameworkIdentifiers->Identity)</TargetFrameworkIdentifiers>
+  </PropertyGroup>
+</Project>
