@@ -12,10 +12,16 @@ using System.Linq;
 
 namespace HedgeCraft.Elements.Extensions.Configuration.CommandLine;
 
+/// <summary>
+/// Provides an internal builder implementation for configuring and creating an <see cref="Option{T}"/>.
+/// </summary>
+/// <typeparam name="T">The type of the option value.</typeparam>
+/// <param name="name">The name of the option.</param>
 internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T : notnull
 {
     private readonly List<Action<Option<T>>> configureOptions = new();
 
+    /// <inheritdoc />
     public IOptionBuilder<T> AsGlobal()
     {
         void ConfigureOption(Option<T> option)
@@ -27,6 +33,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> AsHidden()
     {
         void ConfigureOption(Option<T> option)
@@ -38,6 +45,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> AsLocal()
     {
         void ConfigureOption(Option<T> option)
@@ -49,6 +57,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> AsNotHidden()
     {
         void ConfigureOption(Option<T> option)
@@ -60,6 +69,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> AsOptional()
     {
         void ConfigureOption(Option<T> option)
@@ -71,6 +81,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> AsRecursive()
     {
         void ConfigureOption(Option<T> option)
@@ -82,6 +93,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> AsRequired()
     {
         void ConfigureOption(Option<T> option)
@@ -93,6 +105,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public Option<T> Build()
     {
         Option<T> option = new(name);
@@ -104,6 +117,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return option;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> UsingValidFileNames()
     {
         void ConfigureOption(Option<T> option)
@@ -115,6 +129,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> UsingValidFilePaths()
     {
         void ConfigureOption(Option<T> option)
@@ -126,6 +141,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> WithAlias(string alias)
     {
         void ConfigureOption(Option<T> option)
@@ -137,6 +153,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> WithAliases(string[] aliases)
     {
         void ConfigureOption(Option<T> option)
@@ -151,6 +168,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> WithAllowedValues(IEnumerable<string> allowedValues)
     {
         void ConfigureOption(Option<T> option)
@@ -162,6 +180,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> WithArity(ArgumentArity arity)
     {
         void ConfigureOption(Option<T> option)
@@ -173,6 +192,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> WithCommandLineAction(CommandLineAction action)
     {
         void ConfigureOption(Option<T> option)
@@ -184,6 +204,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> WithCustomParser(Func<ArgumentResult, T> parser)
     {
         void ConfigureOption(Option<T> option)
@@ -195,11 +216,13 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> WithDefaultValue(T defaultValue)
     {
         return this.WithDefaultValueFactory(_ => defaultValue);
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> WithDefaultValueFactory(Func<ArgumentResult, T> factory)
     {
         void ConfigureOption(Option<T> option)
@@ -211,6 +234,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> WithDescription(string description)
     {
         void ConfigureOption(Option<T> option)
@@ -222,6 +246,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> WithHelpText(string helpText)
     {
         void ConfigureOption(Option<T> option)
@@ -233,6 +258,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
         return this;
     }
 
+    /// <inheritdoc />
     public IOptionBuilder<T> WithValidator(Action<OptionResult> validator)
     {
         void ConfigureOption(Option<T> option)
