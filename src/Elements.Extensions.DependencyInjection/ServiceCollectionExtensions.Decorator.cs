@@ -15,6 +15,14 @@ public static partial class ServiceCollectionExtensions
 {
     // based upon https://greatrexpectations.com/2018/10/25/decorators-in-net-core-with-dependency-injection
 
+    /// <summary>
+    /// Decorates an existing service registration of type <typeparamref name="TInterface"/> with a decorator instance created by a factory.
+    /// </summary>
+    /// <typeparam name="TInterface">The service interface type being decorated.</typeparam>
+    /// <typeparam name="TDecorator">The decorator type implementing <typeparamref name="TInterface"/>.</typeparam>
+    /// <param name="services">The service collection.</param>
+    /// <param name="objectFactory">The factory creating the decorator instance.</param>
+    /// <exception cref="InvalidOperationException">Thrown when <typeparamref name="TInterface"/> has not been registered in <paramref name="services"/>.</exception>
     public static void Decorate<TInterface, TDecorator>(
         this IServiceCollection services,
         Func<IServiceProvider, TDecorator> objectFactory)
@@ -29,6 +37,14 @@ public static partial class ServiceCollectionExtensions
         services.Decorate<TInterface, TDecorator>(CreateInstanceOfDecorator);
     }
 
+    /// <summary>
+    /// Decorates an existing service registration of type <typeparamref name="TInterface"/> with a decorator instance using an <see cref="ObjectFactory{T}"/>.
+    /// </summary>
+    /// <typeparam name="TInterface">The service interface type being decorated.</typeparam>
+    /// <typeparam name="TDecorator">The decorator type implementing <typeparamref name="TInterface"/>.</typeparam>
+    /// <param name="services">The service collection.</param>
+    /// <param name="objectFactory">The object factory creating the decorator instance.</param>
+    /// <exception cref="InvalidOperationException">Thrown when <typeparamref name="TInterface"/> has not been registered in <paramref name="services"/>.</exception>
     public static void Decorate<TInterface, TDecorator>(
         this IServiceCollection services,
         ObjectFactory<TDecorator> objectFactory)
@@ -47,6 +63,13 @@ public static partial class ServiceCollectionExtensions
         );
     }
 
+    /// <summary>
+    /// Decorates an existing service registration of type <typeparamref name="TInterface"/> with a decorator instance created via constructor activation.
+    /// </summary>
+    /// <typeparam name="TInterface">The service interface type being decorated.</typeparam>
+    /// <typeparam name="TDecorator">The decorator type implementing <typeparamref name="TInterface"/>.</typeparam>
+    /// <param name="services">The service collection.</param>
+    /// <exception cref="InvalidOperationException">Thrown when <typeparamref name="TInterface"/> has not been registered in <paramref name="services"/>.</exception>
     public static void Decorate<TInterface, TDecorator>(this IServiceCollection services)
         where TInterface : notnull
         where TDecorator : class, TInterface

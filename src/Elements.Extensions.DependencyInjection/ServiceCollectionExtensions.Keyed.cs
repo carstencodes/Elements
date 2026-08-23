@@ -13,6 +13,13 @@ namespace HedgeCraft.Elements.Extensions.DependencyInjection;
 
 public static partial class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// Registers the <see cref="IKeyedServiceCollection{TService}"/> and <see cref="IServiceKeyCollection{TService}"/> for resolving keyed services of type <typeparamref name="TService"/>.
+    /// </summary>
+    /// <typeparam name="TService">The service type.</typeparam>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="lifetime">The service lifetime for the collections.</param>
+    /// <returns>The same <see cref="IServiceCollection"/> instance.</returns>
     public static IServiceCollection AddKeyesForKeyedServices<TService>(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Singleton)
         where TService : notnull
     {
