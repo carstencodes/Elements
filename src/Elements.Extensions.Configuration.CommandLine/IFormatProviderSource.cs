@@ -7,7 +7,13 @@ using System;
 
 namespace HedgeCraft.Elements.Extensions.Configuration.CommandLine;
 
+/// <summary>
+/// Defines a provider that exposes an <see cref="IFormatProvider"/>.
+/// </summary>
 internal interface IFormatProviderSource
 {
+    /// <summary>
+    /// Gets the format provider.
+    /// </summary>
     IFormatProvider FormatProvider { get; }
 }
