@@ -33,11 +33,11 @@
             "x86_64-apple-darwin"
           ]
         },
-    "ghcr.io/lee-orr/rusty-dev-containers/cargo-audit:0": {
+    /*"ghcr.io/lee-orr/rusty-dev-containers/cargo-audit:0": {
           "version": "0.22.2"
         },
     "ghcr.io/lee-orr/rusty-dev-containers/cargo-binstall:0": {},
-    //"ghcr.io/lee-orr/rusty-dev-containers/cargo-nextest:0": {},
+    "ghcr.io/lee-orr/rusty-dev-containers/cargo-nextest:0": {}, */
     "ghcr.io/nikiforovall/devcontainer-features/dotnet-csharpier:1": {
           "version": "1.3.0"
         },

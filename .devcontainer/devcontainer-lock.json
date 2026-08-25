@@ -40,11 +40,6 @@
       "resolved": "ghcr.io/lee-orr/rusty-dev-containers/cargo-binstall@sha256:8eb234bd3165a608bcba39892fac7f0be45ed9604084881c7f113c0115d25162",
       "integrity": "sha256:8eb234bd3165a608bcba39892fac7f0be45ed9604084881c7f113c0115d25162"
     },
-    "ghcr.io/lee-orr/rusty-dev-containers/cargo-nextest:0": {
-      "version": "0.1.8",
-      "resolved": "ghcr.io/lee-orr/rusty-dev-containers/cargo-nextest@sha256:ccdb67b67e8a198fcdf471a3da01f61fc08dc7cb4ed277d4787175fae59c49e4",
-      "integrity": "sha256:ccdb67b67e8a198fcdf471a3da01f61fc08dc7cb4ed277d4787175fae59c49e4"
-    },
     "ghcr.io/nikiforovall/devcontainer-features/dotnet-csharpier:1": {
       "version": "1.0.0",
       "resolved": "ghcr.io/nikiforovall/devcontainer-features/dotnet-csharpier@sha256:e9938510ef18155c356480544dcb8b4fcb61e259099a917f09280dced3a756e4",
