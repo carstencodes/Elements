@@ -22,7 +22,7 @@
             "clippy"
           ],
           "targets": [
-            "x86_64-unknown-linux-gnu",
+            "x86_64-unknown-linux-gnu"
           ]
         },
     "ghcr.io/devcontainers-extra/features/zig:1": {
