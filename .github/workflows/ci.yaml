@@ -24,6 +24,9 @@ jobs:
 
   initialize:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     steps:
       - name: NOOP
         run: echo "NOOP"
@@ -36,6 +39,9 @@ jobs:
 
   checks:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -56,6 +62,10 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
     needs:
       - initialize
       - checks
@@ -102,6 +112,9 @@ jobs:
 
   sbom:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     needs:
       - build
     steps:
@@ -129,6 +142,9 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     needs:
       - build
     steps:
@@ -169,6 +185,9 @@ jobs:
 
   pack:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     needs:
       - test
       - build
@@ -184,6 +203,9 @@ jobs:
 
   summarize:
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     needs:
       - build
       - test
