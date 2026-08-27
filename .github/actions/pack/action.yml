@@ -1,0 +1,7 @@
+name: Pack NuGet packages
+description: Run dotnet pack
+inputs: {}
+
+runs:
+  using: "composite"
+  steps: []

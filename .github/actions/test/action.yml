@@ -1,0 +1,7 @@
+name: Test projects
+description: Run dotnet test
+inputs: {}
+
+runs:
+  using: "composite"
+  steps: []
