@@ -12,14 +12,16 @@ runs:
   steps:
     - name: Cache cargo registry and build
       uses: actions/cache@v6
+      id: cargo-cache
       with:
         path: |
-          "${{ github.workspace }}/deps/cargo/
+          "${{ github.workspace }}/deps/cargo/bin
         key: ${{ runner.os }}-cargo-${{ hashFiles('deps/cargo-tools.ini') }}
         restore-keys: |
           ${{ runner.os }}-cargo-
     - name: Cache dotnet tool registry and build
       uses: actions/cache@v6
+      id: dotnet-cache
       with:
         path: |
           "${{ github.workspace }}/deps/nuget/
@@ -31,9 +33,9 @@ runs:
       run: echo "${{ github.workspace }}/deps/cargo/bin" >> $GITHUB_PATH
     - name: Restore tools using manifest
       shell: sh
-      if: ${{ inputs.tool_restore }}
+      if: ${{ inputs.tool_restore && steps.dotnet-cache.outputs.cache-hit != 'true' }} 
       run: dotnet tool restore
     - name: Restore cargo tools using CargoTools CS
       shell: sh
-      if: ${{ inputs.tool_restore }}
+      if: ${{ inputs.tool_restore && steps.cargo-cache.outputs.cache-hit != 'true' }}
       run: dotnet run deps/CargoTools.cs deps/cargo-tools.ini "${{ github.workspace }}/deps/cargo"
