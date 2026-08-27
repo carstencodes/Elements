@@ -83,7 +83,6 @@ jobs:
       - name: Restore
         uses: ./.github/actions/restore
         with:
-          global_json: global.json
           tool_restore: true
       - name: Build
         uses: ./.github/actions/build
@@ -130,7 +129,6 @@ jobs:
       - name: Restore
         uses: ./.github/actions/restore
         with:
-          global_json: global.json
           tool_restore: true
       - name: Create SBOM
         uses: ./.github/actions/sbom
@@ -160,7 +158,6 @@ jobs:
       - name: Restore
         uses: ./.github/actions/restore
         with:
-          global_json: global.json
           tool_restore: true
       - name: Get Build Results
         uses: actions/download-artifact@v8
