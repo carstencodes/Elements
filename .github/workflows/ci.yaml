@@ -51,8 +51,6 @@ jobs:
           submodules: false
           fetch-depth: 0
       - uses: ./.github/actions/checks
-        with:
-          nested_action_version: ${{ github.sha }}
 
 #####################################################################
 # 
@@ -85,7 +83,6 @@ jobs:
         with:
           global_json: global.json
           tool_restore: true
-          nested_action_version: ${{ github.sha }}
       - name: Build
         uses: ./.github/actions/build
         with:
@@ -130,7 +127,6 @@ jobs:
         with:
           global_json: global.json
           tool_restore: true
-          nested_action_version: ${{ github.sha }}
       - name: Create SBOM
         uses: ./.github/actions/sbom
 
@@ -160,7 +156,6 @@ jobs:
         with:
           global_json: global.json
           tool_restore: true
-          nested_action_version: ${{ github.sha }}
       - name: Get Build Results
         uses: actions/download-artifact@v8
         with:
