@@ -1,0 +1,162 @@
+---
+name: Continuous Integration
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  tag:
+    - 'v*.*.*'
+  workflow_dispatch:
+
+env:
+  NUGET_PACKAGES: ${{ github.workspace }}/deps/nuget/
+
+jobs:
+
+#####################################################################
+# 
+# Initialize the pipeline runs
+#
+#####################################################################
+
+  initialize:
+    runs-on: ubuntu-latest
+    steps: []
+
+#####################################################################
+# 
+# Perform checks
+#
+#####################################################################
+
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ./.github/actions/checks
+
+#####################################################################
+# 
+# Build the project and run code checks
+#
+#####################################################################
+
+  build:
+    runs-on: ubuntu-latest
+    needs:
+      - initialize
+      - checks
+    strategy:
+      matrix:
+        configuration: [ 'Debug', 'Release' ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          clean: true
+          fetch-tags: true
+          submodules: false
+          fetch-depth: 0
+      - name: Prepare docker images
+        uses: ./.github/actions/image-build
+      - name: Checkout and restore
+        uses: ./.github/actions/checkout_and_restore
+        with:
+          global_json: global.json
+          tool_restore: true
+      - name: Build
+        uses: ./.github/actions/build
+        with:
+          configuration: ${{ matrix.configuration }}
+      - uses: github/codeql-action/upload-sarif@v4
+        if: ${{ matrix.configuration == 'Release' }}
+        with:
+          sarif_file: artifacts/Elements.sarif
+      - uses: actions/upload-artifact@v7
+        if: ${{ matrix.configuration == 'Release' }}
+        with:
+          name: artifacts
+          path: artifacts/
+          if-no-files-found: fail
+          retention-days: 7
+          include-hidden-files: true
+          archive: true
+
+#####################################################################
+# 
+# Create the software bill of materials
+#
+#####################################################################
+
+  sbom:
+    runs-on: ubuntu-latest
+    needs:
+      - build:Release
+    steps:
+      - name: Checkout and restore
+        uses: ./.github/actions/checkout_and_restore
+        with:
+          global_json: global.json
+          tool_restore: true
+      - name: Create SBOM
+        uses: ./.github/actions/sbom
+
+#####################################################################
+# 
+# Test the project and also create code coverage reports
+#
+#####################################################################
+
+  tests:
+    runs-on: ubuntu-latest
+    needs:
+      - build:Release
+    steps:
+      - name: Checkout and restore
+        uses: ./.github/actions/checkout_and_restore
+        with:
+          global_json: global.json
+          tool_restore: true
+      - name: Get Build Results
+        uses: actions/download-artifact@v8
+        with:
+          name: artifacts
+          skip-decompress: false
+          digest-mismatch: error
+      - name: Run tests
+        run: dotnet test --no-restore --no-build --configuration Release
+      - name: ReportGenerator
+        uses: danielpalme/ReportGenerator-GitHub-Action@v5.5.11
+        if: ${{ !always() }}
+        with:
+          reports: artifacts/results/coverage/*.xml
+          targetdir: artifacts/
+          reporttypes: Cobertura;MarkdownSummaryGithub
+
+#####################################################################
+# 
+# Pack the projects to nuget
+#
+#####################################################################
+
+  pack:
+    runs-on: ubuntu-latest
+    needs:
+      - build:Release
+    steps: []
+
+#####################################################################
+# 
+# Summarize the build
+#
+#####################################################################
+
+  summarize:
+    runs-on: ubuntu-latest
+    needs:
+      - build:Release
+      - tests
+      - pack
+    steps: []
