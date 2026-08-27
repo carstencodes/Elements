@@ -24,7 +24,9 @@ jobs:
 
   initialize:
     runs-on: ubuntu-latest
-    steps: []
+    steps:
+      - name: NOOP
+        runs: echo "NOOP"
 
 #####################################################################
 # 
@@ -146,7 +148,9 @@ jobs:
     needs:
       - test
       - build
-    steps: []
+    steps:
+      - name: NOOP
+        runs: echo "NOOP"
 
 #####################################################################
 # 
@@ -160,4 +164,6 @@ jobs:
       - build
       - test
       - pack
-    steps: []
+    steps:
+      - name: NOOP
+        runs: echo "NOOP"
