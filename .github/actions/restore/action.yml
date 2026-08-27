@@ -6,6 +6,10 @@ inputs:
     required: false
     type: bool
     default: true
+  nested_action_version:
+    description: The version of the nested action to use
+    required: true
+    type: string
 
 runs:
   using: "composite"
@@ -17,9 +21,9 @@ runs:
         submodules: false
         fetch-depth: 0
     - name: Setup toolchains
-      uses: ./.github/actions/toolchain@${{ github.sha }}
+      uses: ./.github/actions/toolchain@${{ inputs.nested_action_version }}
     - name: Restore tools
-      uses: ./.github/actions/tools@${{ github.sha }}
+      uses: ./.github/actions/tools@${{ inputs.nested_action_version }}
     - name: Restore packages
       shell: sh
       run: dotnet restore --no-http-cache --force --use-lock-file --locked-mode
