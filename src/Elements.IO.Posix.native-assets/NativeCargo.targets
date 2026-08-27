@@ -21,7 +21,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <CargoEnvironment Include="SDK_ROOT" Value="/dev/null" />
+    <CargoEnvironment Include="SDKROOT" Value="/dev/null" />
   </ItemGroup>
 
   <Target Name="CargoGetTargetDirectories">
