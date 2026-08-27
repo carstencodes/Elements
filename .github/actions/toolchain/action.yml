@@ -1,0 +1,22 @@
+name: Setup toolchains
+description: Set toolchains for build
+inputs: {}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup zig
+      uses: xyzzylabs/setup-zig@v1
+      with:
+        zig-version-file: .zigversion
+        use-cache: true
+    - name: Setup rust
+      uses: moonrepo/setup-rust@v1
+      with:
+        inherit-toolchain: true
+        cache: true
+    - name: Setup dotnet
+      uses: actions/setup-dotnet@v6
+      with:
+        global-json-file: global.json
+    
