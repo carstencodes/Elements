@@ -54,7 +54,7 @@
   </Target>
 
   <Target Name="RunNativeCargoBuild" DependsOnTargets="CargoGetTargetDirectories" Inputs="@(RustSourceFile);@(RustBuildFile)" Outputs="@(CargoOutputFiles)" Returns="@(CreatedFilesByCargoBuild)">
-    <Exec 
+    <Exec
         Command="cargo %(BuildIdentifiers.CargoBuildCommand) $(CargoConfiguration) --target-dir &quot;$(CargoTargetDirectory)&quot; --target &quot;%(BuildIdentifiers.CargoRustTarget)&quot;"
         EnvironmentVariables="@(CargoEnvironment->'%(Identity)=%(Value)')"
         />
@@ -82,15 +82,15 @@
   </Target>
 
   <Target Name="RunNativeCargoClean" DependsOnTargets="CargoGetTargetDirectories">
-    <Exec 
-        Command="cargo clean --target-dir &quot;$(CargoTargetDirectory)&quot;" 
+    <Exec
+        Command="cargo clean --target-dir &quot;$(CargoTargetDirectory)&quot;"
         EnvironmentVariables="@(CargoEnvironment->'%(Identity)=%(Value)')"
         />
   </Target>
 
   <Target Name="RunNativeCargoFetch">
-    <Exec 
-        Command="cargo fetch --target &quot;%(BuildIdentifiers.CargoRustTarget)&quot;" 
+    <Exec
+        Command="cargo fetch --target &quot;%(BuildIdentifiers.CargoRustTarget)&quot;"
         EnvironmentVariables="@(CargoEnvironment->'%(Identity)=%(Value)')"
         />
   </Target>
