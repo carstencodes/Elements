@@ -93,7 +93,7 @@ jobs:
   sbom:
     runs-on: ubuntu-latest
     needs:
-      - build:Release
+      - build
     steps:
       - name: Checkout and restore
         uses: ./.github/actions/checkout_and_restore
@@ -109,10 +109,10 @@ jobs:
 #
 #####################################################################
 
-  tests:
+  test:
     runs-on: ubuntu-latest
     needs:
-      - build:Release
+      - build
     steps:
       - name: Checkout and restore
         uses: ./.github/actions/checkout_and_restore
@@ -144,7 +144,8 @@ jobs:
   pack:
     runs-on: ubuntu-latest
     needs:
-      - build:Release
+      - test
+      - build
     steps: []
 
 #####################################################################
@@ -156,7 +157,7 @@ jobs:
   summarize:
     runs-on: ubuntu-latest
     needs:
-      - build:Release
-      - tests
+      - build
+      - test
       - pack
     steps: []
