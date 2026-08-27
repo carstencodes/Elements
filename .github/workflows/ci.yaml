@@ -37,6 +37,13 @@ jobs:
   checks:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          clean: true
+          fetch-tags: true
+          submodules: false
+          fetch-depth: 0
       - uses: ./.github/actions/checks
 
 #####################################################################
@@ -61,10 +68,8 @@ jobs:
           fetch-tags: true
           submodules: false
           fetch-depth: 0
-      - name: Prepare docker images
-        uses: ./.github/actions/image-build
-      - name: Checkout and restore
-        uses: ./.github/actions/checkout_and_restore
+      - name: Restore
+        uses: ./.github/actions/restore
         with:
           global_json: global.json
           tool_restore: true
@@ -97,8 +102,15 @@ jobs:
     needs:
       - build
     steps:
-      - name: Checkout and restore
-        uses: ./.github/actions/checkout_and_restore
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          clean: true
+          fetch-tags: true
+          submodules: false
+          fetch-depth: 0
+      - name: Restore
+        uses: ./.github/actions/restore
         with:
           global_json: global.json
           tool_restore: true
@@ -116,8 +128,15 @@ jobs:
     needs:
       - build
     steps:
-      - name: Checkout and restore
-        uses: ./.github/actions/checkout_and_restore
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          clean: true
+          fetch-tags: true
+          submodules: false
+          fetch-depth: 0
+      - name: Restore
+        uses: ./.github/actions/restore
         with:
           global_json: global.json
           tool_restore: true
