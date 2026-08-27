@@ -22,6 +22,7 @@ jobs:
 #####################################################################
 
   initialize:
+    name: Pipeline initization 
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -37,6 +38,7 @@ jobs:
 #####################################################################
 
   checks:
+    name: Basic Pre-Build Checks
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -58,6 +60,7 @@ jobs:
 #####################################################################
 
   build:
+    name: Build
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -107,6 +110,7 @@ jobs:
 #####################################################################
 
   sbom:
+    name: Software Bill-Of-Materials
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -136,6 +140,7 @@ jobs:
 #####################################################################
 
   test:
+    name: Run Unit-Tests
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -178,6 +183,7 @@ jobs:
 #####################################################################
 
   pack:
+    name: Pack NuGet Package
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -196,6 +202,7 @@ jobs:
 #####################################################################
 
   summarize:
+    name: Build Summary
     runs-on: ubuntu-latest
     permissions:
       actions: read
