@@ -33,7 +33,7 @@ runs:
       run: echo "${{ github.workspace }}/deps/cargo/bin" >> $GITHUB_PATH
     - name: Restore tools using manifest
       shell: sh
-      if: ${{ inputs.tool_restore && steps.dotnet-cache.outputs.cache-hit != 'true' }} 
+      if: ${{ inputs.tool_restore && steps.dotnet-cache.outputs.cache-hit != 'true' }}
       run: dotnet tool restore
     - name: Restore cargo tools using CargoTools CS
       shell: sh
