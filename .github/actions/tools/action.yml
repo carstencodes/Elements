@@ -1,0 +1,39 @@
+name:
+description:
+inputs:
+  tool_restore:
+    description: Run tool restore
+    required: false
+    type: bool
+    default: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Cache cargo registry and build
+      uses: actions/cache@v6
+      with:
+        path: |
+          "${{ github.workspace }}/deps/cargo/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('deps/cargo-tools.ini') }}
+        restore-keys: |
+          ${{ runner.os }}-cargo-
+    - name: Cache dotnet tool registry and build
+      uses: actions/cache@v6
+      with:
+        path: |
+          "${{ github.workspace }}/deps/nuget/
+        key: ${{ runner.os }}-dotnet-tools-${{ hashFiles('dotnet-tools.json') }}
+        restore-keys: |
+          ${{ runner.os }}-dotnet-tools-
+    - name: Add Cargo Tools Root to github path
+      shell: sh
+      run: echo "${{ github.workspace }}/deps/cargo/bin" >> $GITHUB_PATH
+    - name: Restore tools using manifest
+      shell: sh
+      if: ${{ inputs.tool_restore }}
+      run: dotnet tool restore
+    - name: Restore cargo tools using CargoTools CS
+      shell: sh
+      if: ${{ inputs.tool_restore }}
+      run: dotnet run deps/CargoTools.cs deps/cargo-tools.ini "${{ github.workspace }}/deps/cargo"
