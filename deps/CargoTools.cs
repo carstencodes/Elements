@@ -36,6 +36,7 @@ void PrintUsage()
 
     Arguments:
         <path-to-ini-file>   Path to the ini file listing packages to install.
+        [<target-dir>]       Path to the target directory to install to.
 
     Options:
         -h, --help           Show this usage text and exit.
@@ -49,11 +50,38 @@ if (args.Length == 0 || args[0] is "-h" or "--help")
 }
 
 string iniPath = args[0];
+string targetDir;
+if (args.Length == 2)
+{
+    targetDir = args[1];
+}
+else
+{
+    targetDir = string.Empty;
+}
 
 if (!File.Exists(iniPath))
 {
     Console.Error.WriteLine($"File not found: {iniPath}");
     return 1;
+}
+
+if (!string.IsNullOrWhiteSpace(targetDir) && !Directory.Exists(targetDir))
+{
+    DirectoryInfo? currentDir = new DirectoryInfo(targetDir);
+    Stack<DirectoryInfo> toCreate = new();
+    while (currentDir is not null and not { Exists: true })
+    {
+        toCreate.Push(currentDir);
+        currentDir = currentDir.Parent;
+    }
+
+    while (toCreate.Count > 0)
+    {
+        DirectoryInfo dirToCreate = toCreate.Pop();
+        Console.WriteLine($"Creating directory: {dirToCreate.FullName}");
+        dirToCreate.Create();
+    }
 }
 
 List<string> entries = File.ReadAllLines(iniPath)
@@ -75,25 +103,30 @@ foreach (string entry in entries)
 
     ProcessStartInfo psi = new("cargo")
     {
-    UseShellExecute = false,
+        UseShellExecute = false,
     };
     psi.ArgumentList.Add("install");
     psi.ArgumentList.Add("--locked");
+    if (!string.IsNullOrWhiteSpace(targetDir))
+    {
+        psi.ArgumentList.Add("--root");
+        psi.ArgumentList.Add(targetDir);
+    }
     psi.ArgumentList.Add(entry);
 
     using Process? process = Process.Start(psi);
     if (process is not  null)
     {
-    process!.WaitForExit();
+        process!.WaitForExit();
 
-    if (process.ExitCode != 0)
-    {
-        Console.Error.WriteLine($"cargo install failed for '{entry}' (exit code {process.ExitCode})");
-    }
+        if (process.ExitCode != 0)
+        {
+            Console.Error.WriteLine($"cargo install failed for '{entry}' (exit code {process.ExitCode})");
+        }
     }
     else
     {
-    Console.Error.WriteLine($"Failed to start 'cargo install --locked {entry}'");
+        Console.Error.WriteLine($"Failed to start 'cargo install --locked {entry}'");
     }
 }
 
