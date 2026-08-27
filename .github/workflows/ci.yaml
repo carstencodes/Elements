@@ -22,7 +22,7 @@ jobs:
 #####################################################################
 
   initialize:
-    name: Pipeline initization 
+    name: Pipeline initization
     runs-on: ubuntu-latest
     permissions:
       actions: read
