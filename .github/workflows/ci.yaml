@@ -165,6 +165,10 @@ jobs:
           path: artifacts/
           skip-decompress: false
           digest-mismatch: error
+      - name: List directory contents
+        run: ls -al artifacts/
+      - name: List directory contents
+        run: ls -al .
       - name: Run tests
         run: dotnet test --no-restore --no-build --configuration Release
       - name: ReportGenerator
