@@ -162,6 +162,7 @@ jobs:
         uses: actions/download-artifact@v8
         with:
           name: artifacts
+          path: artifacts/
           skip-decompress: false
           digest-mismatch: error
       - name: Run tests
