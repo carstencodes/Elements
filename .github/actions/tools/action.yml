@@ -14,8 +14,7 @@ runs:
       uses: actions/cache@v6
       id: cargo-cache
       with:
-        path: |
-          "${{ github.workspace }}/deps/cargo/bin"
+        path: ${{ github.workspace }}/deps/cargo/bin
         key: ${{ runner.os }}-cargo-${{ hashFiles('deps/cargo-tools.ini') }}
         restore-keys: |
           ${{ runner.os }}-cargo-
@@ -23,8 +22,7 @@ runs:
       uses: actions/cache@v6
       id: dotnet-cache
       with:
-        path: |
-          "${{ github.workspace }}/deps/nuget/"
+        path: ${{ github.workspace }}/deps/nuget/
         key: ${{ runner.os }}-dotnet-tools-${{ hashFiles('dotnet-tools.json') }}
         restore-keys: |
           ${{ runner.os }}-dotnet-tools-
