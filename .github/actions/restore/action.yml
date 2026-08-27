@@ -23,4 +23,3 @@ runs:
     - name: Restore packages
       shell: sh
       run: dotnet restore --no-http-cache --force --use-lock-file --locked-mode
- 
