@@ -98,7 +98,7 @@ jobs:
         with:
           name: artifacts
           path: artifacts/
-          if-no-files-found: fail
+          if-no-files-found: error
           retention-days: 7
           include-hidden-files: true
           archive: true
