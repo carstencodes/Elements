@@ -62,7 +62,7 @@ else
 
 if (!File.Exists(iniPath))
 {
-    Console.Error.WriteLine($"File not found: {iniPath}");
+    await Console.Error.WriteLineAsync($"File not found: {iniPath}");
     return 1;
 }
 
@@ -84,12 +84,14 @@ if (!string.IsNullOrWhiteSpace(targetDir) && !Directory.Exists(targetDir))
     }
 }
 
-List<string> entries = File.ReadAllLines(iniPath)
+List<string> entries = (await File.ReadAllLinesAsync(iniPath))
     // skip empty lines
     .Where(line => !string.IsNullOrWhiteSpace(line))
     // skip section headers: ^\[
     .Where(line => !line.TrimStart().StartsWith('['))
+#pragma warning disable S125
     // skip comments: ^;
+#pragma warning restore S125
     .Where(line => !line.TrimStart().StartsWith(';'))
     // sed 's/=/@/g'
     .Select(line => line.Replace('=', '@'))
@@ -99,12 +101,12 @@ List<string> entries = File.ReadAllLines(iniPath)
 
 foreach (string entry in entries)
 {
-    Console.WriteLine($"cargo install --locked {entry}");
-
+#pragma warning disable S4036
     ProcessStartInfo psi = new("cargo")
     {
         UseShellExecute = false,
     };
+#pragma warning restore S4036
     psi.ArgumentList.Add("install");
     psi.ArgumentList.Add("--locked");
     if (!string.IsNullOrWhiteSpace(targetDir))
@@ -114,19 +116,21 @@ foreach (string entry in entries)
     }
     psi.ArgumentList.Add(entry);
 
+    Console.WriteLine($"cargo {string.Join(" ", psi.ArgumentList)}");
+
     using Process? process = Process.Start(psi);
-    if (process is not  null)
+    if (process is not null)
     {
-        process!.WaitForExit();
+        await process.WaitForExitAsync();
 
         if (process.ExitCode != 0)
         {
-            Console.Error.WriteLine($"cargo install failed for '{entry}' (exit code {process.ExitCode})");
+            await Console.Error.WriteLineAsync($"cargo install failed for '{entry}' (exit code {process.ExitCode})");
         }
     }
     else
     {
-        Console.Error.WriteLine($"Failed to start 'cargo install --locked {entry}'");
+        await Console.Error.WriteLineAsync($"Failed to start 'cargo install --locked {entry}'");
     }
 }
 
