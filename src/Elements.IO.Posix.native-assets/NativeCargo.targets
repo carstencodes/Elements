@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+    <TargetsTriggeredByCompilation>
+      $(TargetsTriggeredByCompilation);
+      RunNativeCargoBuild;
+    </TargetsTriggeredByCompilation>
+    <CoreCleanDependsOn>
+      $(CoreCleanDependsOn);
+      RunNativeCargoClean
+    </CoreCleanDependsOn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <CargoConfiguration />
+    <CargoConfiguration Condition="'$(Configuration)' == 'Release'">--release</CargoConfiguration>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <ConfigurationOutputFolder>$(Configuration.ToLowerInvariant())</ConfigurationOutputFolder>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <CargoEnvironment Include="SDK_ROOT" Value="/dev/null" />
+  </ItemGroup>
+
+  <Target Name="CargoGetTargetDirectories">
+    <PropertyGroup>
+        <CargoTargetDirectory Condition="'$(CargoTargetDirectory)' == ''">$(IntermediateOutputPath)target</CargoTargetDirectory>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <CargoBuildIdentifiers Include="@(BuildIdentifiers)">
+            <TargetFilePath>$(CargoTargetDirectory)/%(BuildIdentifiers.CargoRustTarget)/$(CargoBuildTarget)/$(ConfigurationOutputFolder)/%(BuildIdentifiers.DyLibFilePrefix)$(RustCrateLibName)%(BuildIdentifiers.DyLibExtension)</TargetFilePath>
+            <TargetFileName>%(BuildIdentifiers.DyLibFilePrefix)$(RustCrateLibName)</TargetFileName>
+            <TargetExtension>%(BuildIdentifiers.DyLibExtension)</TargetExtension>
+        </CargoBuildIdentifiers>
+    </ItemGroup>
+
+    <ItemGroup>
+        <CargoIntermediateOutputFiles Include="@(CargoBuildIdentifiers->'%(TargetFilePath)')">
+            <CargoRustTarget>%(CargoBuildIdentifiers.CargoRustTarget)</CargoRustTarget>
+            <TargetFileName>%(CargoBuildIdentifiers.TargetFilename)</TargetFileName>
+            <TargetExtension>%(CargoBuildIdentifiers.TargetExtension)</TargetExtension>
+        </CargoIntermediateOutputFiles>
+    </ItemGroup>
+
+    <ItemGroup>
+        <CargoOutputFiles Include="@(CargoIntermediateOutputFiles->'$(OutDir)%(CargoRustTarget)/%(TargetFileName)%(TargetExtension)')">
+            <SourceFile>%(CargoIntermediateOutputFiles.Identity)</SourceFile>
+            <TargetDir>$(OutDir)/%(CargoRustTarget)</TargetDir>
+        </CargoOutputFiles>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RunNativeCargoBuild" DependsOnTargets="CargoGetTargetDirectories" Inputs="@(RustSourceFile);@(RustBuildFile)" Outputs="@(CargoOutputFiles)" Returns="@(CreatedFilesByCargoBuild)">
+    <Exec 
+        Command="cargo %(BuildIdentifiers.CargoBuildCommand) $(CargoConfiguration) --target-dir &quot;$(CargoTargetDirectory)&quot; --target &quot;%(BuildIdentifiers.CargoRustTarget)&quot;"
+        EnvironmentVariables="@(CargoEnvironment->'%(Identity)=%(Value)')"
+        />
+
+    <ItemGroup>
+      <CreatedFilesByCargoBuild Include="$(CargoOutputFiles)">
+        <TargetFrameworkIdentifier>$(TargetFramework)</TargetFrameworkIdentifier>
+        <TargetPlatformMoniker>$(TargetRuntimeIdentifier)</TargetPlatformMoniker>
+        <TargetPlatformIdentifier>$(TargetRuntimeIdentifier)</TargetPlatformIdentifier>
+        <CopyUpToDateMarker />
+        <TargetFrameworkVersion />
+        <ReferenceAssembly />
+        <RuntimeIdentifier>$(TargetRuntimeIdentifier)</RuntimeIdentifier>
+        <Configuration>$(Configuration)</Configuration>
+      </CreatedFilesByCargoBuild>
+    </ItemGroup>
+
+    <MakeDir Directories="%(CargoOutputFiles.TargetDir)" />
+
+    <Copy SourceFiles="%(CargoOutputFiles.SourceFile)" DestinationFolder="%(CargoOutputFiles.TargetDir)" />
+
+    <ItemGroup>
+      <FilesWrites Include="@(CargoOutputFiles)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RunNativeCargoClean" DependsOnTargets="CargoGetTargetDirectories">
+    <Exec 
+        Command="cargo clean --target-dir &quot;$(CargoTargetDirectory)&quot;" 
+        EnvironmentVariables="@(CargoEnvironment->'%(Identity)=%(Value)')"
+        />
+  </Target>
+
+  <Target Name="RunNativeCargoFetch">
+    <Exec 
+        Command="cargo fetch --target &quot;%(BuildIdentifiers.CargoRustTarget)&quot;" 
+        EnvironmentVariables="@(CargoEnvironment->'%(Identity)=%(Value)')"
+        />
+  </Target>
+</Project>
