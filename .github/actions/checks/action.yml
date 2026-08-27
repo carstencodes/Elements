@@ -6,5 +6,5 @@ runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v7
-    - uses: .github/actions/toolchain
+    - uses: .github/actions/toolchain@${{ github.sha }}
     - uses: pre-commit/action@v3.0.1

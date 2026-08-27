@@ -17,9 +17,9 @@ runs:
         submodules: false
         fetch-depth: 0
     - name: Setup toolchains
-      uses: ./.github/actions/toolchain
+      uses: ./.github/actions/toolchain@${{ github.sha }}
     - name: Restore tools
-      uses: ./.github/actions/tools
+      uses: ./.github/actions/tools@${{ github.sha }}
     - name: Restore packages
       shell: sh
       run: dotnet restore --no-http-cache --force --use-lock-file --locked-mode
