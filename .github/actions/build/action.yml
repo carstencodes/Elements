@@ -1,49 +1,15 @@
-name: Restore packages and build projects
-description: Run dotnet restore and dotnet build for a certain configuration
+name: Build projects
+description: Run dotnet build for a certain configuration
 inputs:
   configuration:
     description: One of Debug or Release
     required: true
     type: string
     default: Release
-  global_json:
-    description: Path to the global.json file
-    required: false
-    type: string
-    default: global.json
-  tool_restore:
-    description: Run tool restore
-    required: false
-    type: bool
-    default: true
 
 runs:
   using: "composite"
   steps:
-    - name: Cache cargo registry and build
-      uses: actions/cache@v6
-      with:
-        path: |
-          ~/.cargo/bin
-          target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('deps/cargo-tools.ini') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v6
-      with:
-        global-json-file: ${{ inputs.global_json }}
-    - name: Restore tools using manifest
-      shell: sh
-      if: ${{ inputs.tool_restore }}
-      run: dotnet tool restore
-    - name: Restore cargo tools using CargoTools PS
-      shell: sh
-      if: ${{ inputs.tool_restore }}
-      run: dotnet run deps/CargoTools.cs deps/cargo-tools.ini
-    - name: Restore packages
-      shell: sh
-      run: dotnet restore --no-http-cache --force --use-lock-file --locked-mode
     - name: Build project
       shell: sh
       run: dotnet build --no-restore --configuration ${{ inputs.configuration }}
