@@ -1,0 +1,10 @@
+name: Pre-Build Checks
+description: Check the codebase for common issues before building and testing
+inputs: {}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v7
+    - uses: .github/actions/toolchain
+    - uses: pre-commit/action@v3.0.1
