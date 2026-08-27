@@ -19,4 +19,3 @@ runs:
       uses: actions/setup-dotnet@v6
       with:
         global-json-file: global.json
-    
