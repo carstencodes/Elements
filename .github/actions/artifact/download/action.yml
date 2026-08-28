@@ -5,8 +5,8 @@ inputs:
     description: The name of the artifact to download
     required: true
     type: string
-  folder:
-    description: The folder to download the artifact to
+  path:
+    description: The path to download the artifact to
     required: true
     type: string
 
@@ -18,12 +18,13 @@ runs:
       id: download
       with:
         name: ${{ inputs.name }}
-        path: ${{ runner.temp }}/artifacts/${{ inputs.folder }}
+        path: ${{ runner.temp }}/artifacts/${{ inputs.path }}
         digest-mismatch: error
+        skip-decompress: true
     - name: Create artifact folder
       shell: sh
       run: mkdir -p ${{ inputs.folder }}
     - name: Decompress artifact
       shell: sh
       run: |
-        tar -zxf ${{ steps.download.output.download-path }}/*.tar.gz -C ${{ inputs.folder }}
+        tar -zxf ${{ steps.download.output.download-path }}/*.tar.gz -C ${{ inputs.path }}
