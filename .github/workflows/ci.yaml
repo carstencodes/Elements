@@ -97,7 +97,7 @@ jobs:
         uses: ./.github/actions/artifact/upload
         if: ${{ matrix.configuration == 'Release' }}
         with:
-          name: build
+          name: build-release
           path: artifacts/
 
 #####################################################################
@@ -155,10 +155,10 @@ jobs:
         uses: ./.github/actions/restore
         with:
           tool_restore: true
-      - name: Get Build Results
+      - name: Download Release Artifacts
         uses: ./.github/actions/artifact/download
         with:
-          name: build
+          name: build-release
           path: artifacts/
       - name: Run tests
         run: dotnet test --no-restore --no-build --configuration Release
