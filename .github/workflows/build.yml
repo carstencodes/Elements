@@ -22,13 +22,6 @@ jobs:
         configuration: [ 'Debug', 'Release' ]
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          clean: true
-          fetch-tags: true
-          submodules: false
-          fetch-depth: 0
       - name: Prepare docker images
         uses: ./.github/actions/image-build
       - name: Build
