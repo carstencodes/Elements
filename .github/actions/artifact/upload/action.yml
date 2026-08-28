@@ -1,0 +1,27 @@
+name: Upload artifacts
+description: Upload artifacts from this job
+inputs:
+  name:
+    description: The name of the artifact to upload
+    required: true
+    type: string
+  folder:
+    description: The folder to upload the artifact from
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: Compress artifact
+      shell: sh
+      run: |
+        mkdir -p ${{ runner.temp }}/artifacts/
+        tar -zcf ${{ runner.temp }}/artifacts/${{ inputs.name }}.tar.gz -C ${{ inputs.folder }} .
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ runner.temp }}/artifacts/${{ inputs.name }}.tar.gz
+        if-no-files-found: error
+        retention-days: 7

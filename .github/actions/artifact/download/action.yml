@@ -1,0 +1,29 @@
+name: Download artifacts
+description: Download artifacts from a previous job
+inputs:
+  name:
+    description: The name of the artifact to download
+    required: true
+    type: string
+  folder:
+    description: The folder to download the artifact to
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v8
+      id: download
+      with:
+        name: ${{ inputs.name }}
+        path: ${{ runner.temp }}/artifacts/${{ inputs.folder }}
+        digest-mismatch: error
+    - name: Create artifact folder
+      shell: sh
+      run: mkdir -p ${{ inputs.folder }}
+    - name: Decompress artifact
+      shell: sh
+      run: |
+        tar -zxf ${{ steps.download.output.download-path }}/*.tar.gz -C ${{ inputs.folder }}

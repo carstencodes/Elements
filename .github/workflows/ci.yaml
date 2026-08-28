@@ -94,14 +94,11 @@ jobs:
         with:
           sarif_file: artifacts/Elements.sarif
       - name: Upload artifacts folder
-        uses: actions/upload-artifact@v7
+        uses: ./.github/actions/artifact/upload
         if: ${{ matrix.configuration == 'Release' }}
         with:
-          name: artifacts
+          name: build
           path: artifacts/
-          if-no-files-found: error
-          retention-days: 7
-          include-hidden-files: true
 
 #####################################################################
 #
@@ -159,16 +156,10 @@ jobs:
         with:
           tool_restore: true
       - name: Get Build Results
-        uses: actions/download-artifact@v8
+        uses: ./.github/actions/artifact/download
         with:
-          name: artifacts
+          name: build
           path: artifacts/
-          skip-decompress: false
-          digest-mismatch: error
-      - name: List directory contents
-        run: ls -al artifacts/
-      - name: List directory contents
-        run: ls -al .
       - name: Run tests
         run: dotnet test --no-restore --no-build --configuration Release
       - name: ReportGenerator
