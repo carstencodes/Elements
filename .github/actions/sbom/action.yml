@@ -1,0 +1,7 @@
+name: Create SBOM
+description: Create a Software Bill of Materials (SBOM) for the project
+inputs: {}
+
+runs:
+  using: "composite"
+  steps: []
