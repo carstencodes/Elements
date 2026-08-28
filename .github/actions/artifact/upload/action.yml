@@ -25,3 +25,4 @@ runs:
         path: ${{ runner.temp }}/artifacts/${{ inputs.name }}.tar.gz
         if-no-files-found: error
         retention-days: 7
+        archive: false
