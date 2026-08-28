@@ -5,8 +5,8 @@ inputs:
     description: The name of the artifact to upload
     required: true
     type: string
-  folder:
-    description: The folder to upload the artifact from
+  path:
+    description: The path to upload the artifact from
     required: true
     type: string
 
@@ -17,7 +17,7 @@ runs:
       shell: sh
       run: |
         mkdir -p ${{ runner.temp }}/artifacts/
-        tar -zcf ${{ runner.temp }}/artifacts/${{ inputs.name }}.tar.gz -C ${{ inputs.folder }} .
+        tar -zcf ${{ runner.temp }}/artifacts/${{ inputs.name }}.tar.gz -C ${{ inputs.path }} .
     - name: Upload artifacts
       uses: actions/upload-artifact@v7
       with:
