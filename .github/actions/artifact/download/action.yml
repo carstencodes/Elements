@@ -15,7 +15,6 @@ runs:
   steps:
     - name: Download artifact
       uses: actions/download-artifact@v8
-      id: download
       with:
         name: ${{ inputs.name }}.tar.gz
         path: ${{ runner.temp }}/artifacts/${{ inputs.path }}
@@ -26,4 +25,4 @@ runs:
     - name: Decompress artifact
       shell: sh
       run: |
-        tar -zxf ${{ steps.download.output.download-path }}/*.tar.gz -C ${{ inputs.path }}
+        tar -zxf ${{ runner.temp }}/artifacts/${{ inputs.path }}/${{ inputs.name }}.tar.gz -C ${{ inputs.path }}
