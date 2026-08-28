@@ -20,6 +20,14 @@ runs:
       uses: ./.github/actions/toolchain
     - name: Restore tools
       uses: ./.github/actions/tools
+    - name: Cache dotnet packages
+      uses: actions/cache@v6
+      id: dotnet-cache
+      with:
+        path: ${{ github.workspace }}/deps/nuget/
+        key: ${{ runner.os }}-dotnet-${{ hashFiles('**/Directory.Packages.props') }}
+        restore-keys: |
+          ${{ runner.os }}-directory-packages-props-
     - name: Restore packages
       shell: sh
       run: dotnet restore --no-http-cache --force --use-lock-file --locked-mode
