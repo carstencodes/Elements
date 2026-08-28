@@ -20,10 +20,9 @@ runs:
         name: ${{ inputs.name }}
         path: ${{ runner.temp }}/artifacts/${{ inputs.path }}
         digest-mismatch: error
-        skip-decompress: true
     - name: Create artifact folder
       shell: sh
-      run: mkdir -p ${{ inputs.folder }}
+      run: mkdir -p ${{ inputs.path }}
     - name: Decompress artifact
       shell: sh
       run: |
