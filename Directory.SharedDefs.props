@@ -6,5 +6,6 @@
     <SarifResultsPath>$(ResultsPath)/sarif/</SarifResultsPath>
     <UnitTestsResultPaths>$(ResultsPath)/unit-tests/</UnitTestsResultPaths>
     <CodeCoverageResultPaths>$(ResultsPath)/coverage/</CodeCoverageResultPaths>
+    <NuGetThirdPartyResultPaths>$(ResultsPath)/3rdpartyinfo/</NuGetThirdPartyResultPaths>
   </PropertyGroup>
 </Project>
