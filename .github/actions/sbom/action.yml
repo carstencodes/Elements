@@ -7,7 +7,7 @@ runs:
   steps:
     - name: Create CycloneDX files
       shell: sh
-      run: dotnet msbuild --configuration Release -t:CreateSbomCycloneDx
+      run: dotnet msbuild -p:Configuration=Release -t:CreateSbomCycloneDx
     - name: Create NuGetLicenseInformation files
       shell: sh
-      run: dotnet msbuild --configuration Release -t:CreateNuGetLicenseOutputFile
+      run: dotnet msbuild -p:Configuration=Release -t:CreateNuGetLicenseOutputFile
