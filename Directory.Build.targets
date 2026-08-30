@@ -9,6 +9,7 @@
 
   <Import Project="$(MSBuildThisFileDirectory)/build/local/PackageReleaseNotes.targets" />
   <Import Project="$(MSBuildThisFileDirectory)/build/local/NuGetLicense.targets" />
+  <Import Project="$(MSBuildThisFileDirectory)/build/local/CycloneDx.targets" />
 
   <Target Name="EnsureResultsPath">
     <MakeDir Directories="$(ArtifactsPath)" Condition="!Exists('$(ArtifactsPath)')" />
@@ -16,6 +17,7 @@
     <MakeDir Directories="$(SarifResultsPath)" Condition="!Exists('$(SarifResultsPath)')" />
     <MakeDir Directories="$(UnitTestsResultPaths)" Condition="!Exists('$(UnitTestsResultPaths)')" />
     <MakeDir Directories="$(CodeCoverageResultPaths)" Condition="!Exists('$(CodeCoverageResultPaths)')" />
+    <MakeDir Directories="$(CycloneDxResultPaths)" Condition="!Exists('$(CycloneDxResultPaths)')" />
     <MakeDir Directories="$(NuGetThirdPartyResultPaths)" Condition="!Exists('$(NuGetThirdPartyResultPaths)')" />
   </Target>
 </Project>
