@@ -43,8 +43,8 @@
         </GenerateCycloneDxDocumentDependsOn>
     </PropertyGroup>
 
-    <Target Name="GenerateCycloneDxDocument" 
-            DependsOnTargets="$(GenerateCycloneDxDocumentDependsOn)" 
+    <Target Name="GenerateCycloneDxDocument"
+            DependsOnTargets="$(GenerateCycloneDxDocumentDependsOn)"
             Returns="$(CycloneDxResultFilePath)">
         <MakeDir Directories="$(CycloneDxResultDirectory)" Condition="!Exists('$(CycloneDxResultDirectory)')" />
 

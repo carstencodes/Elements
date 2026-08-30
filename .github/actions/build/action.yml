@@ -7,8 +7,8 @@ inputs:
     type: choice
     default: Release
     options:
-     - Release
-     - Debug
+      - Release
+      - Debug
 
 runs:
   using: "composite"
