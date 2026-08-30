@@ -4,4 +4,8 @@ inputs: {}
 
 runs:
   using: "composite"
-  steps: []
+  steps:
+    - name: Create CycloneDX files
+      run: dotnet msbuild --configuration Release -t:CreateSbomCycloneDx
+    - name: Create NuGetLicenseInformation files
+      run: dotnet msbuild --configuration Release -t:CreateNuGetLicenseOutputFile

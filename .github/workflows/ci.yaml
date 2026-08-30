@@ -126,8 +126,23 @@ jobs:
         uses: ./.github/actions/restore
         with:
           tool_restore: true
+      - name: Download Release Artifacts
+        uses: ./.github/actions/artifact/download
+        with:
+          name: build-release
+          path: artifacts/
       - name: Create SBOM
         uses: ./.github/actions/sbom
+      - name: Upload sbom folder
+        uses: ./.github/actions/artifact/upload
+        with:
+          name: sbom-files
+          path: artifacts/results/cyclonedx
+      - name: Upload nuget-licenseinfo folder
+        uses: ./.github/actions/artifact/upload
+        with:
+          name: license-info-files
+          path: artifacts/results/3rdpartyinfo
 
 #####################################################################
 #
