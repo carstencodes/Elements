@@ -19,9 +19,9 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="PackNuGetLicenseOutputFile" DependsOnTargets="GenerateNuGetLicenseOutputFile;$(PackNuGetLicenseOutputFileDependsOn)" Condition="Exists('$(NuGetLicenseOutputFile)')">
+  <Target Name="PackNuGetLicenseOutputFile" DependsOnTargets="GenerateNuGetLicenseOutputFile;$(PackNuGetLicenseOutputFileDependsOn)">
     <ItemGroup>
-      <None Include="$(NuGetLicenseOutputFile)" Visible="false" Pack="true" PackagePath="sbom/ThirdPartyInformation.txt" />
+      <None Include="$(NuGetLicenseOutputFile)" Visible="false" Pack="true" PackagePath="sbom/ThirdPartyInformation.txt" Condition="Exists('$(NuGetLicenseOutputFile)')" />
     </ItemGroup>
   </Target>
 

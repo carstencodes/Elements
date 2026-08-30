@@ -63,9 +63,9 @@
         </ItemGroup>
     </Target>
 
-    <Target Name="PackCycloneDxFile" DependsOnTargets="GenerateCycloneDxDocument;$(PackCycloneDxFileDependsOn)" Condition="Exists('$(CycloneDxResultFilePath)')">
+    <Target Name="PackCycloneDxFile" DependsOnTargets="GenerateCycloneDxDocument;$(PackCycloneDxFileDependsOn)">
         <ItemGroup>
-            <None Include="$(CycloneDxResultFilePath)" Visible="false" Pack="true" PackagePath="sbom/package-sbom.$(CycloneDxOutputFormat)" />
+            <None Include="$(CycloneDxResultFilePath)" Visible="false" Pack="true" PackagePath="sbom/package-sbom.$(CycloneDxOutputFormat)" Condition="Exists('$(CycloneDxResultFilePath)')" />
         </ItemGroup>
     </Target>
 
