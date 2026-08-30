@@ -27,8 +27,10 @@ jobs:
           fetch-tags: true
           submodules: false
           fetch-depth: 0
-      - name: Prepare docker images
-        uses: ./.github/actions/image-build
+      - name: Restore
+        uses: ./.github/actions/restore
+        with:
+          tool_restore: true
       - name: Build
         uses: ./.github/actions/build
         with:
