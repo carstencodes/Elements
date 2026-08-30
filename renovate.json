@@ -17,6 +17,16 @@
       "matchStrings": [
         "; renovate: datasource=(?<datasource>[a-z-]+?) depName=(?:(?<depName>[a-zA-Z0-9-]+?))?\\s+(?<packageName>[^=\\s]+?)\\s*=\\s*(?<currentValue>(\\d+(\\.\\d+)*)?)"
       ]
+    },
+    {
+      "customType": "regex",
+      "description": "Update pre-commit in ci actions",
+      "managerFilePatterns": [
+        ".github/actions/pre-commit/action.yml"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?:(?<depName>[a-zA-Z0-9-]+?))?\\s+run:\\s+python\\s+-m\\s+pip\\s+install\\s+(?<packageName>[^=\\s]+?)==(?<currentValue>(\\d+(\\.\\d+)*)?)"
+      ]
     }
   ],
   "nuget": {

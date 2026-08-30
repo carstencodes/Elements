@@ -7,4 +7,4 @@ runs:
   steps:
     - uses: actions/checkout@v7
     - uses: ./.github/actions/toolchain
-    - uses: pre-commit/action@v3.0.1
+    - uses: ./.github/actions/pre-commit
