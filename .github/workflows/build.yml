@@ -29,6 +29,10 @@ jobs:
           fetch-tags: true
           submodules: false
           fetch-depth: 0
+      - name: Restore
+        uses: ./.github/actions/restore
+        with:
+          tool_restore: true
       - name: Build
         uses: ./.github/actions/build
         with:
