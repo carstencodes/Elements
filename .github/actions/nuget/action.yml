@@ -16,24 +16,28 @@ runs:
             publish=false
             destination=none
             source=""
+            echo "::notice title=Target-Feed::The packages shall be stored ad github.com"
             ;;
 
           *:refs/tags/*)
             publish=true
             destination=nuget
             source="$nuget_source"
+            echo "::notice title=Target-Feed::The packages shall be stored ad nuget.org"
             ;;
 
           workflow_dispatch:*|*:refs/heads/main)
             publish=true
             destination=github
             source="$github_source"
+            echo "::notice title=Target-Feed::The packages shall be stored ad github.com"
             ;;
 
           *)
             publish=false
             destination=none
             source=""
+            echo "::notice title=Target-Feed::The packages will not be published"
             ;;
         esac
 
