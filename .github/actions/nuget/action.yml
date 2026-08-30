@@ -1,0 +1,91 @@
+name: Publish packages
+description: Packages from artifacts/packages will be published
+
+runs:
+  using: composite
+  steps:
+    - name: Determine publishing mode
+      id: mode
+      shell: sh
+      run: |
+        github_source="${{ github.server_url }}/_registry/nuget/${{ github.repository_owner }}/index.json"
+        nuget_source="https://api.nuget.org/v3/index.json"
+
+        case "${{ github.event_name }}:${{ github.ref }}" in
+          pull_request:*)
+            publish=false
+            destination=none
+            source=""
+            ;;
+
+          *:refs/tags/*)
+            publish=true
+            destination=nuget
+            source="$nuget_source"
+            ;;
+
+          workflow_dispatch:*|*:refs/heads/main)
+            publish=true
+            destination=github
+            source="$github_source"
+            ;;
+
+          *)
+            publish=false
+            destination=none
+            source=""
+            ;;
+        esac
+
+        {
+          printf 'publish=%s\n' "$publish"
+          printf 'destination=%s\n' "$destination"
+          printf 'source=%s\n' "$source"
+        } >> "$GITHUB_OUTPUT"
+    - name: Configure GitHub Packages source
+      if: steps.mode.outputs.destination == 'github'
+      shell: sh
+      run: |
+        dotnet nuget remove source github 2>/dev/null || true
+
+        dotnet nuget add source \
+          "${{ steps.mode.outputs.source }}" \
+          --name github \
+          --username "${{ github.actor }}" \
+          --password "${{ github.token }}" \
+          --store-password-in-clear-text
+    - name: Authenticate to NuGet.org with OIDC
+      if: steps.mode.outputs.destination == 'nuget'
+      uses: NuGet/login@v1
+    - name: Publish packages
+      if: steps.mode.outputs.publish == 'true'
+      shell: sh
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      run: |
+        case "${{ steps.nuget.outputs.destination }}" in
+          github)
+            api_key="$GITHUB_TOKEN"
+            symbols_store_arguments=
+            ;;
+
+          nuget)
+            api_key="oidc"
+            symbols_store_arguments=--symbol-source\ "https://symbols.nuget.org/upload"\ --symbol-api-key\ "oidc"
+            ;;
+
+          *)
+            echo "Unsupported package destination: ${{ steps.mode.outputs.destination }}" >&2
+            exit 1
+            ;;
+        esac
+
+        for package in ./artifacts/packages/*.nupkg; do
+          [ -f "$package" ] || continue
+
+          dotnet nuget push "$package" \
+            --source "${{ steps.nuget.outputs.source }}" \
+            --api-key "$api_key" \
+            $symbols_store_arguments \
+            --skip-duplicate
+        done
