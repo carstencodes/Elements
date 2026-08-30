@@ -21,7 +21,7 @@
                       DyLibFilePrefix="lib"
                       CargoBuildCommand="zigbuild"
                       Visible="false" />
-    <BuildIdentifiers Include="MaxOsX/arm64"
+    <BuildIdentifiers Include="MacOsX/arm64"
                       DotnetRuntimeIdentifier="osx-arm64"
                       CargoRustTarget="aarch64-apple-darwin"
                       DyLibExtension=".dylib"
