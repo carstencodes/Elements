@@ -62,7 +62,7 @@ else
 
 if (!File.Exists(iniPath))
 {
-    await Console.Error.WriteLineAsync($"File not found: {iniPath}");
+    await Console.Error.WriteLineAsync($"File not found: {iniPath}").ConfigureAwait(false);
     return 1;
 }
 
@@ -84,7 +84,7 @@ if (!string.IsNullOrWhiteSpace(targetDir) && !Directory.Exists(targetDir))
     }
 }
 
-List<string> entries = (await File.ReadAllLinesAsync(iniPath))
+List<string> entries = (await File.ReadAllLinesAsync(iniPath).ConfigureAwait(false))
     // skip empty lines
     .Where(line => !string.IsNullOrWhiteSpace(line))
     // skip section headers: ^\[
@@ -116,21 +116,21 @@ foreach (string entry in entries)
     }
     psi.ArgumentList.Add(entry);
 
-    Console.WriteLine($"cargo {string.Join(" ", psi.ArgumentList)}");
+    await Console.Out.WriteLineAsync($"cargo {string.Join(" ", psi.ArgumentList)}").ConfigureAwait(false);
 
     using Process? process = Process.Start(psi);
     if (process is not null)
     {
-        await process.WaitForExitAsync();
+        await process.WaitForExitAsync().ConfigureAwait(false);
 
         if (process.ExitCode != 0)
         {
-            await Console.Error.WriteLineAsync($"cargo install failed for '{entry}' (exit code {process.ExitCode})");
+            await Console.Error.WriteLineAsync($"cargo install failed for '{entry}' (exit code {process.ExitCode})").ConfigureAwait(false);
         }
     }
     else
     {
-        await Console.Error.WriteLineAsync($"Failed to start 'cargo install --locked {entry}'");
+        await Console.Error.WriteLineAsync($"Failed to start 'cargo install --locked {entry}'").ConfigureAwait(false);
     }
 }
 
