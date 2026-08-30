@@ -45,8 +45,10 @@
         "(^|/)\\.devcontainer/features/src/[^/]+/devcontainer-feature\\.json$"
       ],
       "matchStrings": [
-        "//\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depName>[^\\s]+?))?(?:\\s+packageName=(?<packageName>[^\\s]+?))?\\s*\\r?\\n\\s*\"(?<depName>[^\"]+?):(?<currentValue>[^\"]+?)\""
-      ]
+        "//\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depNameComment>[^\\s]+?))?(?:\\s+packageName=(?<packageNameComment>[^\\s]+?))?\\s*\\r?\\n\\s*\"(?<depNameFeature>[^\"]+?):(?<currentValue>[^\"]+?)\""
+      ],
+      "depNameTemplate": "{{#if depNameComment}}{{{depNameComment}}}{{else}}{{{depNameFeature}}}{{/if}}",
+      "packageNameTemplate": "{{#if packageNameComment}}{{{packageNameComment}}}{{else}}{{{depNameFeature}}}{{/if}}"
     }
   ],
   "nuget": {
