@@ -4,6 +4,7 @@
     <TargetsTriggeredByCompilation>
       $(TargetsTriggeredByCompilation);
       RunNativeCargoBuild;
+      CargoCreateSarifFileWithClippy;
     </TargetsTriggeredByCompilation>
     <CoreCleanDependsOn>
       $(CoreCleanDependsOn);
@@ -64,7 +65,53 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="RunNativeCargoBuild" DependsOnTargets="CargoGetTargetDirectories;CreateSbomCycloneDxUsingCargo" Inputs="@(RustSourceFile);@(RustBuildFile)" Outputs="@(CargoOutputFiles)" Returns="@(CreatedFilesByCargoBuild)">
+  <Target Name="CargoCreateSarifFileWithClippy" Condition="'$(ErrorLog)' != ''">
+    <PropertyGroup>
+      <ClippyChecks />
+      <ClippyChecks>$(ClippyChecks) -D clippy::correctness</ClippyChecks>
+      <ClippyChecks>$(ClippyChecks) -W clippy::correctness</ClippyChecks>
+      <ClippyChecks>$(ClippyChecks) -W clippy::suspicious</ClippyChecks>
+      <ClippyChecks>$(ClippyChecks) -W clippy::style</ClippyChecks>
+      <ClippyChecks>$(ClippyChecks) -W clippy::complexity</ClippyChecks>
+      <ClippyChecks>$(ClippyChecks) -W clippy::perf</ClippyChecks>
+      <ClippyChecks>$(ClippyChecks) -W clippy::pedantic</ClippyChecks>
+    </PropertyGroup>
+
+    <Exec Command="cargo clippy --all-targets --all-features --message-format=json -- $(ClippyChecks)"
+          ContinueOnError="warnAndContinue"
+          ConsoleToMSBuild="true"
+          IgnoreStandardErrorWarningFormat="true"
+          IgnoreExitCode="false">
+      <Output TaskParameter="ExitCode" PropertyName="CargoClippyExitCode" />
+      <Output TaskParameter="ConsoleOutput" ItemName="CargoClippyConsoleOutput" />
+    </Exec>
+
+    <WriteLinesToFile File="$(IntermediateOutputPath)/cargo.clippy.output.json"
+                      Lines="@(CargoClippyConsoleOutput)"
+                      Overwrite="true"
+                      WriteOnlyWhenDifferent="true" />
+
+    <PropertyGroup>
+      <LastSemicolonIndexInErrorLog>$([System.String]::Copy('$(ErrorLog)').LastIndexOf(';'))</LastSemicolonIndexInErrorLog>
+      <CargoErrorLog>$(ErrorLog)</CargoErrorLog>
+      <CargoErrorLog Condition="$(LastSemicolonIndexInErrorLog) &gt; 0">$([System.String]::Copy('$(ErrorLog)').Substring(0, $(LastSemicolonIndexInErrorLog)))</CargoErrorLog>
+    </PropertyGroup>
+
+    <Exec Command="clippy-sarif -i &quot;$(IntermediateOutputPath)/cargo.clippy.output.json&quot; -o &quot;$(CargoErrorLog)&quot;"
+          ContinueOnError="warnAndContinue"
+          ConsoleToMSBuild="true"
+          IgnoreStandardErrorWarningFormat="true"
+          IgnoreExitCode="false">
+      <Output TaskParameter="ExitCode" PropertyName="CargoClippyExitCode" />
+      <Output TaskParameter="ConsoleOutput" ItemName="CargoClippyConsoleOutput" />
+    </Exec>
+
+    <ItemGroup>
+      <FileWrites Include="$(CargoErrorLog)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RunNativeCargoBuild" DependsOnTargets="CargoGetTargetDirectories;CargoCreateSarifFileWithClippy;CreateSbomCycloneDxUsingCargo" Inputs="@(RustSourceFile);@(RustBuildFile)" Outputs="@(CargoOutputFiles)" Returns="@(CreatedFilesByCargoBuild)">
     <Exec
         Command="cargo %(BuildIdentifiers.CargoBuildCommand) $(CargoConfiguration) --target-dir &quot;$(CargoTargetDirectory)&quot; --target &quot;%(BuildIdentifiers.CargoRustTarget)&quot;"
         EnvironmentVariables="@(CargoEnvironment->'%(Identity)=%(Value)')"
