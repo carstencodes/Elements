@@ -9,6 +9,14 @@
       $(CoreCleanDependsOn);
       RunNativeCargoClean
     </CoreCleanDependsOn>
+    <GenerateCycloneDxDocumentDependsOn>
+        CycloneDxSetToolConfigurationRustProj;
+        $(GenerateCycloneDxDocumentDependsOn)
+    </GenerateCycloneDxDocumentDependsOn>
+    <PackCycloneDxFileDependsOn>
+      MoveCycloneDxFileToResultsFolder;
+      $(PackCycloneDxFileDependsOn)
+    </PackCycloneDxFileDependsOn>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -93,5 +101,32 @@
         Command="cargo fetch --target &quot;%(BuildIdentifiers.CargoRustTarget)&quot;"
         EnvironmentVariables="@(CargoEnvironment->'%(Identity)=%(Value)')"
         />
+  </Target>
+
+  <Target Name="CycloneDxSetToolConfigurationRustProj">
+    <PropertyGroup Condition="'$(CycloneDxType)' == ''">
+      <CycloneDxType>library</CycloneDxType>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <CycloneDxToolLauncher>cargo</CycloneDxToolLauncher>
+        <CycloneDxCommandName>cyclonedx</CycloneDxCommandName>
+        <CycloneDxToolArguments />
+        <CycloneDxToolArguments>$(CycloneDxToolArguments) --manifest-path '$(MSBuildProjectDirectory)/Cargo.toml'</CycloneDxToolArguments>
+        <CycloneDxToolArguments>$(CycloneDxToolArguments) --format '$(CycloneDxOutputFormat)'</CycloneDxToolArguments>
+        <CycloneDxToolArguments>$(CycloneDxToolArguments) --all-features</CycloneDxToolArguments>
+        <CycloneDxToolArguments>$(CycloneDxToolArguments) --all</CycloneDxToolArguments>
+        <CycloneDxToolArguments>$(CycloneDxToolArguments) --spec-version '$(CycloneDxVersion)'</CycloneDxToolArguments>
+        <CycloneDxToolArguments>$(CycloneDxToolArguments) --override-filename '$(MsBuildProjectName).cyclonedx'</CycloneDxToolArguments>
+        <CycloneDxToolInvocation>$(CycloneDxToolLauncher) $(CycloneDxCommandName) $(CycloneDxToolArguments)</CycloneDxToolInvocation>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <CycloneDxResultsExecDir>$(CycloneDxResultDirectory)</CycloneDxResultsExecDir>
+      </PropertyGroup>
+  </Target>
+
+  <Target Name="MoveCycloneDxFileToResultsFolder" Inputs="$(MSBuildProjectDirectory)/$(CycloneDxResultFileName)" Outputs="$(CycloneDxResultFilePath)">
+    <Move SourceFiles="$(MSBuildProjectDirectory)/$(CycloneDxResultFileName)" DestinationFolder="$(CycloneDxResultDirectory)" />
   </Target>
 </Project>
