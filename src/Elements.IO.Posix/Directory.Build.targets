@@ -66,7 +66,7 @@
         <PackagePath>runtimes/%(NativeAssetReference.TargetPlatformIdentifier)/native/%(NativeAssetReference.FileName)%(NativeAssetReference.Extension)</PackagePath>
       </TfmSpecificPackageFile>
       <TfmSpecificPackageFile Include="@(NativeAssetReference)" Condition="'%(NativeAssetReference.AssetType)' == 'Content'">
-        <PackagePath>sbom/%(NativeAssetReference.FileName).native%(NativeAssetReference.Extension)</PackagePath>
+        <PackagePath>sbom/package-sbom.native%(NativeAssetReference.Extension)</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
   </Target>
