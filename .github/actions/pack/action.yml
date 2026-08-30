@@ -4,4 +4,7 @@ inputs: {}
 
 runs:
   using: "composite"
-  steps: []
+  steps:
+    - name: Pack Projects to NuGet packages
+      shell: sh
+      run: dotnet pack --no-restore --no-build -c Release

@@ -137,12 +137,12 @@ jobs:
         uses: ./.github/actions/artifact/upload
         with:
           name: sbom-files
-          path: artifacts/results/cyclonedx
+          path: artifacts/results/cyclonedx/
       - name: Upload nuget-licenseinfo folder
         uses: ./.github/actions/artifact/upload
         with:
           name: license-info-files
-          path: artifacts/results/3rdpartyinfo
+          path: artifacts/results/3rdpartyinfo/
 
 #####################################################################
 #
@@ -197,13 +197,31 @@ jobs:
     permissions:
       actions: read
       contents: read
+      packages: write
     needs:
       - test
       - build
       - sbom
     steps:
-      - name: NOOP
-        run: echo "NOOP"
+      - name: Download Release Artifacts
+        uses: ./.github/actions/artifact/download
+        with:
+          name: build-release
+          path: artifacts/
+      - name: Download sbom folder
+        uses: ./.github/actions/artifact/download
+        with:
+          name: sbom-files
+          path: artifacts/results/cyclonedx/
+      - name: Download nuget-licenseinfo folder
+        uses: ./.github/actions/artifact/download
+        with:
+          name: license-info-files
+          path: artifacts/results/3rdpartyinfo/
+      - name: Pack projects
+        uses: ./.github/actions/pack
+      - name: Publish NuGet packages
+        uses: ./.github/actions/nuget
 
 #####################################################################
 #
