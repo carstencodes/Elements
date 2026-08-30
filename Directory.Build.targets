@@ -16,5 +16,6 @@
     <MakeDir Directories="$(SarifResultsPath)" Condition="!Exists('$(SarifResultsPath)')" />
     <MakeDir Directories="$(UnitTestsResultPaths)" Condition="!Exists('$(UnitTestsResultPaths)')" />
     <MakeDir Directories="$(CodeCoverageResultPaths)" Condition="!Exists('$(CodeCoverageResultPaths)')" />
+    <MakeDir Directories="$(NuGetThirdPartyResultPaths)" Condition="!Exists('$(NuGetThirdPartyResultPaths)')" />
   </Target>
 </Project>
