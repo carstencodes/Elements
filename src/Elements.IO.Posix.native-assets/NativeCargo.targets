@@ -42,6 +42,7 @@
             <TargetFilePath>$(CargoTargetDirectory)/%(BuildIdentifiers.CargoRustTarget)/$(CargoBuildTarget)/$(ConfigurationOutputFolder)/%(BuildIdentifiers.DyLibFilePrefix)$(RustCrateLibName)%(BuildIdentifiers.DyLibExtension)</TargetFilePath>
             <TargetFileName>%(BuildIdentifiers.DyLibFilePrefix)$(RustCrateLibName)</TargetFileName>
             <TargetExtension>%(BuildIdentifiers.DyLibExtension)</TargetExtension>
+            <DotnetRuntimeIdentifier>%(BuildIdentifiers.DotnetRuntimeIdentifier)</DotnetRuntimeIdentifier>
         </CargoBuildIdentifiers>
     </ItemGroup>
 
@@ -50,6 +51,7 @@
             <CargoRustTarget>%(CargoBuildIdentifiers.CargoRustTarget)</CargoRustTarget>
             <TargetFileName>%(CargoBuildIdentifiers.TargetFilename)</TargetFileName>
             <TargetExtension>%(CargoBuildIdentifiers.TargetExtension)</TargetExtension>
+            <DotnetRuntimeIdentifier>%(CargoBuildIdentifiers.DotnetRuntimeIdentifier)</DotnetRuntimeIdentifier>
         </CargoIntermediateOutputFiles>
     </ItemGroup>
 
@@ -57,6 +59,7 @@
         <CargoOutputFiles Include="@(CargoIntermediateOutputFiles->'$(OutDir)%(CargoRustTarget)/%(TargetFileName)%(TargetExtension)')">
             <SourceFile>%(CargoIntermediateOutputFiles.Identity)</SourceFile>
             <TargetDir>$(OutDir)/%(CargoRustTarget)</TargetDir>
+            <DotnetRuntimeIdentifier>%(CargoIntermediateOutputFiles.DotnetRuntimeIdentifier)</DotnetRuntimeIdentifier>
         </CargoOutputFiles>
     </ItemGroup>
   </Target>
@@ -70,12 +73,12 @@
     <ItemGroup>
       <CreatedFilesByCargoBuild Include="$(CargoOutputFiles)">
         <TargetFrameworkIdentifier>$(TargetFramework)</TargetFrameworkIdentifier>
-        <TargetPlatformMoniker>$(TargetRuntimeIdentifier)</TargetPlatformMoniker>
-        <TargetPlatformIdentifier>$(TargetRuntimeIdentifier)</TargetPlatformIdentifier>
+        <TargetPlatformMoniker>%(CargoOutputFiles.DotnetRuntimeIdentifier)</TargetPlatformMoniker>
+        <TargetPlatformIdentifier>%(CargoOutputFiles.DotnetRuntimeIdentifier)</TargetPlatformIdentifier>
         <CopyUpToDateMarker />
         <TargetFrameworkVersion />
         <ReferenceAssembly />
-        <RuntimeIdentifier>$(TargetRuntimeIdentifier)</RuntimeIdentifier>
+        <RuntimeIdentifier>%(CargoOutputFiles.DotnetRuntimeIdentifier)</RuntimeIdentifier>
         <Configuration>$(Configuration)</Configuration>
       </CreatedFilesByCargoBuild>
     </ItemGroup>
@@ -86,6 +89,10 @@
 
     <ItemGroup>
       <FilesWrites Include="@(CargoOutputFiles)" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <TargetPathWithTargetPlatformMoniker Include="@(CreatedFilesByCargoBuild)" />
     </ItemGroup>
   </Target>
 
