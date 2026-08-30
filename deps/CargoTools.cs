@@ -1,5 +1,8 @@
 #!/usr/bin/env -S dotnet --
 
+// Allow file-names and ClassName to diverge
+#pragma warning disable MA0048
+
 #:property TargetFramework=net10.0
 #:property PublishAot=false
 #:property GenerateDocumentationFile=false
@@ -8,14 +11,10 @@
 #:property SkipNuGetLicense=true
 #:property GenerateCycloneDxSbom=false
 
-#pragma warning disable MA0029
-#pragma warning disable MA0042
-#pragma warning disable MA0048
-#pragma warning disable MA0076
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 
@@ -86,13 +85,13 @@ if (!string.IsNullOrWhiteSpace(targetDir) && !Directory.Exists(targetDir))
 
 List<string> entries = (await File.ReadAllLinesAsync(iniPath).ConfigureAwait(false))
     // skip empty lines
-    .Where(line => !string.IsNullOrWhiteSpace(line))
-    // skip section headers: ^\[
-    .Where(line => !line.TrimStart().StartsWith('['))
+    .Where(line => !string.IsNullOrWhiteSpace(line)
+        // skip section headers: ^\[
+        && !line.TrimStart().StartsWith('[')
 #pragma warning disable S125
-    // skip comments: ^;
+        // skip comments: ^;
 #pragma warning restore S125
-    .Where(line => !line.TrimStart().StartsWith(';'))
+        && !line.TrimStart().StartsWith(';'))
     // sed 's/=/@/g'
     .Select(line => line.Replace('=', '@'))
     // unquoted $(...) word-splits on whitespace too
@@ -116,7 +115,7 @@ foreach (string entry in entries)
     }
     psi.ArgumentList.Add(entry);
 
-    await Console.Out.WriteLineAsync($"cargo {string.Join(" ", psi.ArgumentList)}").ConfigureAwait(false);
+    await Console.Out.WriteLineAsync($"cargo {string.Join(' ', psi.ArgumentList)}").ConfigureAwait(false);
 
     using Process? process = Process.Start(psi);
     if (process is not null)
@@ -125,7 +124,7 @@ foreach (string entry in entries)
 
         if (process.ExitCode != 0)
         {
-            await Console.Error.WriteLineAsync($"cargo install failed for '{entry}' (exit code {process.ExitCode})").ConfigureAwait(false);
+            await Console.Error.WriteLineAsync($"cargo install failed for '{entry}' (exit code {process.ExitCode.ToString(CultureInfo.InvariantCulture)})").ConfigureAwait(false);
         }
     }
     else
