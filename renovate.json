@@ -31,8 +31,8 @@
     {
       "customType": "regex",
       "description": "Update devcontainer feature options version",
-      "fileMatch": [
-        "(^|/)\\.devcontainer/(?:local/)?devcontainer\\.json$"
+      "managerFilePatterns": [
+        "/(^|/)\\.devcontainer/(?:local/)?devcontainer\\.json$/"
       ],
       "matchStrings": [
         "//\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depName>[^\\s]+?))?(?:\\s+packageName=(?<packageName>[^\\s]+?))?\\s*\\r?\\n\\s*\"version\"\\s*:\\s*\"(?<currentValue>[^\"]+?)\""
@@ -41,8 +41,8 @@
     {
       "customType": "regex",
       "description": "Update custom devcontainer feature dependencies",
-      "fileMatch": [
-        "(^|/)\\.devcontainer/features/src/[^/]+/devcontainer-feature\\.json$"
+      "managerFilePatterns": [
+        "/(^|/)\\.devcontainer/features/src/[^/]+/devcontainer-feature\\.json$/"
       ],
       "matchStrings": [
         "//\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depNameComment>[^\\s]+?))?(?:\\s+packageName=(?<packageNameComment>[^\\s]+?))?\\s*\\r?\\n\\s*\"(?<depNameFeature>[^\"]+?):(?<currentValue>[^\"]+?)\""
@@ -64,7 +64,7 @@
       ]
     },
     {
-      "matchManagers": ["nuget", "regex"],
+      "matchManagers": ["nuget", "custom.regex"],
       "matchDatasources": ["dotnet-version"],
       "matchPackageNames": ["dotnet-sdk"],
       "matchFileNames": [
@@ -76,7 +76,7 @@
       "enabled": false
     },
     {
-      "matchManagers": ["nuget", "regex"],
+      "matchManagers": ["nuget", "custom.regex"],
       "matchDatasources": ["dotnet-version"],
       "matchPackageNames": ["dotnet-sdk"],
       "matchFileNames": [
