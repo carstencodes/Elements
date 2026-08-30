@@ -22,9 +22,6 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <GenerateSBOM>true</GenerateSBOM>
-    <SbomGenerationNamespaceBaseUri>https://carstencodes.github.io/Elements/spdx/$(PackageId)</SbomGenerationNamespaceBaseUri>
-    <SbomGenerationManifestInfo>SPDX:3.0</SbomGenerationManifestInfo>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -70,15 +67,6 @@
 
   <PropertyGroup>
     <SolutionDir Condition="'$(SolutionDir)' == ''">$(MsBuildThisFileDirectory)</SolutionDir>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <CycloneDxContinueOnError>false</CycloneDxContinueOnError>
-    <CycloneDxOutputFormat>json</CycloneDxOutputFormat>
-    <CycloneDxOutputFilename>package-bom</CycloneDxOutputFilename>
-    <CycloneDxEnableGitHubLicenses>false</CycloneDxEnableGitHubLicenses>
-    <_CycloneDxConfigDir>$(SolutionDir)</_CycloneDxConfigDir>
-    <CycloneDxValidateSbom>false</CycloneDxValidateSbom>
   </PropertyGroup>
 
   <ItemGroup>
