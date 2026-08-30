@@ -49,7 +49,7 @@
     <ItemGroup>
         <CargoIntermediateOutputFiles Include="@(CargoBuildIdentifiers->'%(TargetFilePath)')">
             <CargoRustTarget>%(CargoBuildIdentifiers.CargoRustTarget)</CargoRustTarget>
-            <TargetFileName>%(CargoBuildIdentifiers.TargetFilename)</TargetFileName>
+            <TargetFileName>%(CargoBuildIdentifiers.TargetFileName)</TargetFileName>
             <TargetExtension>%(CargoBuildIdentifiers.TargetExtension)</TargetExtension>
             <DotnetRuntimeIdentifier>%(CargoBuildIdentifiers.DotnetRuntimeIdentifier)</DotnetRuntimeIdentifier>
         </CargoIntermediateOutputFiles>
@@ -71,7 +71,7 @@
         />
 
     <ItemGroup>
-      <CreatedFilesByCargoBuild Include="$(CargoOutputFiles)">
+      <CreatedFilesByCargoBuild Include="@(CargoOutputFiles)">
         <TargetFrameworkIdentifier>$(TargetFramework)</TargetFrameworkIdentifier>
         <TargetPlatformMoniker>%(CargoOutputFiles.DotnetRuntimeIdentifier)</TargetPlatformMoniker>
         <TargetPlatformIdentifier>%(CargoOutputFiles.DotnetRuntimeIdentifier)</TargetPlatformIdentifier>
