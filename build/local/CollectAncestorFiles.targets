@@ -5,9 +5,9 @@
     collecting files whose names match any entry in FileNames (semicolon-separated).
     Returns them as the FoundFiles output item.
   -->
-  <UsingTask TaskName="CollectAncestorFiles"
-             TaskFactory="RoslynCodeTaskFactory"
-             AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
+  <UsingTask  TaskName="CollectAncestorFiles"
+              TaskFactory="RoslynCodeTaskFactory"
+              AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
     <ParameterGroup>
       <StartDirectory ParameterType="System.String" Required="true" />
       <RootDirectory  ParameterType="System.String" Required="true" />
