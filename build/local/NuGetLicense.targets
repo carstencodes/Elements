@@ -6,7 +6,7 @@
 
   <Target Name="GenerateNuGetLicenseOutputFile" Condition="'$(MsBuildProjectExtension)' == '.csproj'">
     <MakeDir Directories="$(NuGetThirdPartyResultPaths)$(MsBuildProjectName)" Condition="!Exists('$(NuGetThirdPartyResultPaths)$(MsBuildProjectName)')" />
-    
+
     <Exec
       Command="dotnet tool run nuget-license -i &quot;$(MsBuildProjectFullPath)&quot; -t -isp -o Table -fo &quot;$(NuGetLicenseOutputFile)&quot;"
       ContinueOnError="false"
