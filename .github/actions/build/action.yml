@@ -4,8 +4,11 @@ inputs:
   configuration:
     description: One of Debug or Release
     required: true
-    type: string
+    type: choice
     default: Release
+    options:
+     - Release
+     - Debug
 
 runs:
   using: "composite"
