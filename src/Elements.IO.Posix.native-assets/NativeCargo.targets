@@ -30,6 +30,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <NuGetAndToolsConfigFiles Remove="$(NuGetAndToolsConfigFiles)" />
+    <NuGetAndToolsConfigFiles Include="$(MsBuildProjectFile)" />
+    <NuGetAndToolsConfigFiles Include="$(MSBuildProjectDirectory)/Cargo.toml" />
+    <NuGetAndToolsConfigFiles Include="$(SolutionDirectory)/deps/cargo-tools.ini" />
+  </ItemGroup>
+
+  <ItemGroup>
     <CargoEnvironment Include="SDKROOT" Value="/dev/null" />
   </ItemGroup>
 
@@ -184,7 +191,7 @@
   </Target>
 
   <Target Name="MoveCycloneDxFileToResultsFolder" Inputs="$(MSBuildProjectDirectory)/$(CycloneDxResultFileName)" Outputs="$(CycloneDxResultFilePath)">
-    <Move SourceFiles="$(MSBuildProjectDirectory)/$(CycloneDxResultFileName)" DestinationFolder="$(CycloneDxResultDirectory)" />
+    <Move SourceFiles="$(MSBuildProjectDirectory)/$(CycloneDxResultFileName)" DestinationFolder="$(CycloneDxResultDirectory)"  Condition="Exists('$(MSBuildProjectDirectory)/$(CycloneDxResultFileName)')" />
   </Target>
 
   <Target Name="CreateSbomCycloneDxUsingCargo" DependsOnTargets="CreateSbomCycloneDx;MoveCycloneDxFileToResultsFolder" Returns="@(NativeAssetReference)" Condition="'$(GenerateCycloneDxSbom)' == 'true'">
