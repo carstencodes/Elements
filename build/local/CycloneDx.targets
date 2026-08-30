@@ -1,0 +1,73 @@
+<Project>
+    <PropertyGroup>
+        <CycloneDxOutputFormat Condition="'$(CycloneDxOutputFormat)' == ''">json</CycloneDxOutputFormat>
+        <CycloneDxResultDirectory Condition="'$(CycloneDxResultDirectory)' == ''">$(CycloneDxResultPaths)$(MSBuildProjectName)/</CycloneDxResultDirectory>
+        <CycloneDxResultFileName Condition="'$(CycloneDxResultFileName)' == ''">$(MSBuildProjectName).cyclonedx.$(CycloneDxOutputFormat)</CycloneDxResultFileName>
+        <CycloneDxResultFilePath>$(CycloneDxResultDirectory)$(CycloneDxResultFileName)</CycloneDxResultFilePath>
+        <CycloneDxVersion Condition="'$(CycloneDxVersion)' == ''">1.7</CycloneDxVersion>
+        <GenerateCycloneDxSbom Condition="'$(GenerateCycloneDxSbom)' == ''">$(IsPackable)</GenerateCycloneDxSbom>
+    </PropertyGroup>
+
+    <Target Name="CycloneDxSetToolConfigurationCsProj" DependsOnTargets="MinVer" Condition="'$(MsBuildProjectExtension)' == '.csproj'">
+        <PropertyGroup Condition="'$(CycloneDxType)' == ''">
+            <CycloneDxType Condition="'$(OutputType)' == 'Exe' OR '$(OutputType)' == 'WinExe'">application</CycloneDxType>
+            <CycloneDxType Condition="'$(OutputType)' == 'Library'">library</CycloneDxType>
+        </PropertyGroup>
+
+        <PropertyGroup>
+            <CycloneDxToolLauncher>dotnet</CycloneDxToolLauncher>
+            <CycloneDxCommandName>CycloneDX</CycloneDxCommandName>
+            <CycloneDxToolArguments />
+            <CycloneDxToolArguments Condition="'$(CycloneDxResultDirectory)' != ''">$(CycloneDxToolArguments) -o &quot;$(CycloneDxResultDirectory)&quot;</CycloneDxToolArguments>
+            <CycloneDxToolArguments Condition="'$(CycloneDxResultFileName)' != ''">$(CycloneDxToolArguments) -fn &quot;$(CycloneDxResultFileName)&quot;</CycloneDxToolArguments>
+            <CycloneDxToolArguments Condition="'$(BaseIntermediateOutputPath)' != ''">$(CycloneDxToolArguments) -biop &quot;$(BaseIntermediateOutputPath)&quot;</CycloneDxToolArguments>
+            <CycloneDxToolArguments Condition="'$(Configuration)' != ''">$(CycloneDxToolArguments) -c $(Configuration)</CycloneDxToolArguments>
+            <CycloneDxToolArguments Condition="'$(CycloneDxOutputFormat)' != ''">$(CycloneDxToolArguments) -F &quot;$(CycloneDxOutputFormat)&quot;</CycloneDxToolArguments>
+            <CycloneDxToolArguments Condition="'$(PackageVersion)' != ''">$(CycloneDxToolArguments) -sv &quot;$(PackageVersion)&quot;</CycloneDxToolArguments>
+            <CycloneDxToolArguments Condition="'$(CycloneDxType)' != ''">$(CycloneDxToolArguments) -st &quot;$(CycloneDxType)&quot;</CycloneDxToolArguments>
+            <CycloneDxToolArguments>$(CycloneDxToolArguments) -ipr</CycloneDxToolArguments>
+            <CycloneDxToolArguments>$(CycloneDxToolArguments) -dpr</CycloneDxToolArguments>
+            <CycloneDxToolArguments>$(CycloneDxToolArguments) &quot;$(MSBuildProjectFullPath)&quot;</CycloneDxToolArguments>
+            <CycloneDxToolInvocation>$(CycloneDxToolLauncher) $(CycloneDxCommandName) $(CycloneDxToolArguments)</CycloneDxToolInvocation>
+        </PropertyGroup>
+    </Target>
+
+    <PropertyGroup Condition="'$(IsPackable)' == 'true'">
+        <BeforePack>
+            PackCycloneDxFile;
+            $(BeforePack)
+        </BeforePack>
+        <GenerateCycloneDxDocumentDependsOn>
+            CycloneDxSetToolConfigurationCsProj;
+            $(GenerateCycloneDxDocumentDependsOn)
+        </GenerateCycloneDxDocumentDependsOn>
+    </PropertyGroup>
+
+    <Target Name="GenerateCycloneDxDocument" 
+            DependsOnTargets="$(GenerateCycloneDxDocumentDependsOn)" 
+            Returns="$(CycloneDxResultFilePath)">
+        <MakeDir Directories="$(CycloneDxResultDirectory)" Condition="!Exists('$(CycloneDxResultDirectory)')" />
+
+        <PropertyGroup Condition="'$(CycloneDxResultsExecDir)' == ''">
+            <CycloneDxResultsExecDir>$(MsBuildProjectDirectory)</CycloneDxResultsExecDir>
+        </PropertyGroup>
+
+        <Exec Command="$(CycloneDxToolInvocation)"
+              WorkingDirectory="$(CycloneDxResultsExecDir)"
+              ContinueOnError="warnAndContinue"
+              ConsoleToMSBuild="true"
+              IgnoreStandardErrorWarningFormat="true" />
+
+        <ItemGroup>
+            <FilesWrites Include="$(CycloneDxResultFilePath)" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="PackCycloneDxFile" DependsOnTargets="GenerateCycloneDxDocument;$(PackCycloneDxFileDependsOn)" Condition="Exists('$(CycloneDxResultFilePath)')">
+        <ItemGroup>
+            <None Include="$(CycloneDxResultFilePath)" Visible="false" Pack="true" PackagePath="sbom/package-sbom.$(CycloneDxOutputFormat)" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="CreateSbomCycloneDx" DependsOnTargets="GenerateCycloneDxDocument;PackCycloneDxFile;$(CreateSbomCycloneDxDependsOn)" Condition="'$(GenerateCycloneDxSbom)' == 'true'" />
+</Project>

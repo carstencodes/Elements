@@ -6,6 +6,7 @@
     <SarifResultsPath>$(ResultsPath)/sarif/</SarifResultsPath>
     <UnitTestsResultPaths>$(ResultsPath)/unit-tests/</UnitTestsResultPaths>
     <CodeCoverageResultPaths>$(ResultsPath)/coverage/</CodeCoverageResultPaths>
+    <CycloneDxResultPaths>$(ResultsPath)/cyclonedx/</CycloneDxResultPaths>
     <NuGetThirdPartyResultPaths>$(ResultsPath)/3rdpartyinfo/</NuGetThirdPartyResultPaths>
   </PropertyGroup>
 </Project>
