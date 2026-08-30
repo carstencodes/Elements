@@ -4,7 +4,11 @@
     <NuGetLicenseOutputFile>$(NuGetThirdPartyResultPaths)$(MsBuildProjectName)/ThirdPartyInformation.txt</NuGetLicenseOutputFile>
   </PropertyGroup>
 
-  <Target Name="GenerateNuGetLicenseOutputFile" Condition="'$(MsBuildProjectExtension)' == '.csproj'">
+  <Target Name="GenerateNuGetLicenseOutputFile"
+          DependsOnTargets="CollectNuGetAndToolsConfigFiles"
+          Inputs="@(NuGetAndToolsConfigFiles)"
+          Outputs="$(NuGetLicenseOutputFile)"
+          Condition="'$(MsBuildProjectExtension)' == '.csproj'">
     <MakeDir Directories="$(NuGetThirdPartyResultPaths)$(MsBuildProjectName)" Condition="!Exists('$(NuGetThirdPartyResultPaths)$(MsBuildProjectName)')" />
 
     <Exec

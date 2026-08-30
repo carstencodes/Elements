@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <!--
+    Inline task: walks up from StartDirectory to RootDirectory (inclusive),
+    collecting files whose names match any entry in FileNames (semicolon-separated).
+    Returns them as the FoundFiles output item.
+  -->
+  <UsingTask TaskName="CollectAncestorFiles"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <StartDirectory ParameterType="System.String" Required="true" />
+      <RootDirectory  ParameterType="System.String" Required="true" />
+      <FileNames      ParameterType="System.String" Required="true" />
+      <FoundFiles     ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Collections.Generic" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+        var names = FileNames.Split(new[]{';'}, StringSplitOptions.RemoveEmptyEntries);
+        var root  = Path.GetFullPath(RootDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+        var dir   = Path.GetFullPath(StartDirectory.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+        var found = new List<Microsoft.Build.Utilities.TaskItem>();
+
+        while (true)
+        {
+            foreach (var name in names)
+            {
+                var candidate = Path.Combine(dir, name);
+                if (File.Exists(candidate))
+                    found.Add(new Microsoft.Build.Utilities.TaskItem(candidate));
+            }
+
+            if (string.Equals(dir, root, StringComparison.OrdinalIgnoreCase))
+                break;
+
+            var parent = Path.GetDirectoryName(dir);
+            if (parent == null || string.Equals(parent, dir, StringComparison.OrdinalIgnoreCase))
+                break;
+
+            dir = parent;
+        }
+
+        FoundFiles = found.ToArray();
+      ]]></Code>
+    </Task>
+  </UsingTask>
+
+  <!--
+    Target: CollectNuGetAndToolsConfigFiles
+    Populates @(NuGetAndToolsConfigFiles) with every Directory.Packages.props and
+    dotnet-tools.json found between $(MSBuildProjectDirectory) and $(SolutionDir),
+    plus the current project file itself.
+  -->
+  <Target Name="CollectNuGetAndToolsConfigFiles">
+    <CollectAncestorFiles
+        StartDirectory="$(MSBuildProjectDirectory)"
+        RootDirectory="$(SolutionDir)"
+        FileNames="Directory.Packages.props;dotnet-tools.json">
+      <Output TaskParameter="FoundFiles" ItemName="NuGetAndToolsConfigFiles" />
+    </CollectAncestorFiles>
+
+    <ItemGroup>
+      <NuGetAndToolsConfigFiles Include="$(MSBuildProjectFullPath)" />
+    </ItemGroup>
+  </Target>
+</Project>
