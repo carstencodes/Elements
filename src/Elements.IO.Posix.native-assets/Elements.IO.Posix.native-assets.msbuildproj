@@ -1,8 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.Build.NoTargets">
   <PropertyGroup>
     <RustCrateLibName>posixioelements</RustCrateLibName>
     <NoWarn>$(NoWarn);MSB3245</NoWarn>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
+    <GenerateCycloneDxSbom>true</GenerateCycloneDxSbom>
+    <CycloneDxVersion>1.5</CycloneDxVersion>
   </PropertyGroup>
 </Project>
