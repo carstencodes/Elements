@@ -26,6 +26,7 @@
     },
     "init": true,
     "installsAfter": [
-        "ghcr.io/devcontainers/features/common-utils"
+        // renovate: datasource=docker
+        "ghcr.io/devcontainers/features/common-utils:1"
     ]
 }

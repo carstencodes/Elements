@@ -27,6 +27,26 @@
       "matchStrings": [
         "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?:(?<depName>[a-zA-Z0-9-]+?))?\\s+run:\\s+python\\s+-m\\s+pip\\s+install\\s+(?<packageName>[^=\\s]+?)==(?<currentValue>(\\d+(\\.\\d+)*)?)"
       ]
+    },
+    {
+      "customType": "regex",
+      "description": "Update devcontainer feature options version",
+      "fileMatch": [
+        "(^|/)\\.devcontainer/(?:local/)?devcontainer\\.json$"
+      ],
+      "matchStrings": [
+        "//\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depName>[^\\s]+?))?(?:\\s+packageName=(?<packageName>[^\\s]+?))?\\s*\\r?\\n\\s*\"version\"\\s*:\\s*\"(?<currentValue>[^\"]+?)\""
+      ]
+    },
+    {
+      "customType": "regex",
+      "description": "Update custom devcontainer feature dependencies",
+      "fileMatch": [
+        "(^|/)\\.devcontainer/features/src/[^/]+/devcontainer-feature\\.json$"
+      ],
+      "matchStrings": [
+        "//\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depName>[^\\s]+?))?(?:\\s+packageName=(?<packageName>[^\\s]+?))?\\s*\\r?\\n\\s*\"(?<depName>[^\"]+?):(?<currentValue>[^\"]+?)\""
+      ]
     }
   ],
   "nuget": {
@@ -42,18 +62,26 @@
       ]
     },
     {
-      "matchManagers": ["nuget"],
+      "matchManagers": ["nuget", "regex"],
       "matchDatasources": ["dotnet-version"],
       "matchPackageNames": ["dotnet-sdk"],
-      "matchFileNames": ["**/global.json"],
+      "matchFileNames": [
+        "**/global.json",
+        ".devcontainer/devcontainer.json",
+        ".devcontainer/local/devcontainer.json"
+      ],
       "matchUpdateTypes": ["patch", "minor"],
       "enabled": false
     },
     {
-      "matchManagers": ["nuget"],
+      "matchManagers": ["nuget", "regex"],
       "matchDatasources": ["dotnet-version"],
       "matchPackageNames": ["dotnet-sdk"],
-      "matchFileNames": ["**/global.json"],
+      "matchFileNames": [
+        "**/global.json",
+        ".devcontainer/devcontainer.json",
+        ".devcontainer/local/devcontainer.json"
+      ],
       "allowedVersions": "/^([1-9]?[0-9]*[02468]{1})\\.(0)\\.(0|100)$/",
       "enabled": true
     }

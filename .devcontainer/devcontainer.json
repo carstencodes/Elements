@@ -8,12 +8,14 @@
     "ghcr.io/devcontainers/features/git-lfs:1": {
     },
     "ghcr.io/devcontainers/features/dotnet:2": {
+          // renovate: datasource=dotnet-version depName=dotnet-sdk
           "version": "10.0",
           "installSdk": true,
           "installRuntime": true,
           "installAspNet": true
         },
     "ghcr.io/devcontainers/features/rust:1": {
+          // renovate: datasource=github-releases depName=rust-lang/rust
           "version": "1.96.0",
           "components": [
             "rust-analyzer",
@@ -26,6 +28,7 @@
           ]
         },
     "ghcr.io/devcontainers-extra/features/zig:1": {
+          // renovate: datasource=github-releases depName=ziglang/zig
           "version": "0.15.2"
         },
     "ghcr.io/devcontainers-extra/features/pre-commit:2": {
