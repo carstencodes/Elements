@@ -56,7 +56,7 @@
 
         <Exec Command="$(CycloneDxToolInvocation)"
               WorkingDirectory="$(CycloneDxResultsExecDir)"
-              ContinueOnError="warnAndContinue"
+              ContinueOnError="false"
               ConsoleToMSBuild="true"
               IgnoreStandardErrorWarningFormat="true" />
 
