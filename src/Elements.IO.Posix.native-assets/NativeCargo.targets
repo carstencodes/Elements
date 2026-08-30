@@ -64,7 +64,7 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="RunNativeCargoBuild" DependsOnTargets="CargoGetTargetDirectories" Inputs="@(RustSourceFile);@(RustBuildFile)" Outputs="@(CargoOutputFiles)" Returns="@(CreatedFilesByCargoBuild)">
+  <Target Name="RunNativeCargoBuild" DependsOnTargets="CargoGetTargetDirectories;CreateSbomCycloneDxUsingCargo" Inputs="@(RustSourceFile);@(RustBuildFile)" Outputs="@(CargoOutputFiles)" Returns="@(CreatedFilesByCargoBuild)">
     <Exec
         Command="cargo %(BuildIdentifiers.CargoBuildCommand) $(CargoConfiguration) --target-dir &quot;$(CargoTargetDirectory)&quot; --target &quot;%(BuildIdentifiers.CargoRustTarget)&quot;"
         EnvironmentVariables="@(CargoEnvironment->'%(Identity)=%(Value)')"
@@ -92,6 +92,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <CreatedFilesByCargoBuild Include="@(NativeAssetReference->WithMetadataValue('AssetType', 'Content'))">
+        <AssetType>Content</AssetType>
+      </CreatedFilesByCargoBuild>
       <TargetPathWithTargetPlatformMoniker Include="@(CreatedFilesByCargoBuild)" />
     </ItemGroup>
   </Target>
@@ -135,5 +138,13 @@
 
   <Target Name="MoveCycloneDxFileToResultsFolder" Inputs="$(MSBuildProjectDirectory)/$(CycloneDxResultFileName)" Outputs="$(CycloneDxResultFilePath)">
     <Move SourceFiles="$(MSBuildProjectDirectory)/$(CycloneDxResultFileName)" DestinationFolder="$(CycloneDxResultDirectory)" />
+  </Target>
+
+  <Target Name="CreateSbomCycloneDxUsingCargo" DependsOnTargets="CreateSbomCycloneDx;MoveCycloneDxFileToResultsFolder" Returns="@(NativeAssetReference)" Condition="'$(GenerateCycloneDxSbom)' == 'true'">
+    <ItemGroup Condition="Exists('$(CycloneDxResultFilePath)')">
+      <NativeAssetReference Include="$(CycloneDxResultFilePath)">
+        <AssetType>Content</AssetType>
+      </NativeAssetReference>
+    </ItemGroup>
   </Target>
 </Project>
