@@ -10,16 +10,6 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Update docker images files",
-      "managerFilePatterns": [
-        "deps/Docker.Images.props"
-      ],
-      "matchStrings": [
-        "<!-- renovate: datasource=(?<datasource>[a-z-]+?)(?: depName=(?<depName>.+?))? -->\\s+<[^>]+>(?<packageName>[^:]+?):(?<currentValue>\\d+(\\.\\d+)*(-[0-9a-zA-z\\.]+)?)</[^>]+>"
-      ]
-    },
-    {
-      "customType": "regex",
       "description": "Update cargo tools",
       "managerFilePatterns": [
         "deps/cargo-tools.ini"
