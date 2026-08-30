@@ -5,14 +5,6 @@
       EnsureResultsPath;
       $(CoreBuildDependsOn)
     </CoreBuildDependsOn>
-    <BeforePack>
-      $(BeforePack);
-      EnsureCycloneDxSbomVersion;
-      ValidateCycloneDxConfiguration;
-      GenerateCycloneDxMetadata;
-      GenerateCycloneDxSbom;
-      IncludeCycloneDxSbomInPackage
-    </BeforePack>
   </PropertyGroup>
 
   <Import Project="$(MSBuildThisFileDirectory)/build/local/PackageReleaseNotes.targets" />
@@ -25,7 +17,4 @@
     <MakeDir Directories="$(UnitTestsResultPaths)" Condition="!Exists('$(UnitTestsResultPaths)')" />
     <MakeDir Directories="$(CodeCoverageResultPaths)" Condition="!Exists('$(CodeCoverageResultPaths)')" />
   </Target>
-
-  <Target Name="EnsureCycloneDxToolInstalled" />
-
 </Project>
