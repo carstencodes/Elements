@@ -1,0 +1,49 @@
+name: Cleanup Preview NuGet Packages
+
+on:
+  schedule:
+    - cron: '0 15 * * 5'  # Every Friday at 15:00 UTC
+  workflow_dispatch:
+
+jobs:
+  discover:
+    name: Discover NuGet packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      packages: ${{ steps.list.outputs.packages }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: List packages
+        id: list
+        run: |
+          packages=$(find src -name "*.csproj" \
+            | xargs -I{} basename {} .csproj \
+            | sed 's/^/HedgeCraft./' \
+            | jq -Rsc '[split("\n") | .[] | select(length > 0)]')
+          echo "packages=$packages" >> $GITHUB_OUTPUT
+
+  cleanup:
+    name: Delete old preview versions of ${{ matrix.package }}
+    runs-on: ubuntu-latest
+    needs: discover
+    permissions:
+      packages: write
+
+    strategy:
+      matrix:
+        package: ${{ fromJson(needs.discover.outputs.packages) }}
+
+    steps:
+      - name: Delete old preview versions
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: ${{ matrix.package }}
+          package-type: nuget
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-versions-to-keep: 10
+          delete-only-pre-release-versions: true
