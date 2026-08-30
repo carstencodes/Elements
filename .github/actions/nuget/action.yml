@@ -67,7 +67,7 @@ runs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
       run: |
-        case "${{ steps.nuget.outputs.destination }}" in
+        case "${{ steps.mode.outputs.destination }}" in
           github)
             api_key="$GITHUB_TOKEN"
             symbols_store_arguments=
