@@ -35,7 +35,7 @@
         "/(^|/)\\.devcontainer/(?:local/)?devcontainer\\.json$/"
       ],
       "matchStrings": [
-        "//\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depName>[^\\s]+?))?(?:\\s+packageName=(?<packageName>[^\\s]+?))?\\s*\\r?\\n\\s*\"version\"\\s*:\\s*\"(?<currentValue>[^\"]+?)\""
+        "//\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depName>[^\\s]+?))?(?:\\s+packageName=(?<packageName>[^\\s]+?))?(?:\\s+registryUrl=(?<registryUrl>[^\\s]+?))?\\s*\\r?\\n\\s*\"version\"\\s*:\\s*\"(?<currentValue>[^\"]+?)\""
       ]
     },
     {
