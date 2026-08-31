@@ -41,7 +41,7 @@
     {
       "customType": "regex",
       "managerFilePatterns": [
-        "/(^|/)\\.zigversion$"
+        "/(^|/)\\.zigversion$/"
       ],
       "matchStrings": [
         "(?<currentValue>\\d+\\.\\d+\\.\\d+)"
