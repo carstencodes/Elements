@@ -61,7 +61,7 @@
               IgnoreStandardErrorWarningFormat="true" />
 
         <ItemGroup>
-            <FilesWrites Include="$(CycloneDxResultFilePath)" />
+            <FileWrites Include="$(CycloneDxResultFilePath)" />
         </ItemGroup>
     </Target>
 
