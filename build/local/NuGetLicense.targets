@@ -19,7 +19,7 @@
       IgnoreExitCode="false" />
 
     <ItemGroup>
-      <FilesWrites Include="$(NuGetLicenseOutputFile)" />
+      <FileWrites Include="$(NuGetLicenseOutputFile)" />
     </ItemGroup>
   </Target>
 

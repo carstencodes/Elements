@@ -142,7 +142,7 @@
     <Copy SourceFiles="%(CargoOutputFiles.SourceFile)" DestinationFolder="%(CargoOutputFiles.TargetDir)" />
 
     <ItemGroup>
-      <FilesWrites Include="@(CargoOutputFiles)" />
+      <FileWrites Include="@(CargoOutputFiles)" />
     </ItemGroup>
 
     <ItemGroup>
