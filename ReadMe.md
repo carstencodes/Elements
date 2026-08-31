@@ -1,4 +1,4 @@
-![Continuous Integration](https://github.com/carstencodes/Elements/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/carstencodes/Elements/actions/workflows/ci.yaml)
+![Continuous Integration](https://github.com/carstencodes/Elements/actions/workflows/ci.yaml/badge.svg?branch=main)
 [![CodeQL](https://github.com/carstencodes/Elements/actions/workflows/github-code-scanning/codeql/badge.svg?branch=main)](https://github.com/carstencodes/Elements/actions/workflows/github-code-scanning/codeql)
 ![GitHub commits since latest release (branch)](https://img.shields.io/github/commits-since/carstencodes/Elements/latest/main?sort=semver&logo=github&color=blue)
 ![GitHub Tag](https://img.shields.io/github/v/tag/carstencodes/Elements)
