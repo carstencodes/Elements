@@ -23,18 +23,20 @@
     </ItemGroup>
   </Target>
 
-  <Target Name="PackNuGetLicenseOutputFile" DependsOnTargets="GenerateNuGetLicenseOutputFile;$(PackNuGetLicenseOutputFileDependsOn)">
+  <PropertyGroup Condition="'$(IsPackable)' == 'true'">
+    <TargetsForTfmSpecificContentInPackage>
+      $(TargetsForTfmSpecificContentInPackage);
+      PackNuGetLicenseOutputFile
+    </TargetsForTfmSpecificContentInPackage>
+  </PropertyGroup>
+
+  <Target Name="PackNuGetLicenseOutputFile" Condition="'$(IsPackable)' == 'true'" DependsOnTargets="GenerateNuGetLicenseOutputFile;$(PackNuGetLicenseOutputFileDependsOn)">
     <ItemGroup>
-      <None Include="$(NuGetLicenseOutputFile)" Visible="false" Pack="true" PackagePath="sbom/ThirdPartyInformation.txt" Condition="Exists('$(NuGetLicenseOutputFile)')" />
+      <TfmSpecificPackageFile Include="$(NuGetLicenseOutputFile)" Condition="Exists('$(NuGetLicenseOutputFile)')">
+        <PackagePath>sbom/ThirdPartyInformation.txt</PackagePath>
+      </TfmSpecificPackageFile>
     </ItemGroup>
   </Target>
 
   <Target Name="CreateNuGetLicenseOutputFile" DependsOnTargets="GenerateNuGetLicenseOutputFile;$(CreateNuGetLicenseOutputFileDependsOn)" />
-
-  <PropertyGroup Condition="'$(IsPackable)' == 'true'">
-    <BeforePack>
-      PackNuGetLicenseOutputFile;
-      $(BeforePack)
-    </BeforePack>
-  </PropertyGroup>
 </Project>
