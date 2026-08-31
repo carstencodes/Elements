@@ -30,10 +30,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <NuGetAndToolsConfigFiles Remove="$(NuGetAndToolsConfigFiles)" />
-    <NuGetAndToolsConfigFiles Include="$(MsBuildProjectFile)" />
-    <NuGetAndToolsConfigFiles Include="$(MSBuildProjectDirectory)/Cargo.toml" />
-    <NuGetAndToolsConfigFiles Include="$(SolutionDirectory)/deps/cargo-tools.ini" />
+    <DependencyDefinitionFiles Remove="$(DependencyDefinitionFiles)" />
+    <DependencyDefinitionFiles Include="$(MsBuildProjectFile)" />
+    <DependencyDefinitionFiles Include="$(MSBuildProjectDirectory)/Cargo.toml" />
+    <DependencyDefinitionFiles Include="$(MSBuildProjectDirectory)/Cargo.lock" Condition="Exists('$(MSBuildProjectDirectory)/Cargo.lock')" />
+    <DependencyDefinitionFiles Include="$(SolutionDir)/Cargo.lock" Condition="Exists('$(SolutionDir)/Cargo.lock')" />
+    <DependencyDefinitionFiles Include="$(SolutionDir)/deps/cargo-tools.ini" Condition="Exists('$(SolutionDir)/deps/cargo-tools.ini')" />
   </ItemGroup>
 
   <ItemGroup>

@@ -45,7 +45,7 @@
 
     <Target Name="GenerateCycloneDxDocument"
             DependsOnTargets="CollectNuGetAndToolsConfigFiles;$(GenerateCycloneDxDocumentDependsOn)"
-            Inputs="@(NuGetAndToolsConfigFiles)"
+            Inputs="@(DependencyDefinitionFiles)"
             Outputs="$(CycloneDxResultFilePath)"
             Returns="$(CycloneDxResultFilePath)">
         <MakeDir Directories="$(CycloneDxResultDirectory)" Condition="!Exists('$(CycloneDxResultDirectory)')" />

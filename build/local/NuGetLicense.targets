@@ -6,7 +6,7 @@
 
   <Target Name="GenerateNuGetLicenseOutputFile"
           DependsOnTargets="CollectNuGetAndToolsConfigFiles"
-          Inputs="@(NuGetAndToolsConfigFiles)"
+          Inputs="@(DependencyDefinitionFiles)"
           Outputs="$(NuGetLicenseOutputFile)"
           Condition="'$(MsBuildProjectExtension)' == '.csproj'">
     <MakeDir Directories="$(NuGetThirdPartyResultPaths)$(MsBuildProjectName)" Condition="!Exists('$(NuGetThirdPartyResultPaths)$(MsBuildProjectName)')" />
