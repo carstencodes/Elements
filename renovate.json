@@ -40,6 +40,17 @@
     },
     {
       "customType": "regex",
+      "managerFilePatterns": ["**/.zigversion"],
+      "matchStrings": [
+        "(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "datasourceTemplate": "github-releases",
+      "depNameTemplate": "ziglang/zig",
+      "versioningTemplate": "semver",
+      "autoReplaceStringTemplate": "{{{newValue}}}"
+    },
+    {
+      "customType": "regex",
       "description": "Update custom devcontainer feature dependencies",
       "managerFilePatterns": [
         "/(^|/)\\.devcontainer/features/src/[^/]+/devcontainer-feature\\.json$/"
