@@ -28,7 +28,7 @@
           ]
         },
     "ghcr.io/devcontainers-extra/features/zig:1": {
-          // renovate: datasource=github-releases depName=ziglang/zig
+          // renovate: datasource=forgejo-tags depName=ziglang/zig registryUrl=https://codeberg.org
           "version": "0.15.2"
         },
     "ghcr.io/devcontainers-extra/features/pre-commit:2": {
