@@ -27,6 +27,6 @@
     "init": true,
     "installsAfter": [
         // renovate: datasource=docker
-        "ghcr.io/devcontainers/features/common-utils:1"
+        "ghcr.io/devcontainers/features/common-utils:2"
     ]
 }
