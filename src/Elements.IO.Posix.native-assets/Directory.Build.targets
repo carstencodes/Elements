@@ -8,6 +8,7 @@
     <RustSourceFile Include="src/**/*.rs" />
     <RustBuildFile Include="build.rs" Link="build/build.rs" />
     <RustBuildFile Include="Cargo.toml" Link="build/Cargo.toml" />
+    <RustBuildFile Include="$(SolutionDir)/Cargo.lock" Link="build/Cargo.lock" Condition="Exists('$(SolutionDir)/Cargo.lock')" />
   </ItemGroup>
 
   <PropertyGroup>
