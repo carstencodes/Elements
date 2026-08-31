@@ -40,14 +40,14 @@
     },
     {
       "customType": "regex",
-      "managerFilePatterns": ["**/.zigversion"],
+      "managerFilePatterns": ["(^|/)\\.zigversion$"],
       "matchStrings": [
         "(?<currentValue>\\d+\\.\\d+\\.\\d+)"
       ],
-      "datasourceTemplate": "github-releases",
+      "datasourceTemplate": "forgejo-tags",
       "depNameTemplate": "ziglang/zig",
-      "versioningTemplate": "semver",
-      "autoReplaceStringTemplate": "{{{newValue}}}"
+      "registryUrlTemplate": "https://codeberg.org",
+      "versioningTemplate": "semver"
     },
     {
       "customType": "regex",
