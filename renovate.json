@@ -16,7 +16,11 @@
       ],
       "matchStrings": [
         "; renovate: datasource=(?<datasource>[a-z-]+?) depName=(?:(?<depName>[a-zA-Z0-9-]+?))?\\s+(?<packageName>[^=\\s]+?)\\s*=\\s*(?<currentValue>(\\d+(\\.\\d+)*)?)"
-      ]
+      ],
+      "datasourceTemplate": "{{datasource}}",
+      "depNameTemplate": "{{packageName}}",
+      "packageNameTemplate": "{{packageName}}",
+      "versioningTemplate": "cargo"
     },
     {
       "customType": "regex",
