@@ -46,7 +46,7 @@
 
   <Target Name="PostCargoBuildAddNativeAssetToOutput" AfterTargets="ResolveProjectReferences" BeforeTargets="AssignTargetPaths">
     <ItemGroup>
-      <None Include="@(NativeAssetReference)"
+      <None Include="@(NativeAssetReference->WithMetadataValue('AssetType', 'Content'))"
             Visible="false"
             Pack="true"
             Link="%(Filename)%(Extension)">
@@ -67,6 +67,9 @@
       </TfmSpecificPackageFile>
       <TfmSpecificPackageFile Include="@(NativeAssetReference)" Condition="'%(NativeAssetReference.AssetType)' == 'Content'">
         <PackagePath>sbom/package-sbom.native%(NativeAssetReference.Extension)</PackagePath>
+      </TfmSpecificPackageFile>
+      <TfmSpecificPackageFile Include="@(NativeAssetReference)" Condition="'%(NativeAssetReference.AssetType)' == 'Attestation'">
+        <PackagePath>sbom/package-sbom.native.attestation.json</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
   </Target>

@@ -70,6 +70,9 @@
             <TfmSpecificPackageFile Include="$(CycloneDxResultFilePath)" Condition="'$(TargetFramework)' == '$(LatestTargetFramework)' AND Exists('$(CycloneDxResultFilePath)')">
                 <PackagePath>sbom/package-sbom.$(CycloneDxOutputFormat)</PackagePath>
             </TfmSpecificPackageFile>
+            <TfmSpecificPackageFile Include="$(CycloneDxResultDirectory)$(MSBuildProjectName).attestation.json" Condition="'$(TargetFramework)' == '$(LatestTargetFramework)' AND Exists('$(CycloneDxResultDirectory)$(MSBuildProjectName).attestation.json')">
+                <PackagePath>sbom/package-sbom.attestation.json</PackagePath>
+            </TfmSpecificPackageFile>
         </ItemGroup>
     </Target>
 
