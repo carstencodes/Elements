@@ -25,7 +25,7 @@
       "customType": "regex",
       "managerFilePatterns": ["/^deps/cargo-tools\\.ini$/"],
       "matchStrings": [
-        "^;\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)\\s+depName=(?:(?<depName>[A-Za-z0-9-]+?))?\\s+(?<packageName>[^=\\s]+?)\\s*=\\s*(?<currentValue>\\d+(?:\\.\\d+)*)$"
+        "^;\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depName>[A-Za-z0-9-]+?))?\\s*\\r?\\n(?<packageName>[^=\\s]+?)\\s*=\\s*(?<currentValue>\\d+(?:\\.\\d+)*)$"
       ],
       "datasourceTemplate": "{{datasource}}",
       "depNameTemplate": "{{#if depName}}{{depName}}{{else}}{{depNameFeature}}{{/if}}",
@@ -47,7 +47,7 @@
       "customType": "regex",
       "managerFilePatterns": ["/^\\.devcontainer/(?:local/)?devcontainer\\.json$/"],
       "matchStrings": [
-        "//\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depName>[^\\s]+?))?(?:\\s+packageName=(?<packageName>[^\\s]+?))?(?:\\s+registryUrl=(?<registryUrl>[^\\s]+?))?\\s*\\r?\\n[\\s\\S]*?\"name\"\\s*:\\s*\"(?<depNameFeature>[^\"]+)\"[\\s\\S]*?\"version\"\\s*:\\s*\"(?<currentValue>[^\"]+)\""
+        "\"(?<depNameFeature>[^\"]+)\"\\s*:\\s*\\{\\s*\\r?\\n\\s*//\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depName>[^\\s]+?))?(?:\\s+packageName=(?<packageName>[^\\s]+?))?(?:\\s+registryUrl=(?<registryUrl>[^\\s]+?))?\\s*\\r?\\n[\\s\\S]*?\"version\"\\s*:\\s*\"(?<currentValue>[^\"]+)\""
       ],
       "datasourceTemplate": "{{datasource}}",
       "depNameTemplate": "{{#if depName}}{{depName}}{{else}}{{depNameFeature}}{{/if}}",
