@@ -8,7 +8,11 @@
   "branchPrefix": "renovate/",
   "prHourlyLimit": 2,
   "prConcurrentLimit": 10,
-  "schedule": ["before 3am on monday"],
+  "schedule": [
+    "at 17:00 on friday",
+    "at 17:00 on saturday",
+    "at 17:00 on sunday"
+  ],
   "labels": ["dependencies", "renovate"],
   "stabilityDays": 2,
   "semanticCommits": true,
@@ -70,7 +74,8 @@
   "packageRules": [
     {
       "matchManagers": ["nuget"],
-      "postUpdateOptions": ["nugetUpdateLockFiles"]
+      "postUpdateOptions": ["nugetUpdateLockFiles"],
+      "minimumReleaseAge": 3
     },
     {
       "matchManagers": ["nuget", "regex"],
@@ -82,19 +87,22 @@
         ".devcontainer/local/devcontainer.json"
       ],
       "allowedVersions": "/^([1-9]?[0-9]*[02468]{1})\\.(0)\\.(0|100)$/",
-      "enabled": true
+      "enabled": true,
+      "minimumReleaseAge": 3
     },
     {
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true,
       "automergeType": "branch",
       "stabilityDays": 2,
-      "labels": ["dependencies", "automerge"]
+      "labels": ["dependencies", "automerge"],
+      "minimumReleaseAge": 3
     },
     {
       "matchUpdateTypes": ["major"],
       "automerge": false,
-      "labels": ["dependencies"]
+      "labels": ["dependencies"],
+      "minimumReleaseAge": 3
     }
   ]
 }
