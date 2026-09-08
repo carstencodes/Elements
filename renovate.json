@@ -25,7 +25,7 @@
       "customType": "regex",
       "managerFilePatterns": ["/^deps/cargo-tools\\.ini$/"],
       "matchStrings": [
-        "^;\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depName>[A-Za-z0-9-]+?))?\\s*\\r?\\n(?<packageName>[^=\\s]+?)\\s*=\\s*(?<currentValue>\\d+(?:\\.\\d+)*)$"
+        ";\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depName>[A-Za-z0-9-]+?))?\\s*\\r?\\n(?<packageName>[^=\\s]+?)\\s*=\\s*(?<currentValue>\\d+(?:\\.\\d+)*)"
       ],
       "datasourceTemplate": "{{datasource}}",
       "depNameTemplate": "{{#if depName}}{{depName}}{{else}}{{depNameFeature}}{{/if}}",
