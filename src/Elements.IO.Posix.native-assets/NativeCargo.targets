@@ -201,6 +201,9 @@
       <NativeAssetReference Include="$(CycloneDxResultFilePath)">
         <AssetType>Content</AssetType>
       </NativeAssetReference>
+      <NativeAssetReference Include="$(CycloneDxResultDirectory)$(MSBuildProjectName).attestation.json" Condition="Exists('$(CycloneDxResultDirectory)$(MSBuildProjectName).attestation.json')">
+        <AssetType>Attestation</AssetType>
+      </NativeAssetReference>
     </ItemGroup>
   </Target>
 </Project>
