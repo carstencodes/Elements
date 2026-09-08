@@ -32,7 +32,7 @@
 
   <Target Name="PackNuGetLicenseOutputFile" Condition="'$(IsPackable)' == 'true'" DependsOnTargets="GenerateNuGetLicenseOutputFile;$(PackNuGetLicenseOutputFileDependsOn)">
     <ItemGroup>
-      <TfmSpecificPackageFile Include="$(NuGetLicenseOutputFile)" Condition="Exists('$(NuGetLicenseOutputFile)')">
+      <TfmSpecificPackageFile Include="$(NuGetLicenseOutputFile)" Condition="'$(TargetFramework)' == '$(LatestTargetFramework)' AND Exists('$(NuGetLicenseOutputFile)')">
         <PackagePath>sbom/ThirdPartyInformation.txt</PackagePath>
       </TfmSpecificPackageFile>
     </ItemGroup>
