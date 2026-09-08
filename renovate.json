@@ -51,7 +51,7 @@
       ],
       "datasourceTemplate": "{{datasource}}",
       "depNameTemplate": "{{#if depName}}{{depName}}{{else}}{{depNameFeature}}{{/if}}",
-      "packageNameTemplate": "{{#if packageName}}{{packageName}}{{else}}{{depNameFeature}}{{/if}}",
+      "packageNameTemplate": "{{#if packageName}}{{packageName}}{{else}}{{#if depName}}{{depName}}{{else}}{{depNameFeature}}{{/if}}{{/if}}",
       "versioningTemplate": "semver"
     },
     {
