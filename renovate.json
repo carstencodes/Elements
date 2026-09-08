@@ -4,64 +4,64 @@
     "config:recommended",
     "local>carstencodes/.shared//renovate/conventional"
   ],
+  "timezone": "UTC",
+  "branchPrefix": "renovate/",
+  "prHourlyLimit": 2,
+  "prConcurrentLimit": 10,
+  "schedule": ["before 3am on monday"],
+  "labels": ["dependencies", "renovate"],
+  "stabilityDays": 2,
+  "semanticCommits": true,
   "lockFileMaintenance": {
-    "enabled": true
+    "enabled": true,
+    "schedule": ["before 5am on sunday"]
   },
-  "customManagers": [
+  "regexManagers": [
     {
-      "customType": "regex",
-      "description": "Update cargo tools",
-      "managerFilePatterns": [
-        "deps/cargo-tools.ini"
-      ],
+      "fileMatch": ["^deps/cargo-tools.ini$"],
       "matchStrings": [
-        "; renovate: datasource=(?<datasource>[a-z-]+?) depName=(?:(?<depName>[a-zA-Z0-9-]+?))?\\s+(?<packageName>[^=\\s]+?)\\s*=\\s*(?<currentValue>(\\d+(\\.\\d+)*)?)"
-      ]
+        "^;\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)\\s+depName=(?:(?<depName>[A-Za-z0-9-]+?))?\\s+(?<packageName>[^=\\s]+?)\\s*=\\s*(?<currentValue>\\d+(?:\\.\\d+)*)$"
+      ],
+      "datasourceTemplate": "{{datasource}}",
+      "depNameTemplate": "{{#if depName}}{{depName}}{{else}}{{packageName}}{{/if}}",
+      "versioningTemplate": "semver"
     },
     {
-      "customType": "regex",
-      "description": "Update pre-commit in ci actions",
-      "managerFilePatterns": [
-        ".github/actions/pre-commit/action.yml"
-      ],
+      "fileMatch": ["^\\.github/actions/pre-commit/action\\.yml$"],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>[a-z-]+?) depName=(?:(?<depName>[a-zA-Z0-9-]+?))?\\s+run:\\s+python\\s+-m\\s+pip\\s+install\\s+(?<packageName>[^=\\s]+?)==(?<currentValue>(\\d+(\\.\\d+)*)?)"
-      ]
+        "#\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)\\s+depName=(?:(?<depName>[A-Za-z0-9-]+?))?\\s*\\n(?:.*\\n)*?\\s*run:\\s*python\\s+-m\\s+pip\\s+install\\s+(?<packageName>[^=\\s]+?)==(?<currentValue>\\d+(?:\\.\\d+)*)"
+      ],
+      "datasourceTemplate": "{{datasource}}",
+      "depNameTemplate": "{{#if depName}}{{depName}}{{else}}{{packageName}}{{/if}}",
+      "versioningTemplate": "semver"
     },
     {
-      "customType": "regex",
-      "description": "Update devcontainer feature options version",
-      "managerFilePatterns": [
-        "/(^|/)\\.devcontainer/(?:local/)?devcontainer\\.json$/"
-      ],
+      "fileMatch": ["^\\.devcontainer/(?:local/)?devcontainer\\.json$"],
       "matchStrings": [
-        "//\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depName>[^\\s]+?))?(?:\\s+packageName=(?<packageName>[^\\s]+?))?(?:\\s+registryUrl=(?<registryUrl>[^\\s]+?))?\\s*\\r?\\n\\s*\"version\"\\s*:\\s*\"(?<currentValue>[^\"]+?)\""
-      ]
+        "//\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depName>[^\\s]+?))?(?:\\s+packageName=(?<packageName>[^\\s]+?))?(?:\\s+registryUrl=(?<registryUrl>[^\\s]+?))?\\s*\\r?\\n[\\s\\S]*?\"name\"\\s*:\\s*\"(?<depNameFeature>[^\"]+)\"[\\s\\S]*?\"version\"\\s*:\\s*\"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "{{datasource}}",
+      "depNameTemplate": "{{#if depName}}{{depName}}{{else}}{{depNameFeature}}{{/if}}",
+      "packageNameTemplate": "{{#if packageName}}{{packageName}}{{else}}{{depNameFeature}}{{/if}}",
+      "versioningTemplate": "semver"
     },
     {
-      "customType": "regex",
-      "managerFilePatterns": [
-        "/(^|/)\\.zigversion$/"
-      ],
-      "matchStrings": [
-        "(?<currentValue>\\d+\\.\\d+\\.\\d+)"
-      ],
+      "fileMatch": ["^\\.zigversion$"],
+      "matchStrings": ["(?<currentValue>\\d+\\.\\d+\\.\\d+)"] ,
       "datasourceTemplate": "forgejo-tags",
       "depNameTemplate": "ziglang/zig",
       "registryUrlTemplate": "https://codeberg.org",
       "versioningTemplate": "semver"
     },
     {
-      "customType": "regex",
-      "description": "Update custom devcontainer feature dependencies",
-      "managerFilePatterns": [
-        "/(^|/)\\.devcontainer/features/src/[^/]+/devcontainer-feature\\.json$/"
-      ],
+      "fileMatch": ["^\\.devcontainer/features/src/[^/]+/devcontainer-feature\\.json$"],
       "matchStrings": [
-        "//\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depNameComment>[^\\s]+?))?(?:\\s+packageName=(?<packageNameComment>[^\\s]+?))?\\s*\\r?\\n\\s*\"(?<depNameFeature>[^\"]+?):(?<currentValue>[^\"]+?)\""
+        "//\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depNameComment>[^\\s]+?))?(?:\\s+packageName=(?<packageNameComment>[^\\s]+?))?\\s*\\r?\\n[\\s\\S]*?\"(?<depNameFeature>[^\"]+)\"[\\s\\S]*?\"version\"\\s*:\\s*\"(?<currentValue>[^\"]+)\""
       ],
-      "depNameTemplate": "{{#if depNameComment}}{{{depNameComment}}}{{else}}{{{depNameFeature}}}{{/if}}",
-      "packageNameTemplate": "{{#if packageNameComment}}{{{packageNameComment}}}{{else}}{{{depNameFeature}}}{{/if}}"
+      "depNameTemplate": "{{#if depNameComment}}{{depNameComment}}{{else}}{{depNameFeature}}{{/if}}",
+      "packageNameTemplate": "{{#if packageNameComment}}{{packageNameComment}}{{else}}{{depNameFeature}}{{/if}}",
+      "datasourceTemplate": "{{datasource}}",
+      "versioningTemplate": "semver"
     }
   ],
   "nuget": {
@@ -69,27 +69,11 @@
   },
   "packageRules": [
     {
-      "matchManagers": [
-        "nuget"
-      ],
-      "postUpdateOptions": [
-        "nugetUpdateLockFiles"
-      ]
+      "matchManagers": ["nuget"],
+      "postUpdateOptions": ["nugetUpdateLockFiles"]
     },
     {
-      "matchManagers": ["nuget", "custom.regex"],
-      "matchDatasources": ["dotnet-version"],
-      "matchPackageNames": ["dotnet-sdk"],
-      "matchFileNames": [
-        "**/global.json",
-        ".devcontainer/devcontainer.json",
-        ".devcontainer/local/devcontainer.json"
-      ],
-      "matchUpdateTypes": ["patch", "minor"],
-      "enabled": false
-    },
-    {
-      "matchManagers": ["nuget", "custom.regex"],
+      "matchManagers": ["nuget", "regex"],
       "matchDatasources": ["dotnet-version"],
       "matchPackageNames": ["dotnet-sdk"],
       "matchFileNames": [
@@ -99,6 +83,18 @@
       ],
       "allowedVersions": "/^([1-9]?[0-9]*[02468]{1})\\.(0)\\.(0|100)$/",
       "enabled": true
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "branch",
+      "stabilityDays": 2,
+      "labels": ["dependencies", "automerge"]
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["dependencies"]
     }
   ]
 }
