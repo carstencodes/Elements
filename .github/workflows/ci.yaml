@@ -112,6 +112,7 @@ jobs:
     permissions:
       actions: read
       contents: read
+      id-token: write
     outputs:
       sbom-list: ${{ steps.sbom-list.outputs.sbom-list }}
       sbom-version: ${{ steps.sbom-version.outputs.sbom-version }}
@@ -134,6 +135,8 @@ jobs:
         with:
           name: build-release
           path: artifacts/
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v4.1.0
       - name: Create SBOM
         uses: ./.github/actions/sbom
       - name: Upload sbom folder

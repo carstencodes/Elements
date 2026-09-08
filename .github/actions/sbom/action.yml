@@ -8,6 +8,12 @@ runs:
     - name: Create CycloneDX files
       shell: sh
       run: dotnet msbuild -p:Configuration=Release -t:CreateSbomCycloneDx
+    - name: Sign CycloneDX files using sigstore
+      shell: sh
+      run: |
+        find artifacts/results/cyclonedx -mindepth 1 -maxdepth 1 -type d -print
+          | xargs -I{} basename {}
+          | xargs -I{} cosign sign-blob artifacts/results/cyclonedx/{}/{}.cyclonedx.json --yes --bundle artifacts/results/cyclonedx/{}/{}.attestation.json
     - name: Create NuGetLicenseInformation files
       shell: sh
       run: dotnet msbuild -p:Configuration=Release -t:CreateNuGetLicenseOutputFile
