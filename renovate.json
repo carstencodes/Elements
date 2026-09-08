@@ -14,8 +14,7 @@
     "at 17:00 on sunday"
   ],
   "labels": ["dependencies", "renovate"],
-  "stabilityDays": 2,
-  "semanticCommits": true,
+  "semanticCommits": "enabled",
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": ["before 5am on sunday"]
@@ -75,7 +74,7 @@
     {
       "matchManagers": ["nuget"],
       "postUpdateOptions": ["nugetUpdateLockFiles"],
-      "minimumReleaseAge": 3
+      "minimumReleaseAge": "3 days"
     },
     {
       "matchManagers": ["nuget", "regex"],
@@ -88,21 +87,20 @@
       ],
       "allowedVersions": "/^([1-9]?[0-9]*[02468]{1})\\.(0)\\.(0|100)$/",
       "enabled": true,
-      "minimumReleaseAge": 3
+      "minimumReleaseAge": "3 days"
     },
     {
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true,
       "automergeType": "branch",
-      "stabilityDays": 2,
       "labels": ["dependencies", "automerge"],
-      "minimumReleaseAge": 3
+      "minimumReleaseAge": "3 days"
     },
     {
       "matchUpdateTypes": ["major"],
       "automerge": false,
       "labels": ["dependencies"],
-      "minimumReleaseAge": 3
+      "minimumReleaseAge": "3 days"
     }
   ]
 }
