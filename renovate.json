@@ -23,12 +23,13 @@
   "customManagers": [
     {
       "customType": "regex",
-      "managerFilePatterns": ["/^deps/cargo-tools.ini$/"],
+      "managerFilePatterns": ["/^deps/cargo-tools\\.ini$/"],
       "matchStrings": [
         "^;\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)\\s+depName=(?:(?<depName>[A-Za-z0-9-]+?))?\\s+(?<packageName>[^=\\s]+?)\\s*=\\s*(?<currentValue>\\d+(?:\\.\\d+)*)$"
       ],
       "datasourceTemplate": "{{datasource}}",
-      "depNameTemplate": "{{#if depName}}{{depName}}{{else}}{{packageName}}{{/if}}",
+      "depNameTemplate": "{{#if depName}}{{depName}}{{else}}{{depNameFeature}}{{/if}}",
+      "packageNameTemplate": "{{#if packageName}}{{packageName}}{{else}}{{depNameFeature}}{{/if}}",
       "versioningTemplate": "semver"
     },
     {
@@ -38,7 +39,8 @@
         "#\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)\\s+depName=(?:(?<depName>[A-Za-z0-9-]+?))?\\s*\\n(?:.*\\n)*?\\s*run:\\s*python\\s+-m\\s+pip\\s+install\\s+(?<packageName>[^=\\s]+?)==(?<currentValue>\\d+(?:\\.\\d+)*)"
       ],
       "datasourceTemplate": "{{datasource}}",
-      "depNameTemplate": "{{#if depName}}{{depName}}{{else}}{{packageName}}{{/if}}",
+      "depNameTemplate": "{{#if depName}}{{depName}}{{else}}{{depNameFeature}}{{/if}}",
+      "packageNameTemplate": "{{#if packageName}}{{packageName}}{{else}}{{depNameFeature}}{{/if}}",
       "versioningTemplate": "semver"
     },
     {
