@@ -112,6 +112,9 @@ jobs:
     permissions:
       actions: read
       contents: read
+    outputs:
+      sbom-list: ${{ steps.sbom-list.outputs.sbom-list }}
+      sbom-version: ${{ steps.sbom-version.outputs.sbom-version }}
     needs:
       - build
     steps:
@@ -143,6 +146,50 @@ jobs:
         with:
           name: license-info-files
           path: artifacts/results/3rdpartyinfo/
+      - name: List SBOM files
+        id: sbom-list
+        shell: sh
+        run: |
+          sbom_list=$(find artifacts/results/cyclonedx/ -mindepth 1 -maxdepth 1 -type d 
+                      | xargs -I{} basename {}
+                      | sed 's/^/HedgeCraft./'
+                      | jq -Rsc '[split("\n") | .[] | select(length > 0)]')
+          echo "sbom-list=$sbom_list" >> $GITHUB_OUTPUT
+      - name: Generate SBOM Version
+        id: sbom-version
+        run: |
+          sbom_version=$(dotnet tool run minver -t v -p preview.0 2>/dev/null || echo "v0.0.0-preview.0")
+          echo "sbom-version=$sbom_version" >> $GITHUB_OUTPUT
+
+  dependencytrack:
+    name: Dependency Track
+    runs-on: ubuntu-latest
+    if: ${{ contains(github.ref, 'refs/tags/v') }}
+    permissions:
+      actions: read
+      contents: read
+      secrets: read
+    matrix:
+      sbom: ${{ fromJson(needs.sbom.outputs.sbom-list) }}
+    needs:
+      - sbom
+    steps:
+      - name: Download sbom folder
+        uses: ./.github/actions/artifact/download
+        with:
+          name: sbom-files
+          path: artifacts/results/cyclonedx/
+      - name: Upload SBOM to Dependency Track
+        uses: DependencyTrack/gh-upload-sbom@v3
+        with:
+          url: ${{ secrets.DEPENDENCY_TRACK_URL }}
+          api-key: ${{ secrets.DEPENDENCY_TRACK_API_KEY }}
+          project-name: HedgeCraft.${{ matrix.sbom }}
+          project-version: ${{ needs.sbom.outputs.sbom-version }}
+          sbom-path: artifacts/results/cyclonedx/${{ matrix.sbom }}/${{ matrix.sbom }}.cyclonedx.json
+          auto-create: true
+          parent-project-name: HedgeCraft.Elements
+          parent-project-version: ${{ needs.sbom.outputs.sbom-version }}
 
 #####################################################################
 #
