@@ -74,6 +74,9 @@
                 <PackagePath>sbom/package-sbom.attestation.json</PackagePath>
             </TfmSpecificPackageFile>
         </ItemGroup>
+        <Warning Code="ELEMENTS001"
+                 Text="SBOM attestation file '$(CycloneDxResultDirectory)$(MSBuildProjectName).attestation.json' does not exist."
+                 Condition="'$(ContinuousIntegrationBuild)' == 'true' AND '$(TargetFramework)' == '$(LatestTargetFramework)' AND !Exists('$(CycloneDxResultDirectory)$(MSBuildProjectName).attestation.json')" />
     </Target>
 
     <Target Name="CreateSbomCycloneDx" DependsOnTargets="GenerateCycloneDxDocument;PackCycloneDxFile;$(CreateSbomCycloneDxDependsOn)" Condition="'$(GenerateCycloneDxSbom)' == 'true'" />

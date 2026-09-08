@@ -205,5 +205,8 @@
         <AssetType>Attestation</AssetType>
       </NativeAssetReference>
     </ItemGroup>
+    <Warning Code="ELEMENTS001"
+             Text="Native SBOM attestation file '$(CycloneDxResultDirectory)$(MSBuildProjectName).attestation.json' does not exist."
+             Condition="'$(ContinuousIntegrationBuild)' == 'true' AND '$(TargetFramework)' == '$(LatestTargetFramework)' AND !Exists('$(CycloneDxResultDirectory)$(MSBuildProjectName).attestation.json')" />
   </Target>
 </Project>
