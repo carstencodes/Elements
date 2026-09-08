@@ -171,9 +171,9 @@ jobs:
     permissions:
       actions: read
       contents: read
-      secrets: read
-    matrix:
-      sbom: ${{ fromJson(needs.sbom.outputs.sbom-list) }}
+    strategy:
+      matrix:
+        sbom: ${{ fromJson(needs.sbom.outputs.sbom-list) }}
     needs:
       - sbom
     steps:
