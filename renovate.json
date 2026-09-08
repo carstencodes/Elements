@@ -14,14 +14,16 @@
     "at 17:00 on sunday"
   ],
   "labels": ["dependencies", "renovate"],
+  "minimumReleaseAge": "2 days",
   "semanticCommits": "enabled",
   "lockFileMaintenance": {
     "enabled": true,
     "schedule": ["before 5am on sunday"]
   },
-  "regexManagers": [
+  "customManagers": [
     {
-      "fileMatch": ["^deps/cargo-tools.ini$"],
+      "customType": "regex",
+      "managerFilePatterns": ["/^deps/cargo-tools.ini$/"],
       "matchStrings": [
         "^;\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)\\s+depName=(?:(?<depName>[A-Za-z0-9-]+?))?\\s+(?<packageName>[^=\\s]+?)\\s*=\\s*(?<currentValue>\\d+(?:\\.\\d+)*)$"
       ],
@@ -30,7 +32,8 @@
       "versioningTemplate": "semver"
     },
     {
-      "fileMatch": ["^\\.github/actions/pre-commit/action\\.yml$"],
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/actions/pre-commit/action\\.yml$/"],
       "matchStrings": [
         "#\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)\\s+depName=(?:(?<depName>[A-Za-z0-9-]+?))?\\s*\\n(?:.*\\n)*?\\s*run:\\s*python\\s+-m\\s+pip\\s+install\\s+(?<packageName>[^=\\s]+?)==(?<currentValue>\\d+(?:\\.\\d+)*)"
       ],
@@ -39,7 +42,8 @@
       "versioningTemplate": "semver"
     },
     {
-      "fileMatch": ["^\\.devcontainer/(?:local/)?devcontainer\\.json$"],
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.devcontainer/(?:local/)??devcontainer\\.json$/"],
       "matchStrings": [
         "//\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depName>[^\\s]+?))?(?:\\s+packageName=(?<packageName>[^\\s]+?))?(?:\\s+registryUrl=(?<registryUrl>[^\\s]+?))?\\s*\\r?\\n[\\s\\S]*?\"name\"\\s*:\\s*\"(?<depNameFeature>[^\"]+)\"[\\s\\S]*?\"version\"\\s*:\\s*\"(?<currentValue>[^\"]+)\""
       ],
@@ -49,7 +53,8 @@
       "versioningTemplate": "semver"
     },
     {
-      "fileMatch": ["^\\.zigversion$"],
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.zigversion$/"],
       "matchStrings": ["(?<currentValue>\\d+\\.\\d+\\.\\d+)"] ,
       "datasourceTemplate": "forgejo-tags",
       "depNameTemplate": "ziglang/zig",
@@ -57,7 +62,8 @@
       "versioningTemplate": "semver"
     },
     {
-      "fileMatch": ["^\\.devcontainer/features/src/[^/]+/devcontainer-feature\\.json$"],
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.devcontainer/features/src/[^/]+/devcontainer-feature\\.json$/"],
       "matchStrings": [
         "//\\s*renovate:\\s*datasource=(?<datasource>[a-z-]+?)(?:\\s+depName=(?<depNameComment>[^\\s]+?))?(?:\\s+packageName=(?<packageNameComment>[^\\s]+?))?\\s*\\r?\\n[\\s\\S]*?\"(?<depNameFeature>[^\"]+)\"[\\s\\S]*?\"version\"\\s*:\\s*\"(?<currentValue>[^\"]+)\""
       ],
@@ -77,7 +83,7 @@
       "minimumReleaseAge": "3 days"
     },
     {
-      "matchManagers": ["nuget", "regex"],
+      "matchManagers": ["nuget", "custom.regex"],
       "matchDatasources": ["dotnet-version"],
       "matchPackageNames": ["dotnet-sdk"],
       "matchFileNames": [
