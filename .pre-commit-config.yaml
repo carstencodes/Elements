@@ -1,12 +1,14 @@
 repos:
-  - repo: local
+  - repo: https://github.com/espressif/conventional-precommit-linter
+    rev: v1.11.0
     hooks:
-      - id: conventional-commit
-        name: conventional commit
-        entry: python build/local/pre-commit/check_commit_message.py
-        language: system
+      - id: conventional-precommit-linter
         stages: [commit-msg]
-        pass_filenames: true
+        args:
+          - --types=build,ci,docs,feat,fix,perf,refactor,style,test
+          - --subject-min-length=1
+          - --scope-case-insensitive
+          - --allow-breaking
 
   - repo: local
     hooks:
