@@ -50,11 +50,11 @@
       },
       "Microsoft.Testing.Extensions.CtrfReport": {
         "type": "Direct",
-        "requested": "[1.0.0-alpha.26452.8, )",
-        "resolved": "1.0.0-alpha.26452.8",
-        "contentHash": "7hvQpNdjlyATgy8IK8/S86DpCOFZb2ELR4S/NdZQHFsIIj/radUz+93GawEU4HubtzW+77+6fDDIg0fsDux0kg==",
+        "requested": "[1.0.0-alpha.26466.3, )",
+        "resolved": "1.0.0-alpha.26466.3",
+        "contentHash": "AzrMwX5hb1IAFuJ5AQEUjjQRLs3PRePXGOG/AnNdRbDYgLn9xEssnNlXou88PatW8rhDffLIIzh/2ENIv7Icag==",
         "dependencies": {
-          "Microsoft.Testing.Platform": "[2.4.0, 3.0.0)"
+          "Microsoft.Testing.Platform": "[2.4.1, 3.0.0)"
         }
       },
       "Microsoft.Testing.Extensions.GitHubActionsReport": {
@@ -68,11 +68,11 @@
       },
       "Microsoft.Testing.Extensions.JUnitReport": {
         "type": "Direct",
-        "requested": "[1.0.0-alpha.26452.8, )",
-        "resolved": "1.0.0-alpha.26452.8",
-        "contentHash": "zwPOxHDYNZpXcb6ZCfcloiXLIeJnDg4eojraNuHDF0pWgTjOOIqak45341bun/GfSaJk9Mf2orStTJoqu+g3MA==",
+        "requested": "[1.0.0-alpha.26466.3, )",
+        "resolved": "1.0.0-alpha.26466.3",
+        "contentHash": "yqJ7CvIrPfJER5tpe1P2vLQRfVHab9/bgF2cXE7bR2rTRGTAhV5qyhRl5ZWUkeK9dDozUOrNcMxEY4cRosCFrw==",
         "dependencies": {
-          "Microsoft.Testing.Platform": "[2.4.0, 3.0.0)"
+          "Microsoft.Testing.Platform": "[2.4.1, 3.0.0)"
         }
       },
       "Microsoft.Testing.Extensions.TrxReport": {
@@ -321,11 +321,11 @@
       },
       "Microsoft.Testing.Extensions.CtrfReport": {
         "type": "Direct",
-        "requested": "[1.0.0-alpha.26452.8, )",
-        "resolved": "1.0.0-alpha.26452.8",
-        "contentHash": "7hvQpNdjlyATgy8IK8/S86DpCOFZb2ELR4S/NdZQHFsIIj/radUz+93GawEU4HubtzW+77+6fDDIg0fsDux0kg==",
+        "requested": "[1.0.0-alpha.26466.3, )",
+        "resolved": "1.0.0-alpha.26466.3",
+        "contentHash": "AzrMwX5hb1IAFuJ5AQEUjjQRLs3PRePXGOG/AnNdRbDYgLn9xEssnNlXou88PatW8rhDffLIIzh/2ENIv7Icag==",
         "dependencies": {
-          "Microsoft.Testing.Platform": "[2.4.0, 3.0.0)",
+          "Microsoft.Testing.Platform": "[2.4.1, 3.0.0)",
           "System.Text.Json": "10.0.11"
         }
       },
@@ -340,11 +340,11 @@
       },
       "Microsoft.Testing.Extensions.JUnitReport": {
         "type": "Direct",
-        "requested": "[1.0.0-alpha.26452.8, )",
-        "resolved": "1.0.0-alpha.26452.8",
-        "contentHash": "zwPOxHDYNZpXcb6ZCfcloiXLIeJnDg4eojraNuHDF0pWgTjOOIqak45341bun/GfSaJk9Mf2orStTJoqu+g3MA==",
+        "requested": "[1.0.0-alpha.26466.3, )",
+        "resolved": "1.0.0-alpha.26466.3",
+        "contentHash": "yqJ7CvIrPfJER5tpe1P2vLQRfVHab9/bgF2cXE7bR2rTRGTAhV5qyhRl5ZWUkeK9dDozUOrNcMxEY4cRosCFrw==",
         "dependencies": {
-          "Microsoft.Testing.Platform": "[2.4.0, 3.0.0)",
+          "Microsoft.Testing.Platform": "[2.4.1, 3.0.0)",
           "System.Text.Json": "10.0.11"
         }
       },
