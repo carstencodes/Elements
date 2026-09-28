@@ -109,6 +109,10 @@
       "automerge": false,
       "labels": ["dependencies"],
       "minimumReleaseAge": "3 days"
+    },
+    {
+      "matchUpdateTypes": ["lockFileMaintenance"],
+      "minimumReleaseAge": 0
     }
   ]
 }
