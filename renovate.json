@@ -112,7 +112,7 @@
     },
     {
       "matchUpdateTypes": ["lockFileMaintenance"],
-      "minimumReleaseAge": 0
+      "minimumReleaseAge": "0"
     }
   ]
 }
