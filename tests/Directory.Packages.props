@@ -7,7 +7,7 @@
   <Import Project="$(_ParentFile)" Condition="'$(_ParentFile)' != '' AND Exists('$(_ParentFile)')" />
 
   <ItemGroup>
-    <PackageVersion Include="Coverlet.MTP" Version="10.0.1" />
+    <PackageVersion Include="Coverlet.MTP" Version="10.1.0" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.4.1" />
     <PackageVersion Include="TUnit" Version="1.69.0" />
     <PackageVersion Include="Microsoft.Testing.Extensions.CrashDump" Version="2.4.1" />
