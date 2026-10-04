@@ -18,6 +18,7 @@
   </Folder>
   <Folder Name="/Libraries/DependencyInjection/">
     <Project Path="src/Elements.Extensions.DependencyInjection/Elements.Extensions.DependencyInjection.csproj" />
+    <Project Path="src/Elements.Extensions.Configuration.DependencyInjection/Elements.Extensions.Configuration.DependencyInjection.csproj" />
   </Folder>
   <Folder Name="/Libraries/IO/" />
   <Folder Name="/Libraries/IO/Core/">
@@ -47,9 +48,6 @@
   </Folder>
   <Folder Name="/SourceGenerators/ToolShim/">
     <Project Path="gen/Elements.SourceGenerators.ToolShim/Elements.SourceGenerators.ToolShim.csproj" />
-  </Folder>
-  <Folder Name="/src/">
-    <Project Path="src/Elements.Extensions.Configuration.DependencyInjection/Elements.Extensions.Configuration.DependencyInjection.csproj" />
   </Folder>
   <Folder Name="/Tools/" />
 </Solution>
