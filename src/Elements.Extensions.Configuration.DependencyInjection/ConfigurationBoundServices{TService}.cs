@@ -13,7 +13,7 @@ namespace HedgeCraft.Elements.Extensions.Configuration.DependencyInjection;
 /// Represents the configuration-bound registrations for a service type.
 /// </summary>
 /// <typeparam name="TService">The concrete service type managed by the registrations.</typeparam>
-internal sealed class ConfigurationBoundServices<TService>(Func<IServiceProvider, TService> createService, Action<IServiceCollection, OptionLifetime, ServiceLifetime> selectFactoryFromOptionLifetime, OptionLifetime optionLifetime, IServiceCollection services): IConfigurationBoundServices<TService>
+internal sealed class ConfigurationBoundServices<TService>(Func<IServiceProvider, TService> createService, Action<IServiceCollection, OptionLifetime, ServiceLifetime> selectFactoryFromOptionLifetime, OptionLifetime optionLifetime, IServiceCollection services) : IConfigurationBoundServices<TService>
     where TService : class
 {
     /// <summary>
@@ -26,7 +26,7 @@ internal sealed class ConfigurationBoundServices<TService>(Func<IServiceProvider
     public IConfigurationBoundServices<TService> AddKeyed<TImplementation>(object serviceKey, ServiceLifetime serviceLifetime = ServiceLifetime.Singleton)
         where TImplementation : class, TService
     {
-        return serviceLifetime switch 
+        return serviceLifetime switch
         {
             ServiceLifetime.Scoped => this.AddKeyedScoped<TImplementation>(serviceKey),
             ServiceLifetime.Singleton => this.AddKeyedSingleton<TImplementation>(serviceKey),
@@ -79,11 +79,11 @@ internal sealed class ConfigurationBoundServices<TService>(Func<IServiceProvider
     /// </summary>
     /// <param name="serviceLifetime">The requested lifetime for the service registration.</param>
     /// <returns>The updated service collection.</returns>
-    public IServiceCollection AddServiceWithLifetime(ServiceLifetime serviceLifetime) 
+    public IServiceCollection AddServiceWithLifetime(ServiceLifetime serviceLifetime)
     {
         selectFactoryFromOptionLifetime(services, optionLifetime, serviceLifetime);
 
-        return serviceLifetime switch 
+        return serviceLifetime switch
         {
             ServiceLifetime.Scoped => services.AddScoped<TService>(createService),
             ServiceLifetime.Singleton => services.AddSingleton<TService>(createService),
@@ -96,7 +96,7 @@ internal sealed class ConfigurationBoundServices<TService>(Func<IServiceProvider
     /// Adds the main service registration as a scoped service.
     /// </summary>
     /// <returns>The updated service collection.</returns>
-    public IServiceCollection AddScopedService() 
+    public IServiceCollection AddScopedService()
     {
         return this.AddServiceWithLifetime(ServiceLifetime.Scoped);
     }
@@ -105,7 +105,7 @@ internal sealed class ConfigurationBoundServices<TService>(Func<IServiceProvider
     /// Adds the main service registration as a singleton service.
     /// </summary>
     /// <returns>The updated service collection.</returns>
-    public IServiceCollection AddSingletonService() 
+    public IServiceCollection AddSingletonService()
     {
         return this.AddServiceWithLifetime(ServiceLifetime.Singleton);
     }
@@ -114,7 +114,7 @@ internal sealed class ConfigurationBoundServices<TService>(Func<IServiceProvider
     /// Adds the main service registration as a transient service.
     /// </summary>
     /// <returns>The updated service collection.</returns>
-    public IServiceCollection AddTransientService() 
+    public IServiceCollection AddTransientService()
     {
         return this.AddServiceWithLifetime(ServiceLifetime.Transient);
     }

@@ -14,7 +14,7 @@ namespace HedgeCraft.Elements.Extensions.Configuration.CommandLine;
 
 public sealed class CommandLineConfigurationOptions : IFormatProviderSource
 {
-    private readonly Dictionary<string, OptionHolderBase> options = new();
+    private readonly Dictionary<string, OptionHolderBase> options = new(StringComparer.Ordinal);
 
     public IFormatProvider FormatProvider { get; set; } = CultureInfo.InvariantCulture;
 

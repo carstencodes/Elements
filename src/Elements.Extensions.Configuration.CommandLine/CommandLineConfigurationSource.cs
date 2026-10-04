@@ -16,7 +16,7 @@ namespace HedgeCraft.Elements.Extensions.Configuration.CommandLine;
 
 public sealed partial class CommandLineConfigurationSource(RootCommand command) : IConfigurationSource, IFormatProviderSource
 {
-    private readonly Dictionary<string, OptionHolderBase> commandLineBindings = new();
+    private readonly Dictionary<string, OptionHolderBase> commandLineBindings = new(StringComparer.Ordinal);
 
     public CommandLineConfigurationSource() : this(new())
     {
