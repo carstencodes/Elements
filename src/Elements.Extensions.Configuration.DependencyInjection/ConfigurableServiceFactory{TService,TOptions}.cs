@@ -20,30 +20,6 @@ internal sealed class ConfigurableServiceFactory<TService, TOptions>(Func<TOptio
     where TOptions : class, new()
 {
     /// <summary>
-    /// Initializes the factory from a single options instance.
-    /// </summary>
-    /// <param name="options">The options instance to read.</param>
-    private ConfigurableServiceFactory(IOptions<TOptions> options) : this(() => options.Value)
-    {
-    }
-
-    /// <summary>
-    /// Initializes the factory from a scoped options snapshot.
-    /// </summary>
-    /// <param name="options">The options snapshot to read.</param>
-    private ConfigurableServiceFactory(IOptionsSnapshot<TOptions> options) : this(() => options.Value)
-    {
-    }
-
-    /// <summary>
-    /// Initializes the factory from the current monitor value.
-    /// </summary>
-    /// <param name="options">The options monitor to read.</param>
-    private ConfigurableServiceFactory(IOptionsMonitor<TOptions> options) : this(() => options.CurrentValue)
-    {
-    }
-
-    /// <summary>
     /// Registers the factory implementation for the selected option lifetime and service lifetime.
     /// </summary>
     /// <param name="services">The service collection receiving the configuration-bound factory.</param>
