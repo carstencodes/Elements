@@ -16,10 +16,6 @@ public abstract class HandlerBase
         public HandlerReachedEndOfChainException() : this(null!)
         {
         }
-
-        public HandlerReachedEndOfChainException(string message) : base(message)
-        {
-        }
     }
 
     [DoesNotReturn]
