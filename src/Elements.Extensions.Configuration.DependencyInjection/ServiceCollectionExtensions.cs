@@ -35,7 +35,7 @@ public static partial class ServiceCollectionExtensions
     {
         OptionsBuilder<TOptions> builder = services
             .AddOptions<TOptions>();
-        if (configurationSection is not null) 
+        if (configurationSection is not null)
         {
             builder = builder.Bind(configurationSection);
         }

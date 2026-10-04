@@ -114,7 +114,7 @@ public class ScribanTemplateGenerator : IIncrementalGenerator
                 file => AdditionalTextToName(file),
                 file => AdditionalTextToName(file),
                 (config, template) => (Config: config, Template: template)
-            ).ToImmutableArray();
+, StringComparer.Ordinal).ToImmutableArray();
         });
 
         context.RegisterSourceOutput(matchedPairs, this.GenerateSourceForScribanCsFiles);
@@ -238,7 +238,7 @@ public class ScribanTemplateGenerator : IIncrementalGenerator
 
     private static IReadOnlyDictionary<string, string> DumpModelNode(JsonElement modelNode)
     {
-        Dictionary<string, string> result = new();
+        Dictionary<string, string> result = new(StringComparer.Ordinal);
 
         DumpNodeRecursive(modelNode, result, string.Empty);
 

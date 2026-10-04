@@ -52,7 +52,7 @@ internal sealed class ConfigurationBoundServicesBuilder<TService, TOptions>(
     /// </summary>
     /// <param name="serviceProvider">The current dependency injection provider.</param>
     /// <returns>The configured service instance.</returns>
-    private TService CreateServiceFromFactory(IServiceProvider serviceProvider) 
+    private TService CreateServiceFromFactory(IServiceProvider serviceProvider)
     {
         ConfigurableServiceFactory<TService, TOptions> factory = serviceProvider.GetRequiredService<ConfigurableServiceFactory<TService, TOptions>>();
         return factory.CreateFromServiceProvider(serviceProvider, getServiceKey);

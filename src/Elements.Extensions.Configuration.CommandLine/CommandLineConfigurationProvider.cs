@@ -13,7 +13,7 @@ namespace HedgeCraft.Elements.Extensions.Configuration.CommandLine;
 
 public sealed class CommandLineConfigurationProvider() : IConfigurationProvider
 {
-    private readonly Dictionary<string, string> configurationValues = new();
+    private readonly Dictionary<string, string> configurationValues = new(StringComparer.Ordinal);
     private readonly ConfigurationReloadToken changeToken = new();
 
     public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string? parentPath)
@@ -38,7 +38,7 @@ public sealed class CommandLineConfigurationProvider() : IConfigurationProvider
             }
 
             string childKey = key[prefix.Length..];
-            int delimiterIndex = childKey.IndexOf(ConfigurationPath.KeyDelimiter);
+            int delimiterIndex = childKey.IndexOf(ConfigurationPath.KeyDelimiter, StringComparison.Ordinal);
 
             if (delimiterIndex >= 0)
             {

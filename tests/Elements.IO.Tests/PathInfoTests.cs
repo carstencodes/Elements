@@ -6,7 +6,7 @@ using TUnit;
 using TUnit.Assertions;
 using HedgeCraft.Elements.IO;
 
-public class PathInfoTests
+internal class PathInfoTests
 {
     [Test]
     public async Task TestPathInfoCreate()

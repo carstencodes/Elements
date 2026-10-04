@@ -57,17 +57,20 @@ internal sealed class ConfigurableServiceFactory<TService, TOptions>(Func<TOptio
             {
                 IOptions<TOptions> options = provider.GetRequiredService<IOptions<TOptions>>();
                 return () => options.Value;
-            },
+            }
+            ,
             OptionLifetime.Snapshot => provider =>
             {
                 IOptionsSnapshot<TOptions> options = provider.GetRequiredService<IOptionsSnapshot<TOptions>>();
                 return () => options.Value;
-            },
+            }
+            ,
             OptionLifetime.Monitor => provider =>
             {
                 IOptionsMonitor<TOptions> options = provider.GetRequiredService<IOptionsMonitor<TOptions>>();
                 return () => options.CurrentValue;
-            },
+            }
+            ,
             _ => throw new ArgumentException($"Invalid Option lifetime: {optionLifetime}", nameof(optionLifetime)),
         };
 
