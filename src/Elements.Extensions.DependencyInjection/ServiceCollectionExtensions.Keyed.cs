@@ -13,7 +13,7 @@ namespace HedgeCraft.Elements.Extensions.DependencyInjection;
 
 public static partial class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddKeyesForKeyedServices<TService>(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Singleton)
+    public static IServiceCollection AddKeysForKeyedServices<TService>(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Singleton)
         where TService : notnull
     {
         services.Add(new ServiceDescriptor(
