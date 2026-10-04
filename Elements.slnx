@@ -48,5 +48,8 @@
   <Folder Name="/SourceGenerators/ToolShim/">
     <Project Path="gen/Elements.SourceGenerators.ToolShim/Elements.SourceGenerators.ToolShim.csproj" />
   </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Elements.Extensions.Configuration.DependencyInjection/Elements.Extensions.Configuration.DependencyInjection.csproj" />
+  </Folder>
   <Folder Name="/Tools/" />
 </Solution>
