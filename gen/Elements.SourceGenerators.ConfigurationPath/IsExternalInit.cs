@@ -7,11 +7,12 @@
 namespace System.Runtime.CompilerServices
 {
     // AI GENERATED START - model: Copilot
-#pragma warning disable S2094 // This marker type must remain empty for compiler record support.
-    internal static class IsExternalInit
+    internal sealed class IsExternalInit
     {
+        public IsExternalInit()
+        {
+        }
     }
-#pragma warning restore S2094
     // AI GENERATED END
 }
 #endif
