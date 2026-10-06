@@ -50,7 +50,11 @@ internal static class ConfigurationContextEmitter
 
         AppendContextDocumentation(source, type);
         source.AppendLine("[global::System.CodeDom.Compiler.GeneratedCodeAttribute(");
-        source.AppendLine("    \"HedgeCraft.Elements.SourceGenerators.ConfigurationPath\", \"1.0\")]");
+        source.Append("    ")
+            .Append(SymbolDisplay.FormatLiteral("HedgeCraft.Elements.SourceGenerators.ConfigurationPath", true))
+            .Append(", ")
+            .Append(SymbolDisplay.FormatLiteral(GeneratorMetadata.Version, true))
+            .AppendLine(")]");
         source.Append("internal sealed partial class ").Append(contextName);
         AppendTypeParameters(source, typeParameters);
         source.Append(" : ").Append(ContextBaseType).Append('<').Append(modelType).AppendLine(">");

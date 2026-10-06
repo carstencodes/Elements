@@ -4,7 +4,7 @@
 namespace ExampleApp;
 
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute(
-    "HedgeCraft.Elements.SourceGenerators.ConfigurationPath", "1.0")]
+    "HedgeCraft.Elements.SourceGenerators.ConfigurationPath", "1.0.0.0")]
 [global::System.AttributeUsage(global::System.AttributeTargets.Class | global::System.AttributeTargets.Struct, Inherited = false)]
 public sealed class ConfigurationObjectAttribute : global::System.Attribute
 {
@@ -24,7 +24,7 @@ namespace ExampleApp.Configuration;
 /// </dl>
 /// </summary>
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute(
-    "HedgeCraft.Elements.SourceGenerators.ConfigurationPath", "1.0")]
+    "HedgeCraft.Elements.SourceGenerators.ConfigurationPath", "1.0.0.0")]
 internal sealed partial class ConfigurationContextOfAppSettings : global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts.ConfigurationObjectContextBase<global::ExampleApp.Configuration.AppSettings>
 {
     private static readonly global::ExampleApp.Configuration.ConfigurationContextOfDatabaseSettings __nestedContext_global__ExampleApp_Configuration_DatabaseSettings_0A1C73492A67 = new();
@@ -159,7 +159,7 @@ namespace ExampleApp.Configuration;
 /// </dl>
 /// </summary>
 [global::System.CodeDom.Compiler.GeneratedCodeAttribute(
-    "HedgeCraft.Elements.SourceGenerators.ConfigurationPath", "1.0")]
+    "HedgeCraft.Elements.SourceGenerators.ConfigurationPath", "1.0.0.0")]
 internal sealed partial class ConfigurationContextOfDatabaseSettings : global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts.ConfigurationObjectContextBase<global::ExampleApp.Configuration.DatabaseSettings>
 {
     public override global::System.Collections.Generic.IReadOnlySet<string[]> GetReadableConfigurationPaths()
