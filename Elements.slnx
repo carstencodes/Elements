@@ -55,5 +55,8 @@
   <Folder Name="/SourceGenerators/ToolShim/">
     <Project Path="gen/Elements.SourceGenerators.ToolShim/Elements.SourceGenerators.ToolShim.csproj" />
   </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="tests/Elements.SourceGenerators.ConfigurationPath.Tests/Elements.SourceGenerators.ConfigurationPath.Tests.csproj" />
+  </Folder>
   <Folder Name="/Tools/" />
 </Solution>
