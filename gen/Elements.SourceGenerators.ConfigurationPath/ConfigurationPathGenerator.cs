@@ -165,19 +165,32 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
     {
         if (type is IArrayTypeSymbol arrayType)
         {
-            if (!IsByteArray(arrayType))
-            {
-                VisitType(arrayType.ElementType, contextTypes, activeTypes);
-            }
-
+            VisitArrayType(arrayType, contextTypes, activeTypes);
             return;
         }
 
-        if (type is not INamedTypeSymbol namedType)
+        if (type is INamedTypeSymbol namedType)
         {
-            return;
+            VisitNamedType(namedType, contextTypes, activeTypes);
         }
+    }
 
+    private static void VisitArrayType(
+        IArrayTypeSymbol arrayType,
+        ISet<INamedTypeSymbol> contextTypes,
+        ISet<INamedTypeSymbol> activeTypes)
+    {
+        if (!IsByteArray(arrayType))
+        {
+            VisitType(arrayType.ElementType, contextTypes, activeTypes);
+        }
+    }
+
+    private static void VisitNamedType(
+        INamedTypeSymbol namedType,
+        ISet<INamedTypeSymbol> contextTypes,
+        ISet<INamedTypeSymbol> activeTypes)
+    {
         if (IsNullableValueType(namedType))
         {
             VisitType(namedType.TypeArguments[0], contextTypes, activeTypes);
@@ -191,14 +204,29 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
 
         if (TryGetCollectionValues(namedType, out ImmutableArray<ITypeSymbol> collectionValues))
         {
-            foreach (ITypeSymbol valueType in collectionValues)
-            {
-                VisitType(valueType, contextTypes, activeTypes);
-            }
-
+            VisitCollectionValues(collectionValues, contextTypes, activeTypes);
             return;
         }
 
+        VisitModelType(namedType, contextTypes, activeTypes);
+    }
+
+    private static void VisitCollectionValues(
+        ImmutableArray<ITypeSymbol> collectionValues,
+        ISet<INamedTypeSymbol> contextTypes,
+        ISet<INamedTypeSymbol> activeTypes)
+    {
+        foreach (ITypeSymbol valueType in collectionValues)
+        {
+            VisitType(valueType, contextTypes, activeTypes);
+        }
+    }
+
+    private static void VisitModelType(
+        INamedTypeSymbol namedType,
+        ISet<INamedTypeSymbol> contextTypes,
+        ISet<INamedTypeSymbol> activeTypes)
+    {
         INamedTypeSymbol definition = namedType.OriginalDefinition;
         contextTypes.Add(definition);
         // A repeated model definition is still emitted once, but its properties need no second graph traversal.
@@ -207,12 +235,17 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
             return;
         }
 
-        foreach (IPropertySymbol property in GetBindableProperties(namedType))
+        try
         {
-            VisitType(property.Type, contextTypes, activeTypes);
+            foreach (IPropertySymbol property in GetBindableProperties(namedType))
+            {
+                VisitType(property.Type, contextTypes, activeTypes);
+            }
         }
-
-        activeTypes.Remove(definition);
+        finally
+        {
+            activeTypes.Remove(definition);
+        }
     }
 
     /// <summary>Returns element types from dictionary values or distinct generic enumerable contracts.</summary>
