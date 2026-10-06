@@ -5,6 +5,7 @@
 
 using System.Text;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 
 namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
@@ -25,7 +26,11 @@ internal static class ConfigurationObjectAttributeEmitter
         source.Append("namespace ").Append(rootNamespace).AppendLine(";");
         source.AppendLine();
         source.AppendLine("[global::System.CodeDom.Compiler.GeneratedCodeAttribute(");
-        source.AppendLine("    \"HedgeCraft.Elements.SourceGenerators.ConfigurationPath\", \"1.0\")]");
+        source.Append("    ")
+            .Append(SymbolDisplay.FormatLiteral("HedgeCraft.Elements.SourceGenerators.ConfigurationPath", true))
+            .Append(", ")
+            .Append(SymbolDisplay.FormatLiteral(GeneratorMetadata.Version, true))
+            .AppendLine(")]");
         source.Append("[global::System.AttributeUsage(")
             .Append("global::System.AttributeTargets.Class | ")
             .Append("global::System.AttributeTargets.Struct, Inherited = false)]")
