@@ -3,8 +3,6 @@
 // (C) 2023-2026 Carsten Igel.
 // Published under MIT License
 
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
@@ -28,483 +26,279 @@ internal static class ConfigurationDumpValueEmitter
             indent,
             "global::System.Collections.Generic.Dictionary<string, object?> values = new(" +
                 "global::System.StringComparer.Ordinal);");
-        DumpValueParameters parameters = new(source, "values", "visited");
-        int localIndex = 0;
+        DumpEmissionContext context = new(source, "values", "visited");
         foreach (IPropertySymbol property in ConfigurationPathGenerator.GetBindableProperties(type))
         {
+            PropertyValueOptions options = new(property, "instance", "parentKeys", indent);
             // Only simple read-only values are omitted: retaining models and collections preserves their child paths.
             if (IsSimpleProperty(property.Type) &&
                 property.SetMethod?.DeclaredAccessibility != Accessibility.Public)
             {
                 AppendLine(source, indent, "if (!considerWritablePropertiesOnly)");
                 AppendLine(source, indent, "{");
-                AppendDumpProperty(parameters, property, indent + 1, ref localIndex);
+                AppendDumpProperty(context, options with { Indent = indent + 1 });
                 AppendLine(source, indent, "}");
                 continue;
             }
 
-            AppendDumpProperty(parameters, property, indent, ref localIndex);
+            AppendDumpProperty(context, options);
         }
 
         AppendLine(source, indent, "return values;");
     }
 
     /// <summary>Reads a property once and routes its value through the type-specific traversal emitter.</summary>
-    /// <param name="parameters">Shared output and traversal-state names for the current dump body.</param>
-    /// <param name="property">The property to read and emit.</param>
-    /// <param name="indent">The generated block indentation level.</param>
-    /// <param name="localIndex">The counter used to keep generated local names unique.</param>
-    private static void AppendDumpProperty(
-        DumpValueParameters parameters,
-        IPropertySymbol property,
-        int indent,
-        ref int localIndex)
+    /// <param name="context">Shared source and traversal state for the dump.</param>
+    /// <param name="options">The property and its containing model expressions.</param>
+    private static void AppendDumpProperty(DumpEmissionContext context, PropertyValueOptions options)
     {
-        StringBuilder source = parameters.Source;
-        string localName = string.Concat("__propertyValue", localIndex++);
+        string localName = string.Concat("__propertyValue", context.NextLocalIndex());
         AppendLine(
-            source,
-            indent,
-            string.Concat("var ", localName, " = instance.")
-                + ConfigurationPathGenerator.EscapeIdentifier(property.Name)
+            context.Source,
+            options.Indent,
+            string.Concat("var ", localName, " = ", options.InstanceExpression, ".")
+                + ConfigurationPathGenerator.EscapeIdentifier(options.Property.Name)
                 + ";");
-        string keysExpression = string.Concat(
-            "AppendKeys(parentKeys, ",
-            SymbolDisplay.FormatLiteral(ConfigurationPathGenerator.GetKeyName(property), true),
-            ")");
+        string keysExpression = CreateKeysExpression(options.ParentKeysExpression, options.Property);
         AppendDumpValue(
-            parameters,
-            property.Type,
-            localName,
-            keysExpression,
-            indent,
-            ref localIndex);
+            context,
+            new DumpValueOptions(options.Property.Type, localName, keysExpression, options.Indent));
     }
 
-    /// <summary>Creates traversal parameters and dispatches an arbitrary value to its matching emitter.</summary>
-    /// <param name="source">The source buffer receiving generated statements.</param>
-    /// <param name="type">The static type of the value expression.</param>
-    /// <param name="valueExpression">The generated expression that evaluates to the value.</param>
-    /// <param name="keysExpression">The configuration path expression for this value.</param>
-    /// <param name="indent">The generated block indentation level.</param>
-    /// <param name="valuesName">The result dictionary variable name.</param>
-    /// <param name="visitedName">The shared reference-cycle tracking variable name.</param>
-    /// <param name="localIndex">The counter used to keep generated local names unique.</param>
-    internal static void AppendDumpValue(
-        StringBuilder source,
-        ITypeSymbol type,
-        string valueExpression,
-        string keysExpression,
-        int indent,
-        string valuesName,
-        string visitedName,
-        ref int localIndex)
+    /// <summary>Selects scalar, array, named-type, and collection emission for one value.</summary>
+    /// <param name="context">Shared source and traversal state for the dump.</param>
+    /// <param name="options">The value's type and generated expressions.</param>
+    internal static void AppendDumpValue(DumpEmissionContext context, DumpValueOptions options)
     {
-        AppendDumpValue(
-            new DumpValueParameters(source, valuesName, visitedName),
-            type,
-            valueExpression,
-            keysExpression,
-            indent,
-            ref localIndex);
-    }
-
-    /// <summary>Selects scalar, array, named-type, and collection emission without repeating traversal state.</summary>
-    /// <param name="parameters">Shared output and traversal-state names for the current dump body.</param>
-    /// <param name="type">The static type of the value expression.</param>
-    /// <param name="valueExpression">The generated expression that evaluates to the value.</param>
-    /// <param name="keysExpression">The configuration path expression for this value.</param>
-    /// <param name="indent">The generated block indentation level.</param>
-    /// <param name="localIndex">The counter used to keep generated local names unique.</param>
-    private static void AppendDumpValue(
-        DumpValueParameters parameters,
-        ITypeSymbol type,
-        string valueExpression,
-        string keysExpression,
-        int indent,
-        ref int localIndex)
-    {
-        StringBuilder source = parameters.Source;
-        string valuesName = parameters.ValuesName;
-        string visitedName = parameters.VisitedName;
-        if (type is IArrayTypeSymbol arrayType)
+        if (options.Type is IArrayTypeSymbol arrayType)
         {
-            if (ConfigurationPathGenerator.IsByteArray(arrayType))
-            {
-                AppendScalar(source, valueExpression, keysExpression, indent, valuesName);
-            }
-            else
-            {
-                ConfigurationDumpCollectionEmitter.AppendCollectionValue(
-                    source,
-                    arrayType.ElementType,
-                    valueExpression,
-                    keysExpression,
-                    indent,
-                    valuesName,
-                    visitedName,
-                    ref localIndex,
-                    true,
-                    false);
-            }
-
+            AppendArrayValue(context, options, arrayType);
             return;
         }
 
-        if (type is INamedTypeSymbol namedType)
+        if (options.Type is INamedTypeSymbol namedType)
         {
-            AppendNamedValue(
-                source,
-                namedType,
-                valueExpression,
-                keysExpression,
-                indent,
-                valuesName,
-                visitedName,
-                ref localIndex);
+            AppendNamedValue(context, options with { Type = namedType });
+            return;
         }
-        else
-        {
-            AppendScalar(source, valueExpression, keysExpression, indent, valuesName);
-        }
+
+        AppendScalar(context, options);
     }
 
-    /// <summary>Dispatches a named type to nullable, scalar, collection, or nested-model handling.</summary>
-    /// <param name="source">The source buffer receiving generated statements.</param>
-    /// <param name="type">The named value type.</param>
-    /// <param name="valueExpression">The generated expression that evaluates to the value.</param>
-    /// <param name="keysExpression">The configuration path expression for this value.</param>
-    /// <param name="indent">The generated block indentation level.</param>
-    /// <param name="valuesName">The result dictionary variable name.</param>
-    /// <param name="visitedName">The shared reference-cycle tracking variable name.</param>
-    /// <param name="localIndex">The counter used to keep generated local names unique.</param>
-    private static void AppendNamedValue(
-        StringBuilder source,
-        INamedTypeSymbol type,
-        string valueExpression,
-        string keysExpression,
-        int indent,
-        string valuesName,
-        string visitedName,
-        ref int localIndex)
+    private static void AppendArrayValue(
+        DumpEmissionContext context,
+        DumpValueOptions options,
+        IArrayTypeSymbol arrayType)
     {
-        if (type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
+        if (ConfigurationPathGenerator.IsByteArray(arrayType))
         {
-            ConfigurationDumpCollectionEmitter.AppendNullableValue(
-                source,
-                type,
-                valueExpression,
-                keysExpression,
-                indent,
-                valuesName,
-                visitedName,
-                ref localIndex);
+            AppendScalar(context, options);
+            return;
         }
-        else if (ConfigurationPathGenerator.IsSimpleType(type))
+
+        ConfigurationDumpCollectionEmitter.AppendCollectionValue(
+            context,
+            new CollectionValueOptions(
+                arrayType.ElementType,
+                options.ValueExpression,
+                options.KeysExpression,
+                options.Indent,
+                CanBeNull: true,
+                IsDictionaryValue: false));
+    }
+
+    /// <summary>Dispatches named values to nullable, scalar, collection, or nested-model handling.</summary>
+    /// <param name="context">Shared source and traversal state for the dump.</param>
+    /// <param name="options">The named value's type and generated expressions.</param>
+    private static void AppendNamedValue(DumpEmissionContext context, DumpValueOptions options)
+    {
+        INamedTypeSymbol type = (INamedTypeSymbol)options.Type;
+        if (IsNullableValueType(type))
         {
-            AppendScalar(source, valueExpression, keysExpression, indent, valuesName);
+            ConfigurationDumpCollectionEmitter.AppendNullableValue(context, options);
+            return;
         }
-        else if (!AppendNamedCollection(
-                      source,
-                      type,
-                      valueExpression,
-                      keysExpression,
-                      indent,
-                      valuesName,
-                      visitedName,
-                      ref localIndex))
+
+        if (ConfigurationPathGenerator.IsSimpleType(type))
         {
-            AppendModelValue(
-                source,
-                type,
-                valueExpression,
-                keysExpression,
-                indent,
-                valuesName,
-                visitedName,
-                ref localIndex);
+            AppendScalar(context, options);
+            return;
         }
+
+        if (AppendNamedCollection(context, options))
+        {
+            return;
+        }
+
+        AppendModelValue(context, options);
     }
 
     /// <summary>Emits dictionary or enumerable handling when the named type is a supported collection.</summary>
-    /// <param name="source">The source buffer receiving generated statements.</param>
-    /// <param name="type">The named type to inspect.</param>
-    /// <param name="valueExpression">The generated expression that evaluates to the collection.</param>
-    /// <param name="keysExpression">The parent configuration path expression.</param>
-    /// <param name="indent">The generated block indentation level.</param>
-    /// <param name="valuesName">The result dictionary variable name.</param>
-    /// <param name="visitedName">The shared reference-cycle tracking variable name.</param>
-    /// <param name="localIndex">The counter used to keep generated local names unique.</param>
+    /// <param name="context">Shared source and traversal state for the dump.</param>
+    /// <param name="options">The collection type and generated expressions.</param>
     /// <returns><see langword="true"/> when collection handling was emitted.</returns>
-    private static bool AppendNamedCollection(
-        StringBuilder source,
-        INamedTypeSymbol type,
-        string valueExpression,
-        string keysExpression,
-        int indent,
-        string valuesName,
-        string visitedName,
-        ref int localIndex)
+    private static bool AppendNamedCollection(DumpEmissionContext context, DumpValueOptions options)
     {
+        INamedTypeSymbol type = (INamedTypeSymbol)options.Type;
         INamedTypeSymbol? dictionary = ConfigurationPathGenerator.GetDictionaryContract(type);
         if (dictionary is not null)
         {
-            ConfigurationDumpCollectionEmitter.AppendCollectionValue(
-                source,
-                dictionary.TypeArguments[1],
-                valueExpression,
-                keysExpression,
-                indent,
-                valuesName,
-                visitedName,
-                ref localIndex,
-                type.IsReferenceType,
-                dictionaryValue: true);
+            AppendDictionaryCollection(context, options, dictionary);
             return true;
         }
 
         if (ConfigurationPathGenerator.TryGetCollectionValues(type, out ImmutableArray<ITypeSymbol> values))
         {
             ConfigurationDumpCollectionEmitter.AppendGenericCollectionValues(
-                source,
-                values,
-                valueExpression,
-                keysExpression,
-                indent,
-                valuesName,
-                visitedName,
-                ref localIndex,
-                type.IsReferenceType);
+                context,
+                new GenericCollectionValuesOptions(
+                    values,
+                    options.ValueExpression,
+                    options.KeysExpression,
+                    options.Indent,
+                    type.IsReferenceType));
             return true;
         }
 
         return false;
     }
 
-    /// <summary>Chooses inline expansion for closed generic models or delegates to a generated context.</summary>
-    /// <param name="source">The source buffer receiving generated statements.</param>
-    /// <param name="type">The model type to expand.</param>
-    /// <param name="valueExpression">The generated expression that evaluates to the model.</param>
-    /// <param name="keysExpression">The parent configuration path expression.</param>
-    /// <param name="indent">The generated block indentation level.</param>
-    /// <param name="valuesName">The result dictionary variable name.</param>
-    /// <param name="visitedName">The shared reference-cycle tracking variable name.</param>
-    /// <param name="localIndex">The counter used to keep generated local names unique.</param>
-    private static void AppendModelValue(
-        StringBuilder source,
-        INamedTypeSymbol type,
-        string valueExpression,
-        string keysExpression,
-        int indent,
-        string valuesName,
-        string visitedName,
-        ref int localIndex)
+    private static void AppendDictionaryCollection(
+        DumpEmissionContext context,
+        DumpValueOptions options,
+        INamedTypeSymbol dictionary)
     {
+        ConfigurationDumpCollectionEmitter.AppendCollectionValue(
+            context,
+            new CollectionValueOptions(
+                dictionary.TypeArguments[1],
+                options.ValueExpression,
+                options.KeysExpression,
+                options.Indent,
+                ((INamedTypeSymbol)options.Type).IsReferenceType,
+                IsDictionaryValue: true));
+    }
+
+    /// <summary>Chooses inline expansion for closed generic models or delegates to a generated context.</summary>
+    /// <param name="context">Shared source and traversal state for the dump.</param>
+    /// <param name="options">The model type and generated expressions.</param>
+    private static void AppendModelValue(DumpEmissionContext context, DumpValueOptions options)
+    {
+        INamedTypeSymbol type = (INamedTypeSymbol)options.Type;
         if (IsClosedGenericObject(type) &&
             ConfigurationPathGenerator.FindExistingContext(type.OriginalDefinition) is null)
         {
-            AppendInlineGenericModel(
-                source,
-                type,
-                valueExpression,
-                keysExpression,
-                indent,
-                valuesName,
-                visitedName,
-                ref localIndex);
+            AppendInlineGenericModel(context, options);
             return;
         }
 
-        AppendContextDump(
-            source,
-            type,
-            valueExpression,
-            keysExpression,
-            indent,
-            valuesName,
-            visitedName);
+        AppendContextDump(context, options);
     }
 
-    /// <summary>
-    /// Expands a closed generic model inline because its open definition cannot have a concrete context.
-    /// </summary>
-    /// <param name="source">The source buffer receiving generated statements.</param>
-    /// <param name="type">The closed generic model type.</param>
-    /// <param name="valueExpression">The generated expression that evaluates to the model.</param>
-    /// <param name="keysExpression">The parent configuration path expression.</param>
-    /// <param name="indent">The generated block indentation level.</param>
-    /// <param name="valuesName">The result dictionary variable name.</param>
-    /// <param name="visitedName">The shared reference-cycle tracking variable name.</param>
-    /// <param name="localIndex">The counter used to keep generated local names unique.</param>
-    private static void AppendInlineGenericModel(
-        StringBuilder source,
-        INamedTypeSymbol type,
-        string valueExpression,
-        string keysExpression,
-        int indent,
-        string valuesName,
-        string visitedName,
-        ref int localIndex)
+    /// <summary>Expands a closed generic model whose open definition cannot have a concrete context.</summary>
+    /// <param name="context">Shared source and traversal state for the dump.</param>
+    /// <param name="options">The model type and generated expressions.</param>
+    private static void AppendInlineGenericModel(DumpEmissionContext context, DumpValueOptions options)
     {
-        bool trackReference = type.IsReferenceType;
+        bool trackReference = options.Type.IsReferenceType;
         if (trackReference)
         {
             string condition = string.Concat(
                 "if (",
-                valueExpression,
+                options.ValueExpression,
                 " is not null && ",
-                visitedName,
+                context.VisitedName,
                 ".Add(",
-                valueExpression,
+                options.ValueExpression,
                 "))");
-            AppendLine(source, indent, condition);
-            AppendLine(source, indent, "{");
-            AppendLine(source, indent + 1, "try");
-            AppendLine(source, indent + 1, "{");
-            indent += 2;
+            AppendLine(context.Source, options.Indent, condition);
+            AppendLine(context.Source, options.Indent, "{");
+            AppendLine(context.Source, options.Indent + 1, "try");
+            AppendLine(context.Source, options.Indent + 1, "{");
         }
 
-        AppendInlineGenericProperties(
-            source,
-            type,
-            valueExpression,
-            keysExpression,
-            indent,
-            valuesName,
-            visitedName,
-            ref localIndex);
+        int propertyIndent = options.Indent + (trackReference ? 2 : 0);
+        AppendInlineGenericProperties(context, options with { Indent = propertyIndent });
 
         if (trackReference)
         {
-            indent -= 2;
-            AppendLine(source, indent + 1, "}");
-            AppendLine(source, indent + 1, "finally");
-            AppendLine(source, indent + 1, "{");
-            AppendLine(source, indent + 2, string.Concat(visitedName, ".Remove(", valueExpression, ");"));
-            AppendLine(source, indent + 1, "}");
-            AppendLine(source, indent, "}");
+            AppendLine(context.Source, options.Indent + 1, "}");
+            AppendLine(context.Source, options.Indent + 1, "finally");
+            AppendLine(context.Source, options.Indent + 1, "{");
+            AppendLine(
+                context.Source,
+                options.Indent + 2,
+                string.Concat(context.VisitedName, ".Remove(", options.ValueExpression, ");"));
+            AppendLine(context.Source, options.Indent + 1, "}");
+            AppendLine(context.Source, options.Indent, "}");
         }
     }
 
-    /// <summary>
-    /// Emits inline generic properties with the same simple read-only filter as root models.
-    /// </summary>
-    /// <param name="source">The source buffer receiving generated statements.</param>
-    /// <param name="type">The closed generic model whose properties are visited.</param>
-    /// <param name="valueExpression">The expression that evaluates to the model instance.</param>
-    /// <param name="keysExpression">The parent configuration path expression.</param>
-    /// <param name="indent">The generated block indentation level.</param>
-    /// <param name="valuesName">The result dictionary variable name.</param>
-    /// <param name="visitedName">The shared reference-cycle tracking variable name.</param>
-    /// <param name="localIndex">The counter used to keep generated local names unique.</param>
-    private static void AppendInlineGenericProperties(
-        StringBuilder source,
-        INamedTypeSymbol type,
-        string valueExpression,
-        string keysExpression,
-        int indent,
-        string valuesName,
-        string visitedName,
-        ref int localIndex)
+    /// <summary>Emits inline generic properties using the root model's writable-only filter.</summary>
+    /// <param name="context">Shared source and traversal state for the dump.</param>
+    /// <param name="options">The closed generic model and its expressions.</param>
+    private static void AppendInlineGenericProperties(DumpEmissionContext context, DumpValueOptions options)
     {
-        foreach (IPropertySymbol property in ConfigurationPathGenerator.GetBindableProperties(type))
+        foreach (IPropertySymbol property in
+                 ConfigurationPathGenerator.GetBindableProperties((INamedTypeSymbol)options.Type))
         {
-            bool filterSimpleReadOnlyProperty = IsSimpleProperty(property.Type) &&
-                property.SetMethod?.DeclaredAccessibility != Accessibility.Public;
-            if (filterSimpleReadOnlyProperty)
-            {
-                AppendLine(source, indent, "if (!considerWritablePropertiesOnly)");
-                AppendLine(source, indent, "{");
-                indent++;
-            }
-
-            AppendInlineGenericProperty(
-                source,
+            PropertyValueOptions propertyOptions = new(
                 property,
-                valueExpression,
-                keysExpression,
-                indent,
-                valuesName,
-                visitedName,
-                ref localIndex);
-
-            if (filterSimpleReadOnlyProperty)
+                options.ValueExpression,
+                options.KeysExpression,
+                options.Indent);
+            if (IsSimpleReadOnlyProperty(property))
             {
-                indent--;
-                AppendLine(source, indent, "}");
+                AppendLine(context.Source, options.Indent, "if (!considerWritablePropertiesOnly)");
+                AppendLine(context.Source, options.Indent, "{");
+                AppendInlineGenericProperty(
+                    context,
+                    propertyOptions with { Indent = options.Indent + 1 });
+                AppendLine(context.Source, options.Indent, "}");
+                continue;
             }
+
+            AppendInlineGenericProperty(context, propertyOptions);
         }
     }
 
-    /// <summary>
-    /// Reads one inline generic property and delegates to its scalar, collection, or context emitter.
-    /// </summary>
-    /// <param name="source">The source buffer receiving generated statements.</param>
-    /// <param name="property">The property to read and emit.</param>
-    /// <param name="instanceExpression">The expression for the containing model instance.</param>
-    /// <param name="parentKeysExpression">The containing model's configuration path expression.</param>
-    /// <param name="indent">The generated block indentation level.</param>
-    /// <param name="valuesName">The result dictionary variable name.</param>
-    /// <param name="visitedName">The shared reference-cycle tracking variable name.</param>
-    /// <param name="localIndex">The counter used to keep generated local names unique.</param>
+    /// <summary>Reads one inline generic property and delegates to its value emitter.</summary>
+    /// <param name="context">Shared source and traversal state for the dump.</param>
+    /// <param name="options">The property and containing model expressions.</param>
     private static void AppendInlineGenericProperty(
-        StringBuilder source,
-        IPropertySymbol property,
-        string instanceExpression,
-        string parentKeysExpression,
-        int indent,
-        string valuesName,
-        string visitedName,
-        ref int localIndex)
+        DumpEmissionContext context,
+        PropertyValueOptions options)
     {
-        string valueName = string.Concat("__genericProperty", localIndex++);
+        string valueName = string.Concat("__genericProperty", context.NextLocalIndex());
         AppendLine(
-            source,
-            indent,
+            context.Source,
+            options.Indent,
             string.Concat(
                 "var ",
                 valueName,
                 " = ",
-                instanceExpression,
+                options.InstanceExpression,
                 ".",
-                ConfigurationPathGenerator.EscapeIdentifier(property.Name),
+                ConfigurationPathGenerator.EscapeIdentifier(options.Property.Name),
                 ";"));
-        string keysExpression = string.Concat(
-            "AppendKeys(",
-            parentKeysExpression,
-            ", ",
-            SymbolDisplay.FormatLiteral(ConfigurationPathGenerator.GetKeyName(property), true),
-            ")");
+        string keysExpression = CreateKeysExpression(options.ParentKeysExpression, options.Property);
 
-        if (property.Type is INamedTypeSymbol nestedType &&
+        if (options.Property.Type is INamedTypeSymbol nestedType &&
             IsClosedGenericObject(nestedType) &&
             ConfigurationPathGenerator.FindExistingContext(nestedType.OriginalDefinition) is null)
         {
             AppendContextDump(
-                source,
-                nestedType,
-                valueName,
-                keysExpression,
-                indent,
-                valuesName,
-                visitedName);
+                context,
+                new DumpValueOptions(nestedType, valueName, keysExpression, options.Indent));
             return;
         }
 
         AppendDumpValue(
-            source,
-            property.Type,
-            valueName,
-            keysExpression,
-            indent,
-            valuesName,
-            visitedName,
-            ref localIndex);
+            context,
+            new DumpValueOptions(options.Property.Type, valueName, keysExpression, options.Indent));
     }
 
-    /// <summary>
-    /// Checks whether a generic model can be expanded with concrete type arguments at this call site.
-    /// </summary>
+    /// <summary>Checks whether a generic model can be expanded with concrete type arguments at this call site.</summary>
     /// <param name="type">The candidate model type.</param>
     /// <returns><see langword="true"/> when it is a non-collection model with closed generic arguments.</returns>
     private static bool IsClosedGenericObject(INamedTypeSymbol type)
@@ -538,122 +332,110 @@ internal static class ConfigurationDumpValueEmitter
         }
     }
 
-    /// <summary>
-    /// Invokes the cached child context and merges its flattened values under the child path.
-    /// </summary>
-    /// <param name="source">The source buffer receiving generated statements.</param>
-    /// <param name="modelType">The nested model handled by the cached context.</param>
-    /// <param name="valueExpression">The expression that evaluates to the nested model.</param>
-    /// <param name="keysExpression">The nested model's configuration path expression.</param>
-    /// <param name="indent">The generated block indentation level.</param>
-    /// <param name="valuesName">The parent result dictionary variable name.</param>
-    /// <param name="visitedName">The shared reference-cycle tracking variable name.</param>
-    private static void AppendContextDump(
-        StringBuilder source,
-        INamedTypeSymbol modelType,
-        string valueExpression,
-        string keysExpression,
-        int indent,
-        string valuesName,
-        string visitedName)
+    /// <summary>Invokes the cached child context and merges its flattened values under the child path.</summary>
+    /// <param name="context">Shared source and traversal state for the dump.</param>
+    /// <param name="options">The nested model type and generated expressions.</param>
+    private static void AppendContextDump(DumpEmissionContext context, DumpValueOptions options)
     {
+        INamedTypeSymbol modelType = (INamedTypeSymbol)options.Type;
         string contextVariable = ConfigurationDumpMethodEmitter.CreateContextFieldName(modelType);
         bool existingContext = ConfigurationPathGenerator.FindExistingContext(modelType.OriginalDefinition) is not null;
         // User-provided contexts expose only the public API; generated contexts share the parent's cycle set.
         string methodName = existingContext ? "DumpConfigurationObject" : "DumpConfigurationObjectCore";
-        string arguments = existingContext
-            ? string.Concat(valueExpression, ", considerWritablePropertiesOnly, ", keysExpression)
-            : string.Concat(
-                valueExpression,
-                ", considerWritablePropertiesOnly, ",
-                keysExpression,
-                ", ",
-                visitedName);
-
+        string arguments = CreateContextArguments(context, options, existingContext);
+        int bodyIndent = options.Indent;
         if (modelType.IsReferenceType)
         {
-            AppendLine(source, indent, string.Concat("if (", valueExpression, " is not null)"));
-            AppendLine(source, indent, "{");
-            indent++;
+            AppendLine(
+                context.Source,
+                bodyIndent,
+                string.Concat("if (", options.ValueExpression, " is not null)"));
+            AppendLine(context.Source, bodyIndent, "{");
+            bodyIndent++;
         }
 
         AppendContextCall(
-            source,
-            contextVariable,
-            methodName,
-            arguments,
-            valuesName,
-            indent);
+            context,
+            new ContextCallOptions(contextVariable, methodName, arguments, bodyIndent));
 
         if (modelType.IsReferenceType)
         {
-            indent--;
-            AppendLine(source, indent, "}");
+            AppendLine(context.Source, options.Indent, "}");
         }
     }
 
-    /// <summary>Emits the child-context loop that copies its entries into the current result dictionary.</summary>
-    /// <param name="source">The source buffer receiving generated statements.</param>
-    /// <param name="contextVariable">The static field name of the cached nested context.</param>
-    /// <param name="methodName">The public or internal dump method to invoke.</param>
-    /// <param name="arguments">The already formatted invocation arguments.</param>
-    /// <param name="valuesName">The parent result dictionary variable name.</param>
-    /// <param name="indent">The generated block indentation level.</param>
-    private static void AppendContextCall(
-        StringBuilder source,
-        string contextVariable,
-        string methodName,
-        string arguments,
-        string valuesName,
-        int indent)
+    private static string CreateContextArguments(
+        DumpEmissionContext context,
+        DumpValueOptions options,
+        bool existingContext)
     {
-        string entryVariable = string.Concat(contextVariable, "Entry");
+        return existingContext
+            ? string.Concat(options.ValueExpression, ", considerWritablePropertiesOnly, ", options.KeysExpression)
+            : string.Concat(
+                options.ValueExpression,
+                ", considerWritablePropertiesOnly, ",
+                options.KeysExpression,
+                ", ",
+                context.VisitedName);
+    }
+
+    /// <summary>Emits the child-context loop that copies its entries into the current result dictionary.</summary>
+    /// <param name="context">Shared source and traversal state for the dump.</param>
+    /// <param name="options">The child context call and generated arguments.</param>
+    private static void AppendContextCall(DumpEmissionContext context, ContextCallOptions options)
+    {
+        string entryVariable = string.Concat(options.ContextVariable, "Entry");
         AppendLine(
-            source,
-            indent,
+            context.Source,
+            options.Indent,
             string.Concat(
                 "foreach (global::System.Collections.Generic.KeyValuePair<string, object?> ",
                 entryVariable,
                 " in ",
-                contextVariable,
+                options.ContextVariable,
                 ".",
-                methodName,
+                options.MethodName,
                 "(",
-                arguments,
+                options.Arguments,
                 "))"));
-        AppendLine(source, indent, "{");
+        AppendLine(context.Source, options.Indent, "{");
         AppendLine(
-            source,
-            indent + 1,
-            string.Concat(valuesName, "[", entryVariable, ".Key] = ", entryVariable, ".Value;"));
-        AppendLine(source, indent, "}");
+            context.Source,
+            options.Indent + 1,
+            string.Concat(context.ValuesName, "[", entryVariable, ".Key] = ", entryVariable, ".Value;"));
+        AppendLine(context.Source, options.Indent, "}");
     }
 
-    /// <summary>
-    /// Emits assignment at the colon-joined configuration key, including a null scalar value.
-    /// </summary>
-    /// <param name="source">The source buffer receiving generated statements.</param>
-    /// <param name="valueExpression">The expression whose value is stored.</param>
-    /// <param name="keysExpression">The array expression containing the full configuration path.</param>
-    /// <param name="indent">The generated block indentation level.</param>
-    /// <param name="valuesName">The result dictionary variable name.</param>
-    internal static void AppendScalar(
-        StringBuilder source,
-        string valueExpression,
-        string keysExpression,
-        int indent,
-        string valuesName)
+    /// <summary>Emits assignment at the colon-joined configuration key, including a null scalar value.</summary>
+    /// <param name="context">Shared source and traversal state for the dump.</param>
+    /// <param name="options">The scalar's value and generated path expressions.</param>
+    internal static void AppendScalar(DumpEmissionContext context, DumpValueOptions options)
     {
         AppendLine(
-            source,
-            indent,
+            context.Source,
+            options.Indent,
             string.Concat(
-                valuesName,
+                context.ValuesName,
                 "[global::System.String.Join(\":\", ",
-                keysExpression,
+                options.KeysExpression,
                 ")] = ",
-                valueExpression,
+                options.ValueExpression,
                 ";"));
+    }
+
+    private static string CreateKeysExpression(string parentKeysExpression, IPropertySymbol property)
+    {
+        return string.Concat(
+            "AppendKeys(",
+            parentKeysExpression,
+            ", ",
+            SymbolDisplay.FormatLiteral(ConfigurationPathGenerator.GetKeyName(property), true),
+            ")");
+    }
+
+    private static bool IsNullableValueType(INamedTypeSymbol type)
+    {
+        return type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
     }
 
     /// <summary>Classifies nullable scalar and named scalar types for writable-only property filtering.</summary>
@@ -661,13 +443,18 @@ internal static class ConfigurationDumpValueEmitter
     /// <returns><see langword="true"/> when the type is a scalar rather than a nested configuration model.</returns>
     private static bool IsSimpleProperty(ITypeSymbol type)
     {
-        if (type is INamedTypeSymbol namedType &&
-            namedType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
+        if (type is INamedTypeSymbol namedType && IsNullableValueType(namedType))
         {
             return ConfigurationPathGenerator.IsSimpleType((INamedTypeSymbol)namedType.TypeArguments[0]);
         }
 
         return type is INamedTypeSymbol simpleType && ConfigurationPathGenerator.IsSimpleType(simpleType);
+    }
+
+    private static bool IsSimpleReadOnlyProperty(IPropertySymbol property)
+    {
+        return IsSimpleProperty(property.Type) &&
+            property.SetMethod?.DeclaredAccessibility != Accessibility.Public;
     }
 
     /// <summary>Appends one source line using the emitter's four-space indentation convention.</summary>
@@ -679,28 +466,16 @@ internal static class ConfigurationDumpValueEmitter
         source.Append(' ', indent * 4).AppendLine(value);
     }
 
-    /// <summary>Groups values shared by recursive emission without repeatedly threading unrelated arguments.</summary>
-    private readonly ref struct DumpValueParameters
-    {
-        /// <summary>Initializes the source output buffer and generated traversal-state local names.</summary>
-        /// <param name="source">The source buffer receiving generated statements.</param>
-        /// <param name="valuesName">The result dictionary variable name.</param>
-        /// <param name="visitedName">The shared reference-cycle tracking variable name.</param>
-        internal DumpValueParameters(StringBuilder source, string valuesName, string visitedName)
-        {
-            Source = source;
-            ValuesName = valuesName;
-            VisitedName = visitedName;
-        }
+    private readonly record struct PropertyValueOptions(
+        IPropertySymbol Property,
+        string InstanceExpression,
+        string ParentKeysExpression,
+        int Indent);
 
-        /// <summary>Gets the source buffer receiving generated statements.</summary>
-        internal StringBuilder Source { get; }
-
-        /// <summary>Gets the generated identifier for the flattened result dictionary.</summary>
-        internal string ValuesName { get; }
-
-        /// <summary>Gets the generated identifier for reference-cycle tracking state.</summary>
-        internal string VisitedName { get; }
-    }
+    private readonly record struct ContextCallOptions(
+        string ContextVariable,
+        string MethodName,
+        string Arguments,
+        int Indent);
 }
 // AI GENERATED END
