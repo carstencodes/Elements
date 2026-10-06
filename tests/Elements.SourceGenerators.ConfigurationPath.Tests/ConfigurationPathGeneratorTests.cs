@@ -11,6 +11,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
+using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Tests.Data;
+using Microsoft.Extensions.Configuration;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -29,186 +31,39 @@ internal sealed class ConfigurationPathGeneratorTests
         .Select(static path => (MetadataReference)MetadataReference.CreateFromFile(path))
         .ToImmutableArray();
 
-    private const string NestedModelsSource = """
-        namespace Demo.Settings
-        {
-            using Demo.Settings.Attributes;
-            using Microsoft.Extensions.Configuration;
-            using System.Collections.Generic;
-
-            [ConfigurationObject]
-            public class Root
-            {
-                [ConfigurationKeyName("renamed")]
-                public Child Child { get; } = new();
-
-                public Dictionary<KeyModel, Child> Values { get; } = new();
-
-                public List<Child> Children { get; } = new();
-
-                public int[] Scores { get; } = [3, 4];
-
-                public byte[] Blob { get; } = [5, 6];
-
-                public Box<Child> Box { get; } = new();
-
-                public List<ListValue> Items { get; } = new();
-
-                public ArrayValue[] ArrayValues { get; } = [];
-            }
-
-            public class Child
-            {
-                public string Name { get; set; } = string.Empty;
-
-                public Root? Parent { get; set; }
-            }
-
-            public class ListValue
-            {
-            }
-
-            public class ArrayValue
-            {
-            }
-
-            public class KeyModel
-            {
-                public string Name { get; set; } = string.Empty;
-            }
-
-            public class Box<T> where T : class, new()
-            {
-                public T Value { get; } = new();
-            }
-        }
-
-        namespace Microsoft.Extensions.Configuration
-        {
-            using System;
-
-            [AttributeUsage(AttributeTargets.Property)]
-            public sealed class ConfigurationKeyNameAttribute(string name) : Attribute
-            {
-                public string Name { get; } = name;
-            }
-        }
-
-        namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts
-        {
-            using System.Collections.Generic;
-
-            public abstract class ConfigurationObjectContextBase<T>
-            {
-                public abstract IReadOnlySet<string[]> GetReadableConfigurationPaths();
-
-                public abstract IReadOnlySet<string[]> GetWritableConfigurationPaths();
-
-                public abstract IReadOnlyDictionary<string, object> DumpConfigurationObject(
-                    T instance,
-                    params string[] parentKeys);
-            }
-        }
-        """;
-
-    private const string FallbackNamespaceSource = """
-        namespace Test.Models
-        {
-            using HedgeCraft.Extensions.Configuration.UserSettings.Attributes;
-
-            [ConfigurationObject]
-            public struct Settings
-            {
-                public string Name { get; }
-            }
-        }
-
-        namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts
-        {
-            using System.Collections.Generic;
-
-            public abstract class ConfigurationObjectContextBase<T>
-            {
-                public abstract IReadOnlySet<string[]> GetReadableConfigurationPaths();
-
-                public abstract IReadOnlySet<string[]> GetWritableConfigurationPaths();
-
-                public abstract IReadOnlyDictionary<string, object> DumpConfigurationObject(
-                    T instance,
-                    params string[] parentKeys);
-            }
-        }
-        """;
-
-    private const string ExistingContextSource = """
-        namespace Existing.Context
-        {
-            using System.Collections.Generic;
-            using Demo.Context.Attributes;
-
-            [ConfigurationObject]
-            public class Root
-            {
-                public Child Child { get; } = new();
-            }
-
-            public class Child
-            {
-                public string Name { get; set; } = string.Empty;
-            }
-
-            internal sealed class ExistingChildContext :
-                HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts.ConfigurationObjectContextBase<Child>
-            {
-                public override IReadOnlySet<string[]> GetReadableConfigurationPaths() => new HashSet<string[]>();
-
-                public override IReadOnlySet<string[]> GetWritableConfigurationPaths() => new HashSet<string[]>();
-
-                public override IReadOnlyDictionary<string, object> DumpConfigurationObject(
-                    Child instance,
-                    params string[] parentKeys) => new Dictionary<string, object>();
-            }
-        }
-
-        namespace Demo.Context.Attributes
-        {
-        }
-
-        namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts
-        {
-            using System.Collections.Generic;
-
-            public abstract class ConfigurationObjectContextBase<T>
-            {
-                public abstract IReadOnlySet<string[]> GetReadableConfigurationPaths();
-
-                public abstract IReadOnlySet<string[]> GetWritableConfigurationPaths();
-
-                public abstract IReadOnlyDictionary<string, object> DumpConfigurationObject(
-                    T instance,
-                    params string[] parentKeys);
-            }
-        }
-        """;
-
     [Test]
     public async Task EmitsAttributeInConfiguredRootNamespaceAndGeneratesNestedContexts()
     {
-        GeneratorRun run = RunGenerator(NestedModelsSource, "Demo.Settings.Attributes");
+        GeneratorRun run = RunGenerator(Input.NestedModels, "Demo.Settings.Attributes");
         await Assert.That(run.GeneratedSources.Any(static text =>
-            text.Contains("namespace Demo.Settings.Attributes;", StringComparison.Ordinal) &&
-            text.Contains("class ConfigurationObjectAttribute", StringComparison.Ordinal))).IsTrue();
+            text.Contains(Expectations.AttributeNamespace, StringComparison.Ordinal) &&
+            text.Contains(Expectations.MarkerAttribute, StringComparison.Ordinal))).IsTrue();
         await Assert.That(run.GeneratedSources.Any(static text =>
-            text.Contains("ConfigurationContextOfRoot", StringComparison.Ordinal))).IsTrue();
+            text.Contains(Expectations.RootContext, StringComparison.Ordinal))).IsTrue();
         await Assert.That(run.GeneratedSources.Any(static text =>
-            text.Contains("ConfigurationContextOfChild", StringComparison.Ordinal))).IsTrue();
+            text.Contains(Expectations.ChildContext, StringComparison.Ordinal))).IsTrue();
         await Assert.That(run.GeneratedSources.Any(static text =>
-            text.Contains("ConfigurationContextOfListValue", StringComparison.Ordinal))).IsTrue();
+            text.Contains(Expectations.ListValueContext, StringComparison.Ordinal))).IsTrue();
         await Assert.That(run.GeneratedSources.Any(static text =>
-            text.Contains("ConfigurationContextOfArrayValue", StringComparison.Ordinal))).IsTrue();
+            text.Contains(Expectations.ArrayValueContext, StringComparison.Ordinal))).IsTrue();
         await Assert.That(run.GeneratedSources.Any(static text =>
-            text.Contains("ConfigurationContextOfBox_T<T>", StringComparison.Ordinal) &&
-            text.Contains("where T : class, new()", StringComparison.Ordinal))).IsTrue();
+            text.Contains(Expectations.GenericBoxContext, StringComparison.Ordinal) &&
+            text.Contains(Expectations.GenericBoxConstraint, StringComparison.Ordinal))).IsTrue();
+        await Assert.That(run.GeneratedSources.All(static text =>
+            text.Contains(Expectations.GeneratedCodeAttribute, StringComparison.Ordinal) &&
+            text.Contains("// <auto-generated />", StringComparison.Ordinal))).IsTrue();
+        await Assert.That(run.GeneratedSources.Any(static text =>
+            text.Contains(Expectations.DefinitionList, StringComparison.Ordinal) &&
+            text.Contains(Expectations.ChildContextReference, StringComparison.Ordinal))).IsTrue();
+        string rootContext = run.GeneratedSources.Single(static text =>
+            text.Contains("class ConfigurationContextOfRoot", StringComparison.Ordinal));
+        await Assert.That(rootContext.Contains(Expectations.ReadOnlyPropertyTerm, StringComparison.Ordinal)).IsTrue();
+        await Assert.That(rootContext.Contains("ReadOnlyName", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(rootContext.Contains("private static readonly", StringComparison.Ordinal)).IsTrue();
+        await Assert.That(run.GeneratedHintNames.All(static name => name.EndsWith(".g.cs", StringComparison.Ordinal)))
+            .IsTrue();
+        await Assert.That(run.GeneratedHintNames.Distinct(StringComparer.Ordinal).Count())
+            .IsEqualTo(run.GeneratedHintNames.Length);
         await Assert.That(run.GeneratedSources.Any(static text =>
             text.Contains("ConfigurationContextOfKeyModel", StringComparison.Ordinal))).IsFalse();
         await Assert.That(run.CompilationErrors).IsEqualTo(string.Empty);
@@ -217,11 +72,9 @@ internal sealed class ConfigurationPathGeneratorTests
     [Test]
     public async Task EmitsFallbackAttributeNamespaceWhenRootNamespaceIsUnavailable()
     {
-        GeneratorRun run = RunGenerator(FallbackNamespaceSource, null);
+        GeneratorRun run = RunGenerator(Input.FallbackNamespace, null);
         await Assert.That(run.GeneratedSources.Any(static text =>
-            text.Contains(
-                "namespace HedgeCraft.Extensions.Configuration.UserSettings.Attributes;",
-                StringComparison.Ordinal))).IsTrue();
+            text.Contains(Expectations.DefaultAttributeNamespace, StringComparison.Ordinal))).IsTrue();
         await Assert.That(run.GeneratedSources.Any(static text =>
             text.Contains("ConfigurationContextOfSettings", StringComparison.Ordinal))).IsTrue();
         await Assert.That(run.CompilationErrors).IsEqualTo(string.Empty);
@@ -230,12 +83,12 @@ internal sealed class ConfigurationPathGeneratorTests
     [Test]
     public async Task ReusesAnExistingContextImplementationForNestedModels()
     {
-        GeneratorRun run = RunGenerator(ExistingContextSource, "Demo.Context.Attributes");
+        GeneratorRun run = RunGenerator(Input.ExistingContext, "Demo.Context.Attributes");
         await Assert.That(run.GeneratedSources.Any(static text =>
             text.Contains("ConfigurationContextOfRoot", StringComparison.Ordinal))).IsTrue();
         await Assert.That(run.GeneratedSources.Any(static text =>
             text.Contains(
-                "internal sealed partial class ConfigurationContextOfChild",
+                Expectations.ContextBaseType,
                 StringComparison.Ordinal))).IsFalse();
         await Assert.That(run.GeneratedSources.Any(static text =>
             text.Contains("DumpConfigurationObject(", StringComparison.Ordinal) &&
@@ -246,7 +99,7 @@ internal sealed class ConfigurationPathGeneratorTests
     [Test]
     public async Task DumpsNestedObjectsAndCollectionsWithParentKeys()
     {
-        GeneratorRun run = RunGenerator(NestedModelsSource, "Demo.Settings.Attributes");
+        GeneratorRun run = RunGenerator(Input.NestedModels, "Demo.Settings.Attributes");
         System.Reflection.Assembly assembly = System.Reflection.Assembly.Load(run.AssemblyImage);
         Type rootType = assembly.GetType("Demo.Settings.Root")!;
         Type contextType = assembly.GetType("Demo.Settings.ConfigurationContextOfRoot")!;
@@ -267,23 +120,92 @@ internal sealed class ConfigurationPathGeneratorTests
         ((System.Collections.IDictionary)rootType.GetProperty("Values")!.GetValue(root)!).Add(key, dictionaryChild);
 
         object context = Activator.CreateInstance(contextType, nonPublic: true)!;
-        object?[] arguments = [root, new[] { "Parent" }];
-        IReadOnlyDictionary<string, object> values =
-            (IReadOnlyDictionary<string, object>)contextType.GetMethod("DumpConfigurationObject")!
+        object?[] arguments = [root, true, new[] { "Parent" }];
+        IReadOnlyDictionary<string, object?> values =
+            (IReadOnlyDictionary<string, object?>)contextType.GetMethod("DumpConfigurationObject")!
                 .Invoke(context, arguments)!;
 
+        object?[] allPropertiesArguments = [root, false, Array.Empty<string>()];
+        IReadOnlyDictionary<string, object?> allProperties =
+            (IReadOnlyDictionary<string, object?>)contextType.GetMethod("DumpConfigurationObject")!
+                .Invoke(context, allPropertiesArguments)!;
+        await AssertDefaultDump(values, allProperties).ConfigureAwait(false);
+        await AssertPathMetadata(contextType, context).ConfigureAwait(false);
+    }
+
+    [Test]
+    public async Task GeneratedWritablePathsMatchConfigurationBinderBehavior()
+    {
+        GeneratorRun run = RunGenerator(Input.BindingScenario, "BindingScenario.Settings.Attributes");
+        System.Reflection.Assembly assembly = System.Reflection.Assembly.Load(run.AssemblyImage);
+        Type rootType = assembly.GetType("BindingScenario.Settings.Root")!;
+        Type contextType = assembly.GetType("BindingScenario.Settings.ConfigurationContextOfRoot")!;
+        object root = Activator.CreateInstance(rootType)!;
+
+        Dictionary<string, string?> values = new(StringComparer.Ordinal)
+        {
+            ["renamed:Name"] = "bound child",
+            ["ReadOnlyName"] = "ignored string",
+            ["ReadOnlyScore"] = "42",
+            ["NullableName"] = "bound nullable",
+            ["NullableScore"] = "7",
+        };
+        IConfigurationRoot configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(values)
+            .Build();
+        ConfigurationBinder.Bind(configuration, root);
+
+        IReadOnlySet<string[]> writablePaths =
+            (IReadOnlySet<string[]>)contextType.GetMethod("GetWritableConfigurationPaths")!
+                .Invoke(Activator.CreateInstance(contextType, nonPublic: true), null)!;
+        HashSet<string> generatedPaths = writablePaths
+            .Select(static path => string.Join(":", path))
+            .ToHashSet(StringComparer.Ordinal);
+        object child = rootType.GetProperty("Child")!.GetValue(root)!;
+        Dictionary<string, bool> binderResults = new(StringComparer.Ordinal)
+        {
+            ["renamed:Name"] = Equals(child.GetType().GetProperty("Name")!.GetValue(child), "bound child"),
+            ["ReadOnlyName"] = !Equals(rootType.GetProperty("ReadOnlyName")!.GetValue(root), "read-only"),
+            ["ReadOnlyScore"] = !Equals(rootType.GetProperty("ReadOnlyScore")!.GetValue(root), 9),
+            ["NullableName"] = Equals(rootType.GetProperty("NullableName")!.GetValue(root), "bound nullable"),
+            ["NullableScore"] = Equals(rootType.GetProperty("NullableScore")!.GetValue(root), 7),
+        };
+
+        foreach ((string path, bool binderAccepted) in binderResults)
+        {
+            if (generatedPaths.Contains(path) != binderAccepted)
+            {
+                throw new InvalidOperationException(
+                    $"Generated writable paths differ from ConfigurationBinder for '{path}'.");
+            }
+        }
+    }
+
+    private static async Task AssertDefaultDump(
+        IReadOnlyDictionary<string, object?> values,
+        IReadOnlyDictionary<string, object?> allProperties)
+    {
         await Assert.That(values["Parent:renamed:Name"]).IsEqualTo("root child");
         await Assert.That(values["Parent:Children:0:Name"]).IsEqualTo("root child");
         await Assert.That(values["Parent:Box:Value:Name"]).IsEqualTo("box child");
         await Assert.That(values["Parent:Scores:0"]).IsEqualTo(3);
         await Assert.That(values["Parent:Scores:1"]).IsEqualTo(4);
-        await Assert.That(((byte[])values["Parent:Blob"]).SequenceEqual(new byte[] { 5, 6 })).IsTrue();
+        await Assert.That(((byte[])values["Parent:Blob"]!).SequenceEqual(new byte[] { 5, 6 })).IsTrue();
         await Assert.That(values.ContainsKey("Parent:Blob:0")).IsFalse();
         string dictionaryValue = values.First(entry =>
             entry.Key.StartsWith("Parent:Values:", StringComparison.Ordinal) &&
-            entry.Key.EndsWith(":Name", StringComparison.Ordinal)).Value.ToString()!;
+            entry.Key.EndsWith(":Name", StringComparison.Ordinal)).Value!.ToString()!;
         await Assert.That(dictionaryValue).IsEqualTo("dictionary child");
+        await Assert.That(values.ContainsKey("Parent:ReadOnlyName")).IsFalse();
+        await Assert.That(values.ContainsKey("Parent:ReadOnlyScore")).IsFalse();
+        await Assert.That(values["Parent:NullableName"]).IsNull();
+        await Assert.That(values["Parent:NullableScore"]).IsNull();
+        await Assert.That(allProperties["ReadOnlyName"]).IsEqualTo("read-only");
+        await Assert.That(allProperties["ReadOnlyScore"]).IsEqualTo(9);
+    }
 
+    private static async Task AssertPathMetadata(Type contextType, object context)
+    {
         IReadOnlySet<string[]> readable =
             (IReadOnlySet<string[]>)contextType.GetMethod("GetReadableConfigurationPaths")!.Invoke(context, null)!;
         IReadOnlySet<string[]> writable =
@@ -313,6 +235,11 @@ internal sealed class ConfigurationPathGeneratorTests
             .SelectMany(static result => result.GeneratedSources)
             .Select(static generated => generated.SourceText.ToString())
             .ToImmutableArray();
+        ImmutableArray<string> generatedHintNames = driver.GetRunResult()
+            .Results
+            .SelectMany(static result => result.GeneratedSources)
+            .Select(static generated => generated.HintName)
+            .ToImmutableArray();
 
         string compilationErrors = string.Join(
             Environment.NewLine,
@@ -336,11 +263,16 @@ internal sealed class ConfigurationPathGeneratorTests
                         diagnostic.GetMessage(CultureInfo.InvariantCulture))));
         }
 
-        return new GeneratorRun(generatedSources, compilationErrors, emitResult.Success ? output.ToArray() : []);
+        return new GeneratorRun(
+            generatedSources,
+            generatedHintNames,
+            compilationErrors,
+            emitResult.Success ? output.ToArray() : []);
     }
 
     private sealed record GeneratorRun(
         ImmutableArray<string> GeneratedSources,
+        ImmutableArray<string> GeneratedHintNames,
         string CompilationErrors,
         byte[] AssemblyImage);
 

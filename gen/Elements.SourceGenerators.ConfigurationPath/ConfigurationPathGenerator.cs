@@ -22,14 +22,19 @@ namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
 [Generator]
 public sealed class ConfigurationPathGenerator : IIncrementalGenerator
 {
+    /// <summary>Provides the fallback namespace when the consuming project does not define a root namespace.</summary>
     private const string DefaultNamespace = "HedgeCraft.Extensions.Configuration.UserSettings.Attributes";
+
+    /// <summary>Identifies the framework attribute that overrides a property's configuration key.</summary>
     private const string KeyNameAttribute = "Microsoft.Extensions.Configuration.ConfigurationKeyNameAttribute";
 
+    /// <summary>Formats type symbols with global qualification so emitted code is unambiguous.</summary>
     private static readonly SymbolDisplayFormat FullyQualifiedFormat = SymbolDisplayFormat.FullyQualifiedFormat;
 
     /// <inheritdoc />
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
+        // Keeping namespace selection and marked-type discovery separate lets Roslyn cache each pipeline branch.
         IncrementalValueProvider<string> rootNamespace = context.AnalyzerConfigOptionsProvider
             .Select(static (provider, _) => GetRootNamespace(provider));
 
@@ -39,10 +44,13 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
             .Select(static (type, _) => type!)
             .WithComparer(SymbolEqualityComparer.Default);
 
-        context.RegisterSourceOutput(rootNamespace, EmitConfigurationObjectAttribute);
+        context.RegisterSourceOutput(rootNamespace, ConfigurationObjectAttributeEmitter.Emit);
         context.RegisterSourceOutput(markedTypes.Collect(), EmitContexts);
     }
 
+    /// <summary>Finds a recognized dictionary contract among a type and its implemented interfaces.</summary>
+    /// <param name="type">The candidate collection type.</param>
+    /// <returns>The generic dictionary contract, or <see langword="null"/> when none is implemented.</returns>
     internal static INamedTypeSymbol? GetDictionaryContract(INamedTypeSymbol type)
     {
         return type.AllInterfaces
@@ -50,6 +58,10 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
             .FirstOrDefault(IsGenericDictionary);
     }
 
+    /// <summary>Filters syntax nodes before semantic analysis to keep incremental discovery inexpensive.</summary>
+    /// <param name="node">The syntax node to inspect.</param>
+    /// <param name="cancellationToken">The token supplied by the compiler for cancellable analysis.</param>
+    /// <returns><see langword="true"/> when the declaration uses the configuration-object marker.</returns>
     private static bool IsMarkedTypeCandidate(SyntaxNode node, CancellationToken cancellationToken)
     {
         if (node is not BaseTypeDeclarationSyntax declaration)
@@ -63,6 +75,10 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
                 GetRightmostName(attribute.Name) is "ConfigurationObject" or "ConfigurationObjectAttribute");
     }
 
+    /// <summary>Resolves a marker candidate to its declared type symbol.</summary>
+    /// <param name="context">The semantic context associated with the candidate declaration.</param>
+    /// <param name="cancellationToken">The token supplied by the compiler for cancellable analysis.</param>
+    /// <returns>The marked named type, or <see langword="null"/> for unsupported declarations.</returns>
     private static INamedTypeSymbol? GetMarkedType(GeneratorSyntaxContext context, CancellationToken cancellationToken)
     {
         return context.Node is BaseTypeDeclarationSyntax declaration
@@ -70,6 +86,9 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
             : null;
     }
 
+    /// <summary>Extracts the final identifier from qualified, aliased, or simple attribute names.</summary>
+    /// <param name="name">The attribute's syntactic name.</param>
+    /// <returns>The final identifier, or an empty string for an unsupported name form.</returns>
     private static string GetRightmostName(NameSyntax name)
     {
         return name switch
@@ -81,6 +100,9 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         };
     }
 
+    /// <summary>Gets a valid root namespace or falls back to the generator's documented default namespace.</summary>
+    /// <param name="provider">The analyzer configuration options for the consuming compilation.</param>
+    /// <returns>A syntactically valid, escaped namespace name.</returns>
     private static string GetRootNamespace(AnalyzerConfigOptionsProvider provider)
     {
         if (!provider.GlobalOptions.TryGetValue("build_property.RootNamespace", out string? rootNamespace) ||
@@ -94,6 +116,7 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
             ? string.Join(".", segments.Select(EscapeIdentifier))
             : DefaultNamespace;
 
+        // Keywords are accepted here because EscapeIdentifier makes them legal in the emitted namespace.
         static bool IsNamespaceIdentifier(string segment)
         {
             return SyntaxFacts.IsValidIdentifier(segment) ||
@@ -102,24 +125,9 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         }
     }
 
-    private static void EmitConfigurationObjectAttribute(SourceProductionContext context, string rootNamespace)
-    {
-        StringBuilder source = new();
-        source.AppendLine("// <auto-generated />");
-        source.AppendLine("#nullable enable");
-        source.Append("namespace ").Append(rootNamespace).AppendLine(";");
-        source.AppendLine();
-        source.Append("[global::System.AttributeUsage(")
-            .Append("global::System.AttributeTargets.Class | ")
-            .Append("global::System.AttributeTargets.Struct, Inherited = false)]")
-            .AppendLine();
-        source.AppendLine("public sealed class ConfigurationObjectAttribute : global::System.Attribute");
-        source.AppendLine("{");
-        source.AppendLine("}");
-
-        context.AddSource("ConfigurationObjectAttribute.g.cs", SourceText.From(source.ToString(), Encoding.UTF8));
-    }
-
+    /// <summary>Discovers reachable model types and emits one context source for each model requiring one.</summary>
+    /// <param name="context">The source-production context used to register generated files.</param>
+    /// <param name="markedTypes">The types directly marked by the consumer.</param>
     private static void EmitContexts(SourceProductionContext context, ImmutableArray<INamedTypeSymbol> markedTypes)
     {
         HashSet<INamedTypeSymbol> contextTypes = new(SymbolEqualityComparer.Default);
@@ -146,6 +154,10 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         }
     }
 
+    /// <summary>Adds non-scalar model types reachable through properties, arrays, and collection values.</summary>
+    /// <param name="type">The current property or element type.</param>
+    /// <param name="contextTypes">The set of model definitions that require generated contexts.</param>
+    /// <param name="activeTypes">The recursion stack used to stop cycles in model graphs.</param>
     private static void VisitType(
         ITypeSymbol type,
         ISet<INamedTypeSymbol> contextTypes,
@@ -189,6 +201,7 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
 
         INamedTypeSymbol definition = namedType.OriginalDefinition;
         contextTypes.Add(definition);
+        // A repeated model definition is still emitted once, but its properties need no second graph traversal.
         if (!activeTypes.Add(definition))
         {
             return;
@@ -202,6 +215,10 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         activeTypes.Remove(definition);
     }
 
+    /// <summary>Returns element types from dictionary values or distinct generic enumerable contracts.</summary>
+    /// <param name="type">The collection type being examined.</param>
+    /// <param name="collectionValues">The discovered value or element types.</param>
+    /// <returns><see langword="true"/> when the type exposes one or more recognized value types.</returns>
     internal static bool TryGetCollectionValues(
         INamedTypeSymbol type,
         out ImmutableArray<ITypeSymbol> collectionValues)
@@ -209,6 +226,7 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         INamedTypeSymbol? dictionary = GetDictionaryContract(type);
         if (dictionary is not null)
         {
+            // Configuration paths name dictionary entries by key, so key types do not need generated contexts.
             collectionValues = [dictionary.TypeArguments[1]];
             return true;
         }
@@ -227,6 +245,9 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         return values.Count > 0;
     }
 
+    /// <summary>Tests whether a named type is one of the supported generic dictionary definitions.</summary>
+    /// <param name="type">The contract to inspect.</param>
+    /// <returns><see langword="true"/> for a recognized two-argument generic dictionary contract.</returns>
     private static bool IsGenericDictionary(INamedTypeSymbol type)
     {
         return type.Arity == 2 &&
@@ -237,6 +258,9 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
             type.MetadataName is "IDictionary`2" or "IReadOnlyDictionary`2" or "Dictionary`2";
     }
 
+    /// <summary>Tests whether a named type is the framework's generic enumerable contract.</summary>
+    /// <param name="type">The contract to inspect.</param>
+    /// <returns><see langword="true"/> for <see cref="System.Collections.Generic.IEnumerable{T}"/>.</returns>
     private static bool IsGenericEnumerable(INamedTypeSymbol type)
     {
         return type.Arity == 1 &&
@@ -247,16 +271,27 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
             string.Equals(type.MetadataName, "IEnumerable`1", StringComparison.Ordinal);
     }
 
+    /// <summary>Checks for the CLR nullable-value-type wrapper rather than nullable-reference annotations.</summary>
+    /// <param name="type">The named type to inspect.</param>
+    /// <returns><see langword="true"/> when the type is <see cref="Nullable{T}"/>.</returns>
     private static bool IsNullableValueType(INamedTypeSymbol type)
     {
         return type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
     }
 
+    /// <summary>
+    /// Identifies byte arrays, which configuration treats as scalar binary values rather than sequences.
+    /// </summary>
+    /// <param name="type">The array type to inspect.</param>
+    /// <returns><see langword="true"/> only for a one-dimensional array of bytes.</returns>
     internal static bool IsByteArray(IArrayTypeSymbol type)
     {
         return type.Rank == 1 && type.ElementType.SpecialType == SpecialType.System_Byte;
     }
 
+    /// <summary>Recognizes scalar types that are emitted as one configuration value instead of traversed.</summary>
+    /// <param name="type">The named type to classify.</param>
+    /// <returns><see langword="true"/> for primitives, enums, and supported framework scalar types.</returns>
     internal static bool IsSimpleType(INamedTypeSymbol type)
     {
         if (type.TypeKind == TypeKind.Enum || type.SpecialType != SpecialType.None)
@@ -273,6 +308,9 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
             "global::System.Uri";
     }
 
+    /// <summary>Gets public instance properties with public getters, preferring the most-derived declaration.</summary>
+    /// <param name="type">The model whose bindable properties are requested.</param>
+    /// <returns>Properties sorted by name for deterministic generated output.</returns>
     internal static IEnumerable<IPropertySymbol> GetBindableProperties(INamedTypeSymbol type)
     {
         HashSet<string> names = new(StringComparer.Ordinal);
@@ -293,6 +331,7 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
 
         return properties.OrderBy(static property => property.Name, StringComparer.Ordinal);
 
+        // Visit derived declarations first so a hidden base property cannot replace the effective member.
         void AddProperties(IEnumerable<IPropertySymbol> candidates)
         {
             foreach (IPropertySymbol property in candidates.Where(IsBindableProperty))
@@ -306,6 +345,7 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
             }
         }
 
+        // The getter must be public because generated dump methods read the property directly.
         static bool IsBindableProperty(IPropertySymbol property)
         {
             return !property.IsStatic &&
@@ -315,6 +355,9 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         }
     }
 
+    /// <summary>Gets a property's configured key name, falling back to its source identifier.</summary>
+    /// <param name="property">The property whose configuration key is requested.</param>
+    /// <returns>The key name declared by <c>ConfigurationKeyNameAttribute</c>, or the property name.</returns>
     internal static string GetKeyName(IPropertySymbol property)
     {
         AttributeData? keyNameAttribute = property.GetAttributes()
@@ -327,6 +370,9 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         return keyNameAttribute?.ConstructorArguments.FirstOrDefault().Value as string ?? property.Name;
     }
 
+    /// <summary>Collects generic parameters from the outermost containing type through the supplied type.</summary>
+    /// <param name="type">The nested or top-level type being emitted.</param>
+    /// <returns>Type parameters in declaration order, suitable for a generated sibling type.</returns>
     internal static ImmutableArray<ITypeParameterSymbol> GetTypeParameters(INamedTypeSymbol type)
     {
         Stack<INamedTypeSymbol> containingTypes = new();
@@ -338,6 +384,9 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         return containingTypes.SelectMany(static current => current.TypeParameters).ToImmutableArray();
     }
 
+    /// <summary>Collects constructed generic arguments from containing types through the supplied type.</summary>
+    /// <param name="type">The nested or top-level constructed type being referenced.</param>
+    /// <returns>Type arguments in the same order as <see cref="GetTypeParameters"/>.</returns>
     internal static ImmutableArray<ITypeSymbol> GetTypeArguments(INamedTypeSymbol type)
     {
         Stack<INamedTypeSymbol> containingTypes = new();
@@ -349,6 +398,10 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         return containingTypes.SelectMany(static current => current.TypeArguments).ToImmutableArray();
     }
 
+    /// <summary>Creates a stable sibling context name, including generic parameter names when needed.</summary>
+    /// <param name="type">The model definition represented by the context.</param>
+    /// <param name="typeParameters">The containing and local generic parameters of the model.</param>
+    /// <returns>The generated context class identifier.</returns>
     internal static string CreateContextName(
         INamedTypeSymbol type,
         ImmutableArray<ITypeParameterSymbol> typeParameters)
@@ -362,6 +415,9 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         return string.Concat("ConfigurationContextOf", suffix);
     }
 
+    /// <summary>Formats a generic parameter's constraints for a generated context declaration.</summary>
+    /// <param name="parameter">The parameter whose constraints must be preserved.</param>
+    /// <returns>A complete <c>where</c> clause, or an empty string if the parameter is unconstrained.</returns>
     internal static string CreateConstraintClause(ITypeParameterSymbol parameter)
     {
         List<string> constraints = [];
@@ -398,6 +454,9 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
             : string.Concat("    where ", EscapeIdentifier(parameter.Name), " : ", string.Join(", ", constraints));
     }
 
+    /// <summary>Escapes a keyword identifier so it remains legal in generated C# source.</summary>
+    /// <param name="identifier">The unescaped identifier.</param>
+    /// <returns>The identifier prefixed with <c>@</c> when required.</returns>
     internal static string EscapeIdentifier(string identifier)
     {
         return SyntaxFacts.GetKeywordKind(identifier) != SyntaxKind.None ||
@@ -406,6 +465,9 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
             : identifier;
     }
 
+    /// <summary>Finds a consumer-defined context that already derives from the supported context base.</summary>
+    /// <param name="modelType">The model definition for which to search.</param>
+    /// <returns>The unique matching context, or <see langword="null"/> when none or multiple are suitable.</returns>
     internal static INamedTypeSymbol? FindExistingContext(INamedTypeSymbol modelType)
     {
         ImmutableArray<ITypeParameterSymbol> typeParameters = GetTypeParameters(modelType);
@@ -455,6 +517,7 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
 
         return match;
 
+        // Match the shared base by metadata identity so consumer aliases and global usings do not affect reuse.
         static bool IsContextBase(INamedTypeSymbol type)
         {
             return string.Equals(type.MetadataName, "ConfigurationObjectContextBase`1", StringComparison.Ordinal) &&

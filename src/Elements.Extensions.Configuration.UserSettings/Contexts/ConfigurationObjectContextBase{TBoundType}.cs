@@ -3,7 +3,6 @@
 //  (C) 2023-2026 Carsten Igel.
 //  Published under MIT License
 
-using System;
 using System.Collections.Generic;
 
 namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts;
@@ -45,52 +44,13 @@ public abstract class ConfigurationObjectContextBase<TBoundType>
     /// dictionary representation.
     /// </summary>
     /// <param name="instance">The configuration object instance to dump.</param>
+    /// <param name="considerWritablePropertiesOnly">
+    /// Whether to omit read-only simple properties. Non-simple properties are retained to include their children.
+    /// </param>
     /// <param name="parentKeys">The parent configuration keys to prepend to dumped keys.</param>
     /// <returns>A read-only dictionary mapping configuration keys to their corresponding values.</returns>
-    public abstract IReadOnlyDictionary<string, object> DumpConfigurationObject(
+    public abstract IReadOnlyDictionary<string, object?> DumpConfigurationObject(
         TBoundType instance,
+        bool considerWritablePropertiesOnly = true,
         params string[] parentKeys);
-
-    // AI GENERATED START - model: Copilot
-    private sealed class ConfigurationPathComparer : IEqualityComparer<string[]>
-    {
-        public bool Equals(string[]? left, string[]? right)
-        {
-            if (ReferenceEquals(left, right))
-            {
-                return true;
-            }
-
-            if (left is null || right is null || left.Length != right.Length)
-            {
-                return false;
-            }
-
-            for (int index = 0; index < left.Length; index++)
-            {
-                if (!StringComparer.Ordinal.Equals(left[index], right[index]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public int GetHashCode(string[] path)
-        {
-            ArgumentNullException.ThrowIfNull(path);
-            unchecked
-            {
-                int hash = 17;
-                foreach (string key in path)
-                {
-                    hash = (hash * 31) + StringComparer.Ordinal.GetHashCode(key);
-                }
-
-                return hash;
-            }
-        }
-    }
-    // AI GENERATED END
 }
