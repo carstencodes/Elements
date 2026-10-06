@@ -47,6 +47,7 @@
   </Folder>
   <Folder Name="/SourceGenerators/ConfigurationPath/">
     <Project Path="gen/Elements.SourceGenerators.ConfigurationPath/Elements.SourceGenerators.ConfigurationPath.csproj" />
+    <Project Path="tests/Elements.SourceGenerators.ConfigurationPath.Tests/Elements.SourceGenerators.ConfigurationPath.Tests.csproj" />
   </Folder>
   <Folder Name="/SourceGenerators/Templating/" />
   <Folder Name="/SourceGenerators/Templating/Scriban/">
@@ -54,9 +55,6 @@
   </Folder>
   <Folder Name="/SourceGenerators/ToolShim/">
     <Project Path="gen/Elements.SourceGenerators.ToolShim/Elements.SourceGenerators.ToolShim.csproj" />
-  </Folder>
-  <Folder Name="/Tests/">
-    <Project Path="tests/Elements.SourceGenerators.ConfigurationPath.Tests/Elements.SourceGenerators.ConfigurationPath.Tests.csproj" />
   </Folder>
   <Folder Name="/Tools/" />
 </Solution>
