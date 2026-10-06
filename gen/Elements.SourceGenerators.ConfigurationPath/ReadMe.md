@@ -120,3 +120,22 @@ parent path segments can be supplied with `parentKeys`.
 The context's generated class name is deterministic: `ConfigurationContextOf` followed by
 the model name and, for generic models, its type parameter names. Existing suitable context
 implementations are reused when unambiguous.
+
+## Generated code
+
+The `examples` folder contains the complete model input and corresponding source generator
+output for the example above:
+
+<details>
+<summary>Show the example input and generated output files</summary>
+
+The input model is in [`AppSettings.cs.txt`](examples/AppSettings.cs.txt). The complete
+generated output—including the marker attribute and both generated contexts—is in
+[`AppSettings.g.cs.txt`](examples/AppSettings.g.cs.txt).
+
+</details>
+
+These `.txt` files are reference examples only; the project does not compile or include them.
+The generated contexts implement the abstract path and dump members from
+`ConfigurationObjectContextBase<T>`. The complete output shows their recursive dump
+implementations, nested-context fields, path construction helpers, and structural comparers.

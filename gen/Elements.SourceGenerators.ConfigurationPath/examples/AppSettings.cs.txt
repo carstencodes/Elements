@@ -1,0 +1,20 @@
+using ExampleApp;
+using Microsoft.Extensions.Configuration;
+
+namespace ExampleApp.Configuration;
+
+[ConfigurationObject]
+public sealed class AppSettings
+{
+    [ConfigurationKeyName("environment")]
+    public string Environment { get; set; } = "Development";
+
+    [ConfigurationKeyName("database")]
+    public DatabaseSettings Database { get; set; } = new();
+}
+
+public sealed class DatabaseSettings
+{
+    [ConfigurationKeyName("server")]
+    public string Server { get; set; } = "localhost";
+}
