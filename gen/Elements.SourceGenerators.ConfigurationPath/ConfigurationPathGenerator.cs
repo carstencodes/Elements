@@ -31,7 +31,8 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
     /// <summary>Formats type symbols with global qualification so emitted code is unambiguous.</summary>
     private static readonly SymbolDisplayFormat FullyQualifiedFormat = SymbolDisplayFormat.FullyQualifiedFormat;
 
-    /// <inheritdoc />
+    /// <summary>Registers incremental discovery of marked models and emits their attribute and contexts.</summary>
+    /// <param name="context">The initialization context supplied by the compiler.</param>
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         // Keeping namespace selection and marked-type discovery separate lets Roslyn cache each pipeline branch.
@@ -175,6 +176,10 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         }
     }
 
+    /// <summary>Visits array elements unless the array is a scalar byte buffer.</summary>
+    /// <param name="arrayType">The array type to inspect.</param>
+    /// <param name="contextTypes">The set of model definitions that require generated contexts.</param>
+    /// <param name="activeTypes">The recursion stack used to stop cycles in model graphs.</param>
     private static void VisitArrayType(
         IArrayTypeSymbol arrayType,
         ISet<INamedTypeSymbol> contextTypes,
@@ -186,6 +191,10 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         }
     }
 
+    /// <summary>Routes nullable, scalar, collection, and model types to their appropriate traversal.</summary>
+    /// <param name="namedType">The named type to classify.</param>
+    /// <param name="contextTypes">The set of model definitions that require generated contexts.</param>
+    /// <param name="activeTypes">The recursion stack used to stop cycles in model graphs.</param>
     private static void VisitNamedType(
         INamedTypeSymbol namedType,
         ISet<INamedTypeSymbol> contextTypes,
@@ -211,6 +220,10 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         VisitModelType(namedType, contextTypes, activeTypes);
     }
 
+    /// <summary>Visits the value or element types exposed by a supported collection.</summary>
+    /// <param name="collectionValues">The collection value and element types to visit.</param>
+    /// <param name="contextTypes">The set of model definitions that require generated contexts.</param>
+    /// <param name="activeTypes">The recursion stack used to stop cycles in model graphs.</param>
     private static void VisitCollectionValues(
         ImmutableArray<ITypeSymbol> collectionValues,
         ISet<INamedTypeSymbol> contextTypes,
@@ -222,6 +235,10 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         }
     }
 
+    /// <summary>Adds a model definition and traverses its bindable properties once per active path.</summary>
+    /// <param name="namedType">The model type whose properties should be visited.</param>
+    /// <param name="contextTypes">The set of model definitions that require generated contexts.</param>
+    /// <param name="activeTypes">The recursion stack used to stop cycles in model graphs.</param>
     private static void VisitModelType(
         INamedTypeSymbol namedType,
         ISet<INamedTypeSymbol> contextTypes,
@@ -505,60 +522,68 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
     {
         ImmutableArray<ITypeParameterSymbol> typeParameters = GetTypeParameters(modelType);
         string contextName = CreateContextName(modelType, typeParameters);
-        INamedTypeSymbol? match = null;
-        foreach (INamedTypeSymbol contextType in modelType.ContainingNamespace.GetTypeMembers())
+        INamedTypeSymbol[] matches = modelType.ContainingNamespace.GetTypeMembers()
+            .Where(contextType => IsContextCandidate(contextType, typeParameters.Length))
+            .Where(contextType => ImplementsModel(contextType, modelType.OriginalDefinition))
+            .ToArray();
+
+        // Prefer the generator's predictable name when several valid contexts implement this model.
+        INamedTypeSymbol? namedMatch = matches.FirstOrDefault(contextType =>
+            string.Equals(contextType.Name, contextName, StringComparison.Ordinal));
+        if (namedMatch is not null)
         {
-            if (contextType.TypeKind != TypeKind.Class ||
-                contextType.IsAbstract ||
-                contextType.TypeParameters.Length != typeParameters.Length)
-            {
-                continue;
-            }
-
-            bool implementsModel = false;
-            for (INamedTypeSymbol? baseType = contextType.BaseType;
-                 baseType is not null;
-                 baseType = baseType.BaseType)
-            {
-                if (IsContextBase(baseType) &&
-                    SymbolEqualityComparer.Default.Equals(
-                        baseType.TypeArguments[0].OriginalDefinition,
-                        modelType.OriginalDefinition))
-                {
-                    implementsModel = true;
-                    break;
-                }
-            }
-
-            if (!implementsModel)
-            {
-                continue;
-            }
-
-            if (string.Equals(contextType.Name, contextName, StringComparison.Ordinal))
-            {
-                return contextType;
-            }
-
-            if (match is not null)
-            {
-                return null;
-            }
-
-            match = contextType;
+            return namedMatch;
         }
 
-        return match;
+        // A differently named context is reusable only when it is the sole valid match.
+        return matches.Length == 1 ? matches[0] : null;
+    }
 
-        // Match the shared base by metadata identity so consumer aliases and global usings do not affect reuse.
-        static bool IsContextBase(INamedTypeSymbol type)
+    /// <summary>Filters context declarations by shape before checking their inheritance chain.</summary>
+    /// <param name="contextType">The type declaration being considered for reuse.</param>
+    /// <param name="arity">The number of generic parameters required by the model context.</param>
+    /// <returns><see langword="true"/> when the declaration can represent a generated context.</returns>
+    private static bool IsContextCandidate(INamedTypeSymbol contextType, int arity)
+    {
+        return contextType.TypeKind == TypeKind.Class &&
+            !contextType.IsAbstract &&
+            contextType.TypeParameters.Length == arity;
+    }
+
+    /// <summary>Checks whether a context derives from the supported base instantiated for the model.</summary>
+    /// <param name="contextType">The candidate context declaration.</param>
+    /// <param name="modelDefinition">The original model definition to match.</param>
+    /// <returns><see langword="true"/> when a base type links the candidate to the model.</returns>
+    private static bool ImplementsModel(INamedTypeSymbol contextType, INamedTypeSymbol modelDefinition)
+    {
+        for (INamedTypeSymbol? baseType = contextType.BaseType;
+             baseType is not null;
+             baseType = baseType.BaseType)
         {
-            return string.Equals(type.MetadataName, "ConfigurationObjectContextBase`1", StringComparison.Ordinal) &&
-                string.Equals(
-                    type.ContainingNamespace.ToDisplayString(),
-                    "HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts",
-                    StringComparison.Ordinal);
+            if (IsContextBase(baseType) &&
+                SymbolEqualityComparer.Default.Equals(
+                    baseType.TypeArguments[0].OriginalDefinition,
+                    modelDefinition))
+            {
+                return true;
+            }
         }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Identifies the shared context base by metadata identity, independent of aliases and using directives.
+    /// </summary>
+    /// <param name="type">The base type to identify.</param>
+    /// <returns><see langword="true"/> when the type is the supported configuration context base.</returns>
+    private static bool IsContextBase(INamedTypeSymbol type)
+    {
+        return string.Equals(type.MetadataName, "ConfigurationObjectContextBase`1", StringComparison.Ordinal) &&
+            string.Equals(
+                type.ContainingNamespace.ToDisplayString(),
+                "HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts",
+                StringComparison.Ordinal);
     }
 }
 // AI GENERATED END
