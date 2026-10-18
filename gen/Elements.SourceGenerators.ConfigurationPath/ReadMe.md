@@ -14,6 +14,9 @@ The generator discovers classes and structs marked with `[ConfigurationObject]`.
   `HedgeCraft.Extensions.Configuration.UserSettings.Attributes`.
 - An internal, sealed `ConfigurationContextOf...` class in the same namespace as each model
   that needs a context. Contexts derive from `ConfigurationObjectContextBase<T>`.
+- An internal static `BoundTypeContextExtensions` class in each model namespace, providing
+  thread-safe lazily cached context singletons and extension accessors (`GetConfigurationContext`
+  and `ConfigurationContext`) for each bound model type.
 - `GetReadableConfigurationPaths()` and `GetWritableConfigurationPaths()` implementations.
   Each returns the model's paths as arrays of path segments; writable paths omit read-only
   scalar properties.
@@ -98,19 +101,25 @@ public sealed class AppSettings
 }
 ```
 
-Generated contexts are `internal`, so use them from code in the same assembly. For example,
-this retrieves paths and flattens an object:
+Generated contexts are `internal`, so use them from code in the same assembly. The recommended
+way to retrieve a context is via the generated extension methods on the model instance:
 
 ```csharp
 using System.Collections.Generic;
 using ExampleApp.Configuration;
 
 AppSettings settings = new();
-ConfigurationContextOfAppSettings context = new();
+
+// Retrieve the lazily cached context instance via extension method:
+ConfigurationContextOfAppSettings context = settings.GetConfigurationContext();
+// Alternatively: ConfigurationContextOfAppSettings context = settings.ConfigurationContext();
 
 IReadOnlySet<string[]> writablePaths = context.GetWritableConfigurationPaths();
 IReadOnlyDictionary<string, object?> values = context.DumpConfigurationObject(settings);
 ```
+
+Direct instantiation (`new ConfigurationContextOfAppSettings()`) remains available if a new
+independent context instance is required.
 
 `DumpConfigurationObject` includes writable scalar properties by default. Pass
 `considerWritablePropertiesOnly: false` to include read-only scalar properties as well;
@@ -120,6 +129,17 @@ parent path segments can be supplied with `parentKeys`.
 The context's generated class name is deterministic: `ConfigurationContextOf` followed by
 the model name and, for generic models, its type parameter names. Existing suitable context
 implementations are reused when unambiguous.
+
+## Diagnostics
+
+The generator analyzes bound models and emits compiler diagnostics for invalid or unsupported configurations:
+
+| Diagnostic ID | Severity | Title | Description | Resolution |
+|---|---|---|---|---|
+| `HC_CP001` | Warning | Duplicate configuration key name | Multiple properties in the same model resolve to identical configuration keys. | Ensure distinct property names or use `[ConfigurationKeyName]` to provide unique keys. |
+| `HC_CP002` | Warning | Unsupported dictionary key type | A dictionary property uses a key type that is not convertible to/from a string path segment. | Use `string` or primitive types convertible to strings as dictionary keys. |
+| `HC_CP003` | Warning | Extension member collision | An extension method name (`GetConfigurationContext` or `ConfigurationContext`) collides with an existing member on the target model. The generator skips generating the colliding extension for that model. | Rename the conflicting member on the model type, or instantiate the generated context class directly. |
+| `HC_CP004` | Warning | Unbound generic model type parameter | A model contains unbound (open) generic type parameters. Extension members cannot be generated for open generic types. | Use closed/bound generic types when declaring configuration models. |
 
 ## Generated code
 
@@ -138,4 +158,5 @@ generated output—including the marker attribute and both generated contexts—
 These `.txt` files are reference examples only; the project does not compile or include them.
 The generated contexts implement the abstract path and dump members from
 `ConfigurationObjectContextBase<T>`. The complete output shows their recursive dump
-implementations, nested-context fields, path construction helpers, and structural comparers.
+implementations, nested-context fields, path construction helpers, structural comparers, and
+the `BoundTypeContextExtensions` class.
