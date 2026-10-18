@@ -3,6 +3,7 @@
 //  (C) 2023-2026 Carsten Igel.
 //  Published under MIT License
 
+using System;
 using System.Collections.Generic;
 
 namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts;
@@ -53,4 +54,60 @@ public abstract class ConfigurationObjectContextBase<TBoundType>
         TBoundType instance,
         bool considerWritablePropertiesOnly = true,
         params string[] parentKeys);
+
+    // AI GENERATED START - model: gemini-3.7-flash
+    /// <summary>
+    /// Prefixes the specified nested configuration path segments with a parent key and adds them to the destination set.
+    /// </summary>
+    /// <param name="destination">The destination set receiving the prefixed configuration paths.</param>
+    /// <param name="parentKey">The parent key segment to prefix.</param>
+    /// <param name="nestedPaths">The collection of nested configuration path segments.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="destination"/>, <paramref name="parentKey"/>, or <paramref name="nestedPaths"/> is <see langword="null"/>.
+    /// </exception>
+    protected static void AppendNestedPaths(
+        ISet<string[]> destination,
+        string parentKey,
+        IEnumerable<string[]> nestedPaths)
+    {
+        ArgumentNullException.ThrowIfNull(destination);
+        ArgumentNullException.ThrowIfNull(parentKey);
+        ArgumentNullException.ThrowIfNull(nestedPaths);
+
+        foreach (string[] path in nestedPaths)
+        {
+            string[] combined = new string[path.Length + 1];
+            combined[0] = parentKey;
+            Array.Copy(path, 0, combined, 1, path.Length);
+            destination.Add(combined);
+        }
+    }
+
+    /// <summary>
+    /// Prefixes the specified nested configuration path segments with multiple parent keys and adds them to the destination set.
+    /// </summary>
+    /// <param name="destination">The destination set receiving the prefixed configuration paths.</param>
+    /// <param name="parentKeys">The parent key segments to prefix.</param>
+    /// <param name="nestedPaths">The collection of nested configuration path segments.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="destination"/>, <paramref name="parentKeys"/>, or <paramref name="nestedPaths"/> is <see langword="null"/>.
+    /// </exception>
+    protected static void AppendNestedPaths(
+        ISet<string[]> destination,
+        string[] parentKeys,
+        IEnumerable<string[]> nestedPaths)
+    {
+        ArgumentNullException.ThrowIfNull(destination);
+        ArgumentNullException.ThrowIfNull(parentKeys);
+        ArgumentNullException.ThrowIfNull(nestedPaths);
+
+        foreach (string[] path in nestedPaths)
+        {
+            string[] combined = new string[parentKeys.Length + path.Length];
+            Array.Copy(parentKeys, 0, combined, 0, parentKeys.Length);
+            Array.Copy(path, 0, combined, parentKeys.Length, path.Length);
+            destination.Add(combined);
+        }
+    }
+    // AI GENERATED END
 }

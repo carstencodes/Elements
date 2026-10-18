@@ -10,6 +10,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.CodeGeneration;
+using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters.Options;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -102,8 +103,10 @@ internal static class ConfigurationContextEmitter
 
         source.AppendLine("{");
         AppendNestedContextFields(source, type);
-        ConfigurationPathMethodsEmitter.AppendMethod(source, ReadablePathsMethodName, paths.Readable);
-        ConfigurationPathMethodsEmitter.AppendMethod(source, WritablePathsMethodName, paths.Writable);
+        ConfigurationPathMethodsEmitter.AppendMethod(source, ReadablePathsMethodName, paths.ReadableDirect,
+            paths.Delegations);
+        ConfigurationPathMethodsEmitter.AppendMethod(source, WritablePathsMethodName, paths.WritableDirect,
+            paths.Delegations);
         ConfigurationDumpMethodEmitter.AppendMethods(source, type);
         AppendKeyHelpers(source);
         AppendPathComparer(source);
@@ -293,56 +296,47 @@ internal static class ConfigurationContextEmitter
         }
     }
 
-    /// <summary>Collects readable and writable property paths reachable from the root model.</summary>
+    /// <summary>Collects direct property paths and nested context delegations for the root model.</summary>
     /// <param name="rootType">The model represented by the context being emitted.</param>
-    /// <returns>Both path sets, kept separate because readable metadata is broader than writable metadata.</returns>
+    /// <returns>Direct path sets and nested delegations for path generation.</returns>
     private static ContextPaths CollectPaths(INamedTypeSymbol rootType)
     {
         ContextPaths paths = new();
-        HashSet<INamedTypeSymbol> activeTypes = new(SymbolEqualityComparer.Default) { rootType.OriginalDefinition, };
-        CollectProperties(rootType, [], paths, activeTypes);
+        HashSet<INamedTypeSymbol> activeTypes = new(SymbolEqualityComparer.Default) { rootType.OriginalDefinition };
+        foreach (IPropertySymbol property in ConfigurationPathGenerator.GetBindableProperties(rootType))
+        {
+            string key = ConfigurationPathGenerator.GetKeyName(property);
+            bool isWritable = property.SetMethod?.DeclaredAccessibility == Accessibility.Public;
+            CollectTypePaths(property.Type, [key], paths, rootType, isWritable, activeTypes);
+        }
+
         return paths;
     }
 
-    /// <summary>Adds each property's key path, then recursively adds paths exposed by its nested value type.</summary>
-    /// <param name="type">The model whose properties are collected.</param>
-    /// <param name="parentKeys">The path prefix accumulated from ancestor properties.</param>
-    /// <param name="paths">The readable and writable path collections being built.</param>
-    /// <param name="activeTypes">The recursion stack used to prevent cycles in model references.</param>
-    private static void CollectProperties(
-        INamedTypeSymbol type,
-        ImmutableArray<string> parentKeys,
-        ContextPaths paths,
-        ISet<INamedTypeSymbol> activeTypes)
-    {
-        foreach (IPropertySymbol property in ConfigurationPathGenerator.GetBindableProperties(type))
-        {
-            ImmutableArray<string> keyPath = parentKeys.Add(ConfigurationPathGenerator.GetKeyName(property));
-            paths.Readable.Add(keyPath.ToArray());
-            // Writable metadata describes assignment to this property, not whether its nested values are mutable.
-            if (property.SetMethod?.DeclaredAccessibility == Accessibility.Public)
-            {
-                paths.Writable.Add(keyPath.ToArray());
-            }
-
-            CollectNestedPaths(property.Type, keyPath, paths, activeTypes);
-        }
-    }
-
-    /// <summary>Unwraps containers and continues path collection only for nested configuration models.</summary>
-    /// <param name="type">The property's type or a collection's value type.</param>
-    /// <param name="parentKeys">The path prefix to use for the nested model's properties.</param>
-    /// <param name="paths">The readable and writable path collections being built.</param>
-    /// <param name="activeTypes">The recursion stack used to prevent cycles in model references.</param>
-    private static void CollectNestedPaths(
+    /// <summary>Traverses property types to collect direct paths and child context delegations.</summary>
+    /// <param name="type">The current property or container element type.</param>
+    /// <param name="prefix">The key prefix accumulated for this property.</param>
+    /// <param name="paths">The destination path sets and delegations.</param>
+    /// <param name="rootType">The root context model type.</param>
+    /// <param name="isWritable">Whether this property path has a public setter.</param>
+    /// <param name="activeTypes">Cycle guard set for expanding closed generic types.</param>
+    private static void CollectTypePaths(
         ITypeSymbol type,
-        ImmutableArray<string> parentKeys,
+        ImmutableArray<string> prefix,
         ContextPaths paths,
+        INamedTypeSymbol rootType,
+        bool isWritable,
         ISet<INamedTypeSymbol> activeTypes)
     {
+        paths.ReadableDirect.Add(prefix.ToArray());
+        if (isWritable)
+        {
+            paths.WritableDirect.Add(prefix.ToArray());
+        }
+
         if (type is IArrayTypeSymbol arrayType)
         {
-            CollectNestedPaths(arrayType.ElementType, parentKeys, paths, activeTypes);
+            AddCollectionDelegations(arrayType.ElementType, prefix, paths, rootType);
             return;
         }
 
@@ -353,7 +347,7 @@ internal static class ConfigurationContextEmitter
 
         if (namedType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
         {
-            CollectNestedPaths(namedType.TypeArguments[0], parentKeys, paths, activeTypes);
+            CollectTypePaths(namedType.TypeArguments[0], prefix, paths, rootType, false, activeTypes);
             return;
         }
 
@@ -366,24 +360,116 @@ internal static class ConfigurationContextEmitter
         {
             foreach (ITypeSymbol value in values)
             {
-                CollectNestedPaths(value, parentKeys, paths, activeTypes);
+                AddCollectionDelegations(value, prefix, paths, rootType);
             }
 
             return;
         }
 
-        INamedTypeSymbol definition = namedType.OriginalDefinition;
-        // The same model may recur through several properties; only suppress recursion while it is on this path.
-        if (!activeTypes.Add(definition))
+        if (IsClosedGenericObject(namedType) &&
+            ConfigurationPathGenerator.FindExistingContext(namedType.OriginalDefinition) is null)
+        {
+            CollectClosedGenericPaths(namedType, prefix, paths, rootType, activeTypes);
+            return;
+        }
+
+        if (SymbolEqualityComparer.Default.Equals(namedType.OriginalDefinition, rootType.OriginalDefinition))
         {
             return;
         }
 
-        CollectProperties(namedType, parentKeys, paths, activeTypes);
-        activeTypes.Remove(definition);
+        string fieldName = ConfigurationDumpMethodEmitter.CreateContextFieldName(namedType);
+        bool isUserContext = ConfigurationPathGenerator.FindExistingContext(namedType.OriginalDefinition) is not null;
+        paths.Delegations.Add(new NestedPathDelegation(prefix.ToArray(), fieldName, isUserContext));
     }
 
-    /// <summary>Emits a helper that copies and extends path arrays without mutating caller-owned prefixes.</summary>
+    /// <summary>Expands closed generic model properties and recurses through their bound types.</summary>
+    /// <param name="namedType">The closed generic model type.</param>
+    /// <param name="prefix">The key prefix accumulated for this property.</param>
+    /// <param name="paths">The destination path sets and delegations.</param>
+    /// <param name="rootType">The root context model type.</param>
+    /// <param name="activeTypes">Cycle guard set for expanding closed generic types.</param>
+    private static void CollectClosedGenericPaths(
+        INamedTypeSymbol namedType,
+        ImmutableArray<string> prefix,
+        ContextPaths paths,
+        INamedTypeSymbol rootType,
+        ISet<INamedTypeSymbol> activeTypes)
+    {
+        if (!activeTypes.Add(namedType.OriginalDefinition))
+        {
+            return;
+        }
+
+        foreach (IPropertySymbol subProperty in ConfigurationPathGenerator.GetBindableProperties(namedType))
+        {
+            string subKey = ConfigurationPathGenerator.GetKeyName(subProperty);
+            bool subWritable = subProperty.SetMethod?.DeclaredAccessibility == Accessibility.Public;
+            CollectTypePaths(subProperty.Type, prefix.Add(subKey), paths, rootType, subWritable, activeTypes);
+        }
+
+        activeTypes.Remove(namedType.OriginalDefinition);
+    }
+
+    /// <summary>Adds delegations for models contained inside collection or dictionary values.</summary>
+    /// <param name="elementType">The collection element or map value type.</param>
+    /// <param name="prefix">The parent property key prefix.</param>
+    /// <param name="paths">The destination path sets and delegations.</param>
+    /// <param name="rootType">The root context model type.</param>
+    private static void AddCollectionDelegations(
+        ITypeSymbol elementType,
+        ImmutableArray<string> prefix,
+        ContextPaths paths,
+        INamedTypeSymbol rootType)
+    {
+        foreach (INamedTypeSymbol childModel in GetContextModels(elementType))
+        {
+            if (SymbolEqualityComparer.Default.Equals(childModel.OriginalDefinition, rootType.OriginalDefinition))
+            {
+                continue;
+            }
+
+            string fieldName = ConfigurationDumpMethodEmitter.CreateContextFieldName(childModel);
+            bool isUserContext =
+                ConfigurationPathGenerator.FindExistingContext(childModel.OriginalDefinition) is not null;
+            paths.Delegations.Add(new NestedPathDelegation(prefix.ToArray(), fieldName, isUserContext));
+        }
+    }
+
+    /// <summary>Checks whether a generic model can be expanded with concrete type arguments at this call site.</summary>
+    /// <param name="type">The candidate model type.</param>
+    /// <returns><see langword="true"/> when it is a non-collection model with closed generic arguments.</returns>
+    private static bool IsClosedGenericObject(INamedTypeSymbol type)
+    {
+        if (type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T ||
+            ConfigurationPathGenerator.IsSimpleType(type) ||
+            ConfigurationPathGenerator.GetDictionaryContract(type) is not null ||
+            ConfigurationPathGenerator.TryGetCollectionValues(type, out _))
+        {
+            return false;
+        }
+
+        ImmutableArray<ITypeSymbol> typeArguments = ConfigurationPathGenerator.GetTypeArguments(type);
+        return typeArguments.Length > 0 && typeArguments.All(static argument => !ContainsTypeParameter(argument));
+
+        static bool ContainsTypeParameter(ITypeSymbol type)
+        {
+            if (type.TypeKind == TypeKind.TypeParameter)
+            {
+                return true;
+            }
+
+            if (type is IArrayTypeSymbol arrayType)
+            {
+                return ContainsTypeParameter(arrayType.ElementType);
+            }
+
+            return type is INamedTypeSymbol namedType &&
+                   namedType.TypeArguments.Any(ContainsTypeParameter);
+        }
+    }
+
+    /// <summary>Emits helpers that copy and extend path arrays without mutating caller-owned prefixes.</summary>
     /// <param name="source">The source buffer receiving the helper declaration.</param>
     private static void AppendKeyHelpers(StringBuilder source)
     {
@@ -501,14 +587,17 @@ internal static class ConfigurationContextEmitter
             .Append('>');
     }
 
-    /// <summary>Stores both path sets collected for one context so generation does not mix their semantics.</summary>
+    /// <summary>Stores direct paths and nested delegations collected for one context.</summary>
     private sealed class ContextPaths
     {
-        /// <summary>Gets all public-readable property paths, including paths through nested models.</summary>
-        public List<string[]> Readable { get; } = [];
+        /// <summary>Gets all direct public-readable property paths of the model.</summary>
+        public List<string[]> ReadableDirect { get; } = [];
 
-        /// <summary>Gets property paths with public setters, independent of dump filtering.</summary>
-        public List<string[]> Writable { get; } = [];
+        /// <summary>Gets direct property paths with public setters.</summary>
+        public List<string[]> WritableDirect { get; } = [];
+
+        /// <summary>Gets delegations to nested child context path methods.</summary>
+        public List<NestedPathDelegation> Delegations { get; } = [];
     }
 }
 // AI GENERATED END

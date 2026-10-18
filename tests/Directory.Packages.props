@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.12" />
     <PackageVersion Include="Coverlet.MTP" Version="10.1.0" />
     <PackageVersion Include="Microsoft.Testing.Platform.MSBuild" Version="2.5.1" />
     <PackageVersion Include="TUnit" Version="1.75.0" />

@@ -31,26 +31,76 @@ internal sealed partial class ConfigurationContextOfAppSettings : global::HedgeC
 
     public override global::System.Collections.Generic.IReadOnlySet<string[]> GetReadableConfigurationPaths()
     {
-        return new global::System.Collections.Generic.HashSet<string[]>(
-            new string[][]
-            {
-                new string[] { "database" },
-                new string[] { "database", "server" },
-                new string[] { "environment" },
-            },
-            new ConfigurationPathComparer());
+        return this.GetReadableConfigurationPathsCore(new global::System.Collections.Generic.HashSet<object>(
+            global::System.Collections.Generic.ReferenceEqualityComparer.Instance));
+    }
+
+    internal global::System.Collections.Generic.IReadOnlySet<string[]> GetReadableConfigurationPathsCore(global::System.Collections.Generic.HashSet<object> visited)
+    {
+        if (!visited.Add(this))
+        {
+            return new global::System.Collections.Generic.HashSet<string[]>(
+                new ConfigurationPathComparer());
+        }
+
+        try
+        {
+            global::System.Collections.Generic.HashSet<string[]> paths = new(
+                new string[][]
+                {
+                    new string[] { "database" },
+                    new string[] { "environment" },
+                },
+                new ConfigurationPathComparer());
+
+            AppendNestedPaths(
+                paths,
+                "database",
+                __nestedContext_global__ExampleApp_Configuration_DatabaseSettings_0A1C73492A67.GetReadableConfigurationPathsCore(visited));
+
+            return paths;
+        }
+        finally
+        {
+            visited.Remove(this);
+        }
     }
 
     public override global::System.Collections.Generic.IReadOnlySet<string[]> GetWritableConfigurationPaths()
     {
-        return new global::System.Collections.Generic.HashSet<string[]>(
-            new string[][]
-            {
-                new string[] { "database" },
-                new string[] { "database", "server" },
-                new string[] { "environment" },
-            },
-            new ConfigurationPathComparer());
+        return this.GetWritableConfigurationPathsCore(new global::System.Collections.Generic.HashSet<object>(
+            global::System.Collections.Generic.ReferenceEqualityComparer.Instance));
+    }
+
+    internal global::System.Collections.Generic.IReadOnlySet<string[]> GetWritableConfigurationPathsCore(global::System.Collections.Generic.HashSet<object> visited)
+    {
+        if (!visited.Add(this))
+        {
+            return new global::System.Collections.Generic.HashSet<string[]>(
+                new ConfigurationPathComparer());
+        }
+
+        try
+        {
+            global::System.Collections.Generic.HashSet<string[]> paths = new(
+                new string[][]
+                {
+                    new string[] { "database" },
+                    new string[] { "environment" },
+                },
+                new ConfigurationPathComparer());
+
+            AppendNestedPaths(
+                paths,
+                "database",
+                __nestedContext_global__ExampleApp_Configuration_DatabaseSettings_0A1C73492A67.GetWritableConfigurationPathsCore(visited));
+
+            return paths;
+        }
+        finally
+        {
+            visited.Remove(this);
+        }
     }
 
     public override global::System.Collections.Generic.IReadOnlyDictionary<string, object?> DumpConfigurationObject(global::ExampleApp.Configuration.AppSettings instance, bool considerWritablePropertiesOnly = true, params string[] parentKeys)
@@ -172,6 +222,11 @@ internal sealed partial class ConfigurationContextOfDatabaseSettings : global::H
             new ConfigurationPathComparer());
     }
 
+    internal global::System.Collections.Generic.IReadOnlySet<string[]> GetReadableConfigurationPathsCore(global::System.Collections.Generic.HashSet<object> visited)
+    {
+        return this.GetReadableConfigurationPaths();
+    }
+
     public override global::System.Collections.Generic.IReadOnlySet<string[]> GetWritableConfigurationPaths()
     {
         return new global::System.Collections.Generic.HashSet<string[]>(
@@ -180,6 +235,11 @@ internal sealed partial class ConfigurationContextOfDatabaseSettings : global::H
                 new string[] { "server" },
             },
             new ConfigurationPathComparer());
+    }
+
+    internal global::System.Collections.Generic.IReadOnlySet<string[]> GetWritableConfigurationPathsCore(global::System.Collections.Generic.HashSet<object> visited)
+    {
+        return this.GetWritableConfigurationPaths();
     }
 
     public override global::System.Collections.Generic.IReadOnlyDictionary<string, object?> DumpConfigurationObject(global::ExampleApp.Configuration.DatabaseSettings instance, bool considerWritablePropertiesOnly = true, params string[] parentKeys)

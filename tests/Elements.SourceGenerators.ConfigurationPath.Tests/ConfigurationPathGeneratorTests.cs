@@ -431,6 +431,77 @@ internal sealed class ConfigurationPathGeneratorTests
         }
     }
 
+    [Test]
+    [DisplayName("Generated context paths use structural comparer for set lookup")]
+    [Description(
+        "Verifies that the generated context path sets use structural comparison to correctly match equivalent path segment arrays.")]
+    public async Task GeneratedContextPathsUseStructuralComparerForSetLookup()
+    {
+        GeneratorRun run = RunGenerator(Input.NestedModels, "Demo.Settings.Attributes");
+        System.Reflection.Assembly assembly = System.Reflection.Assembly.Load(run.AssemblyImage);
+        Type contextType = assembly.GetType("Demo.Settings.ConfigurationContextOfRoot")!;
+        object context = Activator.CreateInstance(contextType, nonPublic: true)!;
+
+        IReadOnlySet<string[]> readable =
+            (IReadOnlySet<string[]>)contextType
+                .GetMethod(nameof(ConfigurationObjectContextBase<object>.GetReadableConfigurationPaths))!
+                .Invoke(context, null)!;
+
+        string[] equivalentArray = ["renamed", nameof(TestChildModel.Name)];
+        string[] differentArray = ["renamed", "NonExistent"];
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(readable.Contains(equivalentArray))
+                .IsTrue()
+                .Because("separate array instance with matching segments should be found in readable paths set");
+
+            await Assert.That(readable.Contains(differentArray))
+                .IsFalse()
+                .Because("array instance with differing segments should not be found in readable paths set");
+        }
+    }
+
+    [Test]
+    [DisplayName("Generated context delegates to nested context path methods")]
+    [Description(
+        "Verifies that parent contexts emit calls to AppendNestedPaths and child context methods instead of duplicating child path arrays.")]
+    public async Task GeneratesDelegatedCallsForNestedContextPaths()
+    {
+        GeneratorRun run = RunGenerator(Input.NestedModels, "Demo.Settings.Attributes");
+        string? rootSource = run.GeneratedSources.FirstOrDefault(static s =>
+            s.Contains(Expectations.RootContext, StringComparison.Ordinal));
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(rootSource)
+                .IsNotNull()
+                .Because("generator should generate the root context source file");
+
+            await Assert.That(rootSource!.Contains("AppendNestedPaths(", StringComparison.Ordinal))
+                .IsTrue()
+                .Because("root context should use AppendNestedPaths to delegate child paths");
+
+            await Assert
+                .That(rootSource.Contains("GetReadableConfigurationPathsCore(visited)", StringComparison.Ordinal))
+                .IsTrue()
+                .Because(
+                    "root context should delegate to child GetReadableConfigurationPathsCore with visited cycle guard");
+
+            await Assert
+                .That(rootSource.Contains("GetWritableConfigurationPathsCore(visited)", StringComparison.Ordinal))
+                .IsTrue()
+                .Because(
+                    "root context should delegate to child GetWritableConfigurationPathsCore with visited cycle guard");
+
+            await Assert
+                .That(rootSource.Contains("private static void AppendNestedPaths", StringComparison.Ordinal))
+                .IsFalse()
+                .Because(
+                    "context classes should inherit AppendNestedPaths from base instead of emitting private duplicates");
+        }
+    }
+
     private static async Task AssertDefaultDump(
         IReadOnlyDictionary<string, object?> values,
         IReadOnlyDictionary<string, object?> allProperties)
