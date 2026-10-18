@@ -68,6 +68,8 @@ public sealed partial class CommandLineConfigurationSource(RootCommand command) 
     /// <param name="option">The option to bind.</param>
     public void Add<T>(string key, Option<T> option)
     {
+        ArgumentNullException.ThrowIfNull(option);
+
         option.Recursive = true;
         this.commandLineBindings.Add(key, new OptionHolder<T>(option, this));
     }
@@ -79,6 +81,7 @@ public sealed partial class CommandLineConfigurationSource(RootCommand command) 
     /// <param name="formatProvider">The format provider to use.</param>
     internal void Add(IReadOnlyDictionary<string, OptionHolderBase> options, IFormatProvider formatProvider)
     {
+        ArgumentNullException.ThrowIfNull(options);
         foreach (KeyValuePair<string, OptionHolderBase> binding in options)
         {
             this.commandLineBindings.Add(binding.Key, binding.Value);
@@ -94,6 +97,7 @@ public sealed partial class CommandLineConfigurationSource(RootCommand command) 
     /// <returns>A new <see cref="CommandLineConfigurationProvider"/> instance configured with the option bindings.</returns>
     public IConfigurationProvider Build(IConfigurationBuilder builder)
     {
+        ArgumentNullException.ThrowIfNull(builder);
         CommandLineConfigurationProvider provider = new();
         foreach (KeyValuePair<string, OptionHolderBase> binding in this.commandLineBindings)
         {
