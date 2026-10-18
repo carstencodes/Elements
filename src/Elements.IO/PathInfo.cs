@@ -3,7 +3,9 @@
 // (C) 2023-2026 Carsten Igel.
 // Published under MIT License
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace HedgeCraft.Elements.IO;
@@ -35,6 +37,7 @@ public sealed class PathInfo : FileSystemInfo
     /// <param name="fileSystemEntry">The existing file system info entry.</param>
     public PathInfo(FileSystemInfo fileSystemEntry)
     {
+        ArgumentNullException.ThrowIfNull(fileSystemEntry);
         this.FullPath = fileSystemEntry.FullName;
         this.Name = fileSystemEntry.Name;
     }
@@ -45,6 +48,7 @@ public sealed class PathInfo : FileSystemInfo
     /// <param name="rootDrive">The drive information.</param>
     public PathInfo(DriveInfo rootDrive)
     {
+        ArgumentNullException.ThrowIfNull(rootDrive);
         this.FullPath = rootDrive.RootDirectory.FullName;
         this.Name = rootDrive.Name;
     }
@@ -133,6 +137,52 @@ public sealed class PathInfo : FileSystemInfo
     }
 
     /// <summary>
+    /// Determines whether the specified object is a <see cref="PathInfo"/> with the same full path.
+    /// </summary>
+    /// <param name="obj">The object to compare.</param>
+    /// <returns><see langword="true"/> if the object is equal to this instance; otherwise, <see langword="false"/>.</returns>
+    public override bool Equals(object? obj)
+    {
+        return obj is PathInfo other
+            && string.Equals(this.FullName, other.FullName, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Determines whether two <see cref="PathInfo"/> instances refer to the same full path.
+    /// </summary>
+    /// <param name="left">The first path info.</param>
+    /// <param name="right">The second path info.</param>
+    /// <returns><see langword="true"/> if both paths are equal; otherwise, <see langword="false"/>.</returns>
+    [SuppressMessage("Major Code Smell", "S3875:\"operator==\" should not be overloaded on reference types",
+        Justification = "Value equality on the full path is required by S4050; the operators delegate to Equals and keep comparisons consistent with it.")]
+    public static bool operator ==(PathInfo? left, PathInfo? right)
+    {
+        return left is null ? right is null : left.Equals(right);
+    }
+
+    /// <summary>
+    /// Determines whether two <see cref="PathInfo"/> instances refer to different full paths.
+    /// </summary>
+    /// <param name="left">The first path info.</param>
+    /// <param name="right">The second path info.</param>
+    /// <returns><see langword="true"/> if the paths differ; otherwise, <see langword="false"/>.</returns>
+    [SuppressMessage("Major Code Smell", "S3875:\"operator==\" should not be overloaded on reference types",
+        Justification = "Paired with operator== as required by S4050; delegates to Equals.")]
+    public static bool operator !=(PathInfo? left, PathInfo? right)
+    {
+        return !(left == right);
+    }
+
+    /// <summary>
+    /// Returns a hash code based on the full path.
+    /// </summary>
+    /// <returns>The hash code of the full path.</returns>
+    public override int GetHashCode()
+    {
+        return StringComparer.Ordinal.GetHashCode(this.FullName);
+    }
+
+    /// <summary>
     /// Returns a <see cref="FileInfo"/> representing the current path.
     /// </summary>
     /// <returns>A new <see cref="FileInfo"/> instance.</returns>
@@ -158,6 +208,7 @@ public sealed class PathInfo : FileSystemInfo
     /// <returns>A new <see cref="PathInfo"/> representing the combined path.</returns>
     public static PathInfo Divide(PathInfo path, string child)
     {
+        ArgumentNullException.ThrowIfNull(path);
         return path.Combine(child);
     }
 }
