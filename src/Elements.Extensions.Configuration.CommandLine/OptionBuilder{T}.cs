@@ -24,13 +24,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
     /// <inheritdoc />
     public IOptionBuilder<T> AsGlobal()
     {
-        void ConfigureOption(Option<T> option)
-        {
-            option.Recursive = true;
-        }
-
-        this.configureOptions.Add(ConfigureOption);
-        return this;
+        return this.AsRecursive();
     }
 
     /// <inheritdoc />
@@ -142,11 +136,11 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
     }
 
     /// <inheritdoc />
-    public IOptionBuilder<T> WithAlias(string alias)
+    public IOptionBuilder<T> WithAlias(string aliasName)
     {
         void ConfigureOption(Option<T> option)
         {
-            option.Aliases.Add(alias);
+            option.Aliases.Add(aliasName);
         }
 
         this.configureOptions.Add(ConfigureOption);

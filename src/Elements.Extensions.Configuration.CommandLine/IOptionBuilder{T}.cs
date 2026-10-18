@@ -32,9 +32,9 @@ public interface IOptionBuilder<T> where T : notnull
     /// <summary>
     /// Adds an alias to the option.
     /// </summary>
-    /// <param name="alias">The alias name.</param>
+    /// <param name="aliasName">The alias name.</param>
     /// <returns>The option builder instance.</returns>
-    IOptionBuilder<T> WithAlias(string alias);
+    IOptionBuilder<T> WithAlias(string aliasName);
 
     /// <summary>
     /// Adds multiple aliases to the option.
