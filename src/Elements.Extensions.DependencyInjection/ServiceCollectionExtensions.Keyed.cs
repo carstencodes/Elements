@@ -20,7 +20,7 @@ public static partial class ServiceCollectionExtensions
     /// <param name="services">The service collection to configure.</param>
     /// <param name="lifetime">The service lifetime for the collections.</param>
     /// <returns>The same <see cref="IServiceCollection"/> instance.</returns>
-    public static IServiceCollection AddKeyesForKeyedServices<TService>(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Singleton)
+    public static IServiceCollection AddKeysForKeyedServices<TService>(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Singleton)
         where TService : notnull
     {
         services.Add(new ServiceDescriptor(

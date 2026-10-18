@@ -17,7 +17,7 @@ namespace HedgeCraft.Elements.Extensions.Configuration.CommandLine;
 /// </summary>
 public sealed class CommandLineConfigurationOptions : IFormatProviderSource
 {
-    private readonly Dictionary<string, OptionHolderBase> options = new();
+    private readonly Dictionary<string, OptionHolderBase> options = new(StringComparer.Ordinal);
 
     /// <summary>
     /// Gets or sets the format provider used when converting command-line option values.

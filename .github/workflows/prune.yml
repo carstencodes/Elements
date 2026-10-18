@@ -21,7 +21,7 @@ jobs:
       - name: List packages
         id: list
         run: |
-          packages=$(find src -name "*.csproj" \
+          packages=$(find gen src -name "*.csproj" \
             | xargs -I{} basename {} .csproj \
             | sed 's/^/HedgeCraft./' \
             | jq -Rsc '[split("\n") | .[] | select(length > 0)]')
@@ -47,3 +47,4 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           min-versions-to-keep: 10
           delete-only-pre-release-versions: true
+          delete-only-untagged-versions: true
