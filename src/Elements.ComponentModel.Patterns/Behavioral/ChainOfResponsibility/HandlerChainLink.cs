@@ -54,7 +54,7 @@ public readonly struct HandlerChainLink : IHandler<HandlerChainLink>, IEquatable
     /// <summary>
     /// Handles the current request or forwards it to the successor link in the chain.
     /// </summary>
-    /// <exception cref="HandlerBase.HandlerReachedEndOfChainException">Thrown when no link in the chain can handle the request.</exception>
+    /// <exception cref="HandlerReachedEndOfChainException">Thrown when no link in the chain can handle the request.</exception>
     public void HandleCurrentRequest()
     {
         if (this.CanHandleCurrentRequest())

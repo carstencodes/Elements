@@ -56,7 +56,7 @@ public readonly struct HandlerChainLink<TResult> : IHandler<HandlerChainLink<TRe
     /// Handles the current request and produces a result, or forwards it to the successor link in the chain.
     /// </summary>
     /// <returns>The result produced by handling the request.</returns>
-    /// <exception cref="HandlerBase.HandlerReachedEndOfChainException">Thrown when no link in the chain can handle the request.</exception>
+    /// <exception cref="HandlerReachedEndOfChainException">Thrown when no link in the chain can handle the request.</exception>
     public TResult HandleCurrentRequest()
     {
         if (this.CanHandleCurrentRequest())
