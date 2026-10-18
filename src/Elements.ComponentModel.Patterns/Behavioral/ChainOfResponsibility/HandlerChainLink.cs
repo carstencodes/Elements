@@ -134,16 +134,4 @@ public readonly struct HandlerChainLink : IHandler<HandlerChainLink>, IEquatable
     {
         return !(left == right);
     }
-
-    /// <summary>
-    /// Determines whether the current handler link is in a "none" state, representing an uninitialized or terminal link.
-    /// </summary>
-    /// <returns>
-    /// <see langword="true"/> if the current link is in a "none" state; otherwise, <see langword="false"/>.
-    /// </returns>
-    private bool IsNone()
-    {
-        HandlerChainLink none = new();
-        return this.Equals(none);
-    }
 }

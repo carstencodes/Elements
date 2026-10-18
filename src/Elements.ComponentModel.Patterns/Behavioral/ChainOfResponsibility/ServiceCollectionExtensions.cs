@@ -41,7 +41,7 @@ public static class ServiceCollectionExtensions
 
         Handler HandlerFromServices(IEnumerable<TService> serviceInstances)
         {
-            HandlerChainLink current = HandlerChainLink.None;
+            HandlerChainLink current = new();
             foreach (TService service in serviceInstances.Reverse())
             {
                 current = new HandlerChainLink(
@@ -96,7 +96,7 @@ public static class ServiceCollectionExtensions
 
         ResultedHandler<TResult> HandlerFromServices(IEnumerable<TService> serviceInstances)
         {
-            HandlerChainLink<TResult> current = HandlerChainLink<TResult>.None;
+            HandlerChainLink<TResult> current = new();
             foreach (TService service in serviceInstances.Reverse())
             {
                 current = new HandlerChainLink<TResult>(

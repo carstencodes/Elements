@@ -19,7 +19,6 @@ public readonly struct HandlerChainLink<TResult> : IHandler<HandlerChainLink<TRe
     /// <summary>
     /// Creates a new instance of the <see cref="HandlerChainLink{TResult}"/> struct that represents an empty or terminal handler link.
     /// </summary>
-    /// <typeparam name="TResult">The type of the result produced by the handler.</typeparam>
     public HandlerChainLink() : this(Nothing, () => false)
     {
     }
@@ -135,17 +134,5 @@ public readonly struct HandlerChainLink<TResult> : IHandler<HandlerChainLink<TRe
     public static bool operator !=(HandlerChainLink<TResult> left, HandlerChainLink<TResult> right)
     {
         return !(left == right);
-    }
-
-    /// <summary>
-    /// Determines whether the current handler link represents a terminal or uninitialized state in the chain.
-    /// </summary>
-    /// <returns>
-    /// A boolean value indicating whether the current handler link is considered "none."
-    /// </returns>
-    private bool IsNone()
-    {
-        HandlerChainLink<TResult> none = new();
-        return this.Equals(none);
     }
 }

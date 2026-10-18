@@ -25,6 +25,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <LangVersion>14</LangVersion>
     <LatestTargetFramework>net10.0</LatestTargetFramework>
     <ElementTargetFrameworksToUse>$(LatestTargetFramework);net8.0</ElementTargetFrameworksToUse>
     <TargetFrameworks>$(ElementTargetFrameworksToUse)</TargetFrameworks>
