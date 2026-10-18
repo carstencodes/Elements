@@ -17,9 +17,12 @@ public readonly struct HandlerChainLink<TResult> : IHandler<HandlerChainLink<TRe
     private readonly Func<bool> canHandleRequest;
 
     /// <summary>
-    /// Represents an empty or terminal handler link.
+    /// Creates a new instance of the <see cref="HandlerChainLink{TResult}"/> struct that represents an empty or terminal handler link.
     /// </summary>
-    public static readonly HandlerChainLink<TResult> None = new(Nothing, () => false);
+    /// <typeparam name="TResult">The type of the result produced by the handler.</typeparam>
+    public HandlerChainLink() : this(Nothing, () => false)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HandlerChainLink{TResult}"/> struct with handler delegates and a successor link.
@@ -95,7 +98,7 @@ public readonly struct HandlerChainLink<TResult> : IHandler<HandlerChainLink<TRe
     /// <returns><see langword="true"/> if equal; otherwise, <see langword="false"/>.</returns>
     public override bool Equals(object? obj)
     {
-        return obj is HandlerChainLink other && this.Equals(other);
+        return obj is HandlerChainLink<TResult> other && this.Equals(other);
     }
 
     /// <summary>

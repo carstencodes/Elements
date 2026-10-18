@@ -16,9 +16,11 @@ public readonly struct HandlerChainLink : IHandler<HandlerChainLink>, IEquatable
     private readonly Func<bool> canHandleRequest;
 
     /// <summary>
-    /// Represents an empty or terminal handler link.
+    /// Creates a new instance of the <see cref="HandlerChainLink"/> struct that represents an empty or terminal handler link.
     /// </summary>
-    public static readonly HandlerChainLink None = new(Nothing, () => false);
+    public HandlerChainLink() : this(Nothing, () => false)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HandlerChainLink"/> struct with handler delegates and a successor link.
