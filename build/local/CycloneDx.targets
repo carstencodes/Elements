@@ -68,7 +68,7 @@
     <Target Name="PackCycloneDxFile" Condition="'$(IsPackable)' == 'true'" DependsOnTargets="GenerateCycloneDxDocument;$(PackCycloneDxFileDependsOn)">
         <ItemGroup>
             <TfmSpecificPackageFile Include="$(CycloneDxResultFilePath)" Condition="Exists('$(CycloneDxResultFilePath)')">
-                <PackagePath>sbom/package-sbom.$(CycloneDxOutputFormat)</PackagePath>
+                <PackagePath>sbom/package-sbom.$(TargetFramework).$(CycloneDxOutputFormat)</PackagePath>
             </TfmSpecificPackageFile>
         </ItemGroup>
     </Target>
