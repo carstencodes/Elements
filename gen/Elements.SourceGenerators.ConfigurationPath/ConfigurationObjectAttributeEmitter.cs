@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
 
-// AI GENERATED START - model: Copilot
+// AI GENERATED START - model: gpt-luna 5.6
 /// <summary>Emits the marker attribute consumed by the configuration path generator.</summary>
 internal static class ConfigurationObjectAttributeEmitter
 {

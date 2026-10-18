@@ -4,15 +4,16 @@
 // Published under MIT License
 
 #if NETSTANDARD2_0
-namespace System.Runtime.CompilerServices
+
+namespace System.Runtime.CompilerServices;
+
+ // AI GENERATED START - model: gpt-luna 5.6
+internal sealed class IsExternalInit
 {
-    // AI GENERATED START - model: Copilot
-    internal sealed class IsExternalInit
+    public IsExternalInit()
     {
-        public IsExternalInit()
-        {
-        }
     }
-    // AI GENERATED END
 }
+// AI GENERATED END
+
 #endif

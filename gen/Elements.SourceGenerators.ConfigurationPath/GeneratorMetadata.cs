@@ -8,7 +8,7 @@ using System.Reflection;
 
 namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
 
-// AI GENERATED START - model: Copilot
+// AI GENERATED START - model: gpt-luna 5.6
 /// <summary>Metadata shared by source files emitted from this generator assembly.</summary>
 internal static class GeneratorMetadata
 {

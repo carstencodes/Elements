@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 
 namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
 
-// AI GENERATED START - model: Copilot
+// AI GENERATED START - model: gpt-luna 5.6
 /// <summary>Options describing one value emitted into a flattened configuration dump.</summary>
 internal readonly record struct DumpValueOptions(
     ITypeSymbol Type,

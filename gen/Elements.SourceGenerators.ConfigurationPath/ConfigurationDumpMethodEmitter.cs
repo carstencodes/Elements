@@ -14,7 +14,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
 
-// AI GENERATED START - model: Copilot
+// AI GENERATED START - model: gpt-luna 5.6
 /// <summary>Emits the generated configuration dump API and its recursive value traversal.</summary>
 internal static class ConfigurationDumpMethodEmitter
 {

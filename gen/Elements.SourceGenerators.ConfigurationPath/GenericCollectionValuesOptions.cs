@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 
 namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
 
-// AI GENERATED START - model: Copilot
+// AI GENERATED START - model: gpt-luna 5.6
 /// <summary>Options describing the element contracts exposed by one enumerable value.</summary>
 internal readonly record struct GenericCollectionValuesOptions(
     ImmutableArray<ITypeSymbol> ElementTypes,

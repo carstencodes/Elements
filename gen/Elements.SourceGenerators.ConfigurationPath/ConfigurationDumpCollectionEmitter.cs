@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 
 namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
 
-// AI GENERATED START - model: Copilot
+// AI GENERATED START - model: gpt-luna 5.6
 /// <summary>Emits indexed and dictionary loops used to flatten collection values.</summary>
 internal static class ConfigurationDumpCollectionEmitter
 {

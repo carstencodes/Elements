@@ -14,7 +14,7 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
 
-// AI GENERATED START - model: Copilot
+// AI GENERATED START - model: gpt-luna 5.6
 /// <summary>Builds the generated context type, its metadata, and helper implementations.</summary>
 internal static class ConfigurationContextEmitter
 {
