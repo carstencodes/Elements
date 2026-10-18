@@ -30,7 +30,8 @@
     </TargetsForTfmSpecificContentInPackage>
   </PropertyGroup>
 
-  <Target Name="PackNuGetLicenseOutputFile" Condition="'$(IsPackable)' == 'true'" DependsOnTargets="GenerateNuGetLicenseOutputFile;$(PackNuGetLicenseOutputFileDependsOn)">
+  <!-- The license file is not TFM-specific, so it is packed only for the latest TFM to avoid NU5118 duplicates. -->
+  <Target Name="PackNuGetLicenseOutputFile" Condition="'$(IsPackable)' == 'true' AND '$(TargetFramework)' == '$(LatestTargetFramework)'" DependsOnTargets="GenerateNuGetLicenseOutputFile;$(PackNuGetLicenseOutputFileDependsOn)">
     <ItemGroup>
       <TfmSpecificPackageFile Include="$(NuGetLicenseOutputFile)" Condition="Exists('$(NuGetLicenseOutputFile)')">
         <PackagePath>sbom/ThirdPartyInformation.txt</PackagePath>
