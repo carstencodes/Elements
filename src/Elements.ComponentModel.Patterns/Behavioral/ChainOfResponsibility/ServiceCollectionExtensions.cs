@@ -34,6 +34,11 @@ public static class ServiceCollectionExtensions
             where TService : notnull
             where TServiceHandlerImpl : TService
     {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(handlerFunctionFactory);
+        ArgumentNullException.ThrowIfNull(canHandleFunctionFactory);
+        ArgumentNullException.ThrowIfNull(serviceFromHandlerFactory);
+
         Handler HandlerFromServices(IEnumerable<TService> serviceInstances)
         {
             HandlerChainLink current = HandlerChainLink.None;
@@ -84,6 +89,11 @@ public static class ServiceCollectionExtensions
         where TServiceHandlerImpl : TService
         where TResult : notnull
     {
+        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(handlerFunctionFactory);
+        ArgumentNullException.ThrowIfNull(canHandleFunctionFactory);
+        ArgumentNullException.ThrowIfNull(serviceFromHandlerFactory);
+
         ResultedHandler<TResult> HandlerFromServices(IEnumerable<TService> serviceInstances)
         {
             HandlerChainLink<TResult> current = HandlerChainLink<TResult>.None;

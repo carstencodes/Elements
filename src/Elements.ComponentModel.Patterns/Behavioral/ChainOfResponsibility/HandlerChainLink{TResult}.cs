@@ -19,7 +19,7 @@ public readonly struct HandlerChainLink<TResult> : IHandler<HandlerChainLink<TRe
     /// <summary>
     /// Represents an empty or terminal handler link.
     /// </summary>
-    public static readonly HandlerChainLink<TResult> None = new(Nothing, Never);
+    public static readonly HandlerChainLink<TResult> None = new(Nothing, () => false);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HandlerChainLink{TResult}"/> struct with handler delegates and a successor link.
@@ -29,7 +29,7 @@ public readonly struct HandlerChainLink<TResult> : IHandler<HandlerChainLink<TRe
     /// <param name="next">The next handler link in the chain.</param>
     public HandlerChainLink(Func<TResult> handleRequest, Func<bool> canHandleRequest, HandlerChainLink<TResult> next) : this(handleRequest, canHandleRequest)
     {
-        this.Next = next;
+        this.NextHandler = next;
     }
 
     /// <summary>
@@ -61,12 +61,12 @@ public readonly struct HandlerChainLink<TResult> : IHandler<HandlerChainLink<TRe
     {
         if (this.CanHandleCurrentRequest())
         {
-            return this.HandleCurrentRequest();
+            return this.handleRequest();
         }
 
-        if (!HandlerChainLink<TResult>.None.Equals(this.Next))
+        if (!HandlerChainLink<TResult>.None.Equals(this.NextHandler))
         {
-            return this.Next.HandleCurrentRequest();
+            return this.NextHandler.HandleCurrentRequest();
         }
 
         HandlerBase.StopHandling();
@@ -76,7 +76,7 @@ public readonly struct HandlerChainLink<TResult> : IHandler<HandlerChainLink<TRe
     /// <summary>
     /// Gets the next handler link in the chain.
     /// </summary>
-    public IHandler<HandlerChainLink<TResult>, TResult> Next { get; } = None;
+    public IHandler<HandlerChainLink<TResult>, TResult> NextHandler { get; } = None;
 
     /// <summary>
     /// Indicates whether the current link is equal to another link.
@@ -85,7 +85,7 @@ public readonly struct HandlerChainLink<TResult> : IHandler<HandlerChainLink<TRe
     /// <returns><see langword="true"/> if equal; otherwise, <see langword="false"/>.</returns>
     bool IEquatable<HandlerChainLink<TResult>>.Equals(HandlerChainLink<TResult> other)
     {
-        return this.handleRequest.Equals(other.handleRequest) && this.canHandleRequest.Equals(other.canHandleRequest) && this.Next.Equals(other.Next);
+        return this.handleRequest.Equals(other.handleRequest) && this.canHandleRequest.Equals(other.canHandleRequest) && this.NextHandler.Equals(other.NextHandler);
     }
 
     /// <summary>
@@ -104,12 +104,7 @@ public readonly struct HandlerChainLink<TResult> : IHandler<HandlerChainLink<TRe
     /// <returns>A hash code integer.</returns>
     public override int GetHashCode()
     {
-        return HashCode.Combine(this.handleRequest, this.canHandleRequest, this.Next);
-    }
-
-    private static bool Never()
-    {
-        return false;
+        return HashCode.Combine(this.handleRequest, this.canHandleRequest, this.NextHandler);
     }
 
     private static TResult Nothing()
