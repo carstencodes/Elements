@@ -197,18 +197,47 @@ internal static class ConfigurationDumpValueEmitter
 
         if (ConfigurationPathGenerator.TryGetCollectionValues(type, out ImmutableArray<ITypeSymbol> values))
         {
+            // A default ImmutableArray<T> is an uninitialized struct that throws on enumeration, so it is skipped.
+            bool guardDefault = IsImmutableArray(type);
+            int indent = guardDefault ? options.Indent + 1 : options.Indent;
+            if (guardDefault)
+            {
+                AppendLine(
+                    context.Source,
+                    options.Indent,
+                    string.Concat("if (!", options.ValueExpression, ".IsDefault)"));
+                AppendLine(context.Source, options.Indent, "{");
+            }
+
             ConfigurationDumpCollectionEmitter.AppendGenericCollectionValues(
                 context,
                 new GenericCollectionValuesOptions(
                     values,
                     options.ValueExpression,
                     options.KeysExpression,
-                    options.Indent,
+                    indent,
                     type.IsReferenceType));
+            if (guardDefault)
+            {
+                AppendLine(context.Source, options.Indent, "}");
+            }
+
             return true;
         }
 
         return false;
+    }
+
+    /// <summary>Tests whether a named type is <c>System.Collections.Immutable.ImmutableArray&lt;T&gt;</c>.</summary>
+    /// <param name="type">The type to inspect.</param>
+    /// <returns><see langword="true"/> for a constructed immutable array.</returns>
+    private static bool IsImmutableArray(INamedTypeSymbol type)
+    {
+        return type.OriginalDefinition is
+               {
+                   MetadataName: "ImmutableArray`1", ContainingNamespace: { } ns,
+               } &&
+               string.Equals(ns.ToDisplayString(), "System.Collections.Immutable", StringComparison.Ordinal);
     }
 
     /// <summary>Emits dictionary traversal using the dictionary's value type.</summary>

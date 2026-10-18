@@ -821,7 +821,7 @@ internal sealed class ConfigurationPathGeneratorTests
         return fileVersion ?? "1.0.0.0-unknown";
     }
 
-    private static GeneratorRun RunGenerator(string source, string? rootNamespace)
+    internal static GeneratorRun RunGenerator(string source, string? rootNamespace)
     {
         CSharpParseOptions parseOptions = new(LanguageVersion.CSharp14);
         CSharpCompilation compilation = CSharpCompilation.Create(
@@ -880,7 +880,7 @@ internal sealed class ConfigurationPathGeneratorTests
             generatorDiagnostics);
     }
 
-    private sealed record GeneratorRun(
+    internal sealed record GeneratorRun(
         ImmutableArray<string> GeneratedSources,
         ImmutableArray<string> GeneratedHintNames,
         string CompilationErrors,
