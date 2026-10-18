@@ -29,6 +29,15 @@ public abstract class ConfigurationObjectContextBase<TBoundType>
     public abstract IReadOnlySet<ConfigurationPath> GetWritableConfigurationPaths();
 
     /// <summary>
+    /// When overridden in a derived class, retrieves the set of descriptors for bindable configuration leaf nodes
+    /// associated with the bound configuration object type, i.e. the nodes that accept primitive values only and
+    /// can be bound to a configuration source using the
+    /// <code>Microsoft.Extensions.Configuration.IConfigurationBinder</code> APIs.
+    /// </summary>
+    /// <returns>A read-only set containing descriptors for bindable configuration leaf nodes.</returns>
+    public abstract IReadOnlySet<ConfigurationLeafDescriptor> GetBindableConfigurationLeafDescriptors();
+
+    /// <summary>
     /// Gets the set of all configuration paths, combining both readable and writable paths.
     /// </summary>
     /// <returns>A read-only set containing all unique readable and writable configuration path segments.</returns>
@@ -97,6 +106,52 @@ public abstract class ConfigurationObjectContextBase<TBoundType>
         ArgumentNullException.ThrowIfNull(nestedPaths);
 
         destination.UnionWith(new ConfigurationPath(parentKeys).Append(nestedPaths));
+    }
+
+    /// <summary>
+    /// Prefixes the specified nested configuration leaf descriptors with a parent key and adds them to the
+    /// destination set.
+    /// </summary>
+    /// <param name="destination">The destination set receiving the prefixed leaf descriptors.</param>
+    /// <param name="parentKey">The parent key segment to prefix.</param>
+    /// <param name="nestedLeaves">The leaf descriptors of the nested context.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="destination"/>, <paramref name="parentKey"/>, or <paramref name="nestedLeaves"/> is <see langword="null"/>.
+    /// </exception>
+    protected static void AppendNestedLeafDescriptors(
+        ISet<ConfigurationLeafDescriptor> destination,
+        string parentKey,
+        IEnumerable<ConfigurationLeafDescriptor> nestedLeaves)
+    {
+        ArgumentNullException.ThrowIfNull(parentKey);
+
+        AppendNestedLeafDescriptors(destination, new[] { parentKey }, nestedLeaves);
+    }
+
+    /// <summary>
+    /// Prefixes the specified nested configuration leaf descriptors with multiple parent keys and adds them to the
+    /// destination set. The value type and description of each descriptor are preserved.
+    /// </summary>
+    /// <param name="destination">The destination set receiving the prefixed leaf descriptors.</param>
+    /// <param name="parentKeys">The parent key segments to prefix.</param>
+    /// <param name="nestedLeaves">The leaf descriptors of the nested context.</param>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when <paramref name="destination"/>, <paramref name="parentKeys"/>, or <paramref name="nestedLeaves"/> is <see langword="null"/>.
+    /// </exception>
+    protected static void AppendNestedLeafDescriptors(
+        ISet<ConfigurationLeafDescriptor> destination,
+        string[] parentKeys,
+        IEnumerable<ConfigurationLeafDescriptor> nestedLeaves)
+    {
+        ArgumentNullException.ThrowIfNull(destination);
+        ArgumentNullException.ThrowIfNull(parentKeys);
+        ArgumentNullException.ThrowIfNull(nestedLeaves);
+
+        foreach (ConfigurationLeafDescriptor leaf in nestedLeaves)
+        {
+            ConfigurationPath prefixed = new([.. parentKeys, .. leaf.Path.Segments ?? []]);
+            destination.Add(new ConfigurationLeafDescriptor(prefixed, leaf.ConfigurationValueType, leaf.Description));
+        }
     }
     // AI GENERATED END
 }

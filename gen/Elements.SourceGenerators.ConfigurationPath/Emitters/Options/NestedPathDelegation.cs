@@ -10,8 +10,12 @@ namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters.Option
 /// <param name="KeyPath">The parent property key path to prefix to nested paths.</param>
 /// <param name="ContextFieldName">The field name of the cached nested context instance.</param>
 /// <param name="IsUserContext">Whether the target context is an external user-provided context.</param>
+/// <param name="IsCollectionValue">
+/// Whether the target context describes the values of a collection, whose index or key is unknown at generation time.
+/// </param>
 internal sealed record NestedPathDelegation(
     string[] KeyPath,
     string ContextFieldName,
-    bool IsUserContext);
+    bool IsUserContext,
+    bool IsCollectionValue = false);
 // AI GENERATED END

@@ -97,6 +97,42 @@ internal sealed partial class ConfigurationContextOfAppSettings : global::HedgeC
         }
     }
 
+    public override global::System.Collections.Generic.IReadOnlySet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationLeafDescriptor> GetBindableConfigurationLeafDescriptors()
+    {
+        return this.GetBindableConfigurationLeafDescriptorsCore(new global::System.Collections.Generic.HashSet<object>(
+            global::System.Collections.Generic.ReferenceEqualityComparer.Instance));
+    }
+
+    internal global::System.Collections.Generic.IReadOnlySet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationLeafDescriptor> GetBindableConfigurationLeafDescriptorsCore(global::System.Collections.Generic.HashSet<object> visited)
+    {
+        if (!visited.Add(this))
+        {
+            return new global::System.Collections.Generic.HashSet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationLeafDescriptor>();
+        }
+
+        try
+        {
+            global::System.Collections.Generic.HashSet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationLeafDescriptor> leaves = new()
+            {
+                new global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationLeafDescriptor(
+                    new global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath("environment"),
+                    typeof(string),
+                    "Environment"),
+            };
+
+            AppendNestedLeafDescriptors(
+                leaves,
+                "database",
+                __nestedContext_global__ExampleApp_Configuration_DatabaseSettings_0A1C73492A67.GetBindableConfigurationLeafDescriptorsCore(visited));
+
+            return leaves;
+        }
+        finally
+        {
+            visited.Remove(this);
+        }
+    }
+
     public override global::System.Collections.Generic.IReadOnlyDictionary<string, object?> DumpConfigurationObject(global::ExampleApp.Configuration.AppSettings instance, bool considerWritablePropertiesOnly = true, params string[] parentKeys)
     {
         string[] keys = parentKeys ?? global::System.Array.Empty<string>();
@@ -190,6 +226,22 @@ internal sealed partial class ConfigurationContextOfDatabaseSettings : global::H
     internal global::System.Collections.Generic.IReadOnlySet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath> GetWritableConfigurationPathsCore(global::System.Collections.Generic.HashSet<object> visited)
     {
         return this.GetWritableConfigurationPaths();
+    }
+
+    public override global::System.Collections.Generic.IReadOnlySet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationLeafDescriptor> GetBindableConfigurationLeafDescriptors()
+    {
+        return new global::System.Collections.Generic.HashSet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationLeafDescriptor>
+        {
+            new global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationLeafDescriptor(
+                new global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath("server"),
+                typeof(string),
+                "Server"),
+        };
+    }
+
+    internal global::System.Collections.Generic.IReadOnlySet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationLeafDescriptor> GetBindableConfigurationLeafDescriptorsCore(global::System.Collections.Generic.HashSet<object> visited)
+    {
+        return this.GetBindableConfigurationLeafDescriptors();
     }
 
     public override global::System.Collections.Generic.IReadOnlyDictionary<string, object?> DumpConfigurationObject(global::ExampleApp.Configuration.DatabaseSettings instance, bool considerWritablePropertiesOnly = true, params string[] parentKeys)

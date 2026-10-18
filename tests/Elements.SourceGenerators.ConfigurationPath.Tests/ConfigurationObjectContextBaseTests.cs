@@ -5,8 +5,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts;
+using HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys;
 using DisplayNameAttribute = TUnit.Core.DisplayNameAttribute;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
@@ -130,6 +132,84 @@ internal sealed class ConfigurationObjectContextBaseTests
         }
     }
 
+    [Test]
+    [DisplayName("AppendNestedLeafDescriptors prefixes nested leaves with single parent key")]
+    [Description("Verifies that AppendNestedLeafDescriptors prefixes each leaf path and keeps type and description.")]
+    public async Task AppendNestedLeafDescriptorsWithSingleKeyPrefixesPathsAndKeepsMetadata()
+    {
+        TestContext context = new();
+        HashSet<ConfigurationLeafDescriptor> destination = new();
+        ConfigurationLeafDescriptor[] nestedLeaves =
+        [
+            new(new ConfigurationPath("server"), typeof(string), "The server name."),
+            new(new ConfigurationPath("credentials", "retries"), typeof(int), "Retry count."),
+        ];
+
+        context.InvokeAppendNestedLeafDescriptors(destination, "database", nestedLeaves);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(destination.Count)
+                .IsEqualTo(2)
+                .Because("destination set should contain exactly two prefixed leaf descriptors");
+
+            await Assert.That(destination.Single(static leaf => leaf.Path.Equals(
+                    new ConfigurationPath("database", "server"))).Description)
+                .IsEqualTo("The server name.")
+                .Because("the description of a prefixed leaf should be preserved");
+
+            await Assert.That(destination.Single(static leaf => leaf.Path.Equals(
+                    new ConfigurationPath("database", "credentials", "retries"))).ConfigurationValueType)
+                .IsEqualTo(typeof(int))
+                .Because("the value type of a prefixed leaf should be preserved");
+        }
+    }
+
+    [Test]
+    [DisplayName("AppendNestedLeafDescriptors prefixes nested leaves with multiple parent keys")]
+    [Description("Verifies that AppendNestedLeafDescriptors prefixes each leaf path with the full parent key array.")]
+    public async Task AppendNestedLeafDescriptorsWithMultipleKeysPrefixesPathsCorrectly()
+    {
+        TestContext context = new();
+        HashSet<ConfigurationLeafDescriptor> destination = new();
+        ConfigurationLeafDescriptor[] nestedLeaves = [new(new ConfigurationPath("server"), typeof(string), "Server")];
+
+        context.InvokeAppendNestedLeafDescriptors(destination, ["app", "database"], nestedLeaves);
+
+        await Assert.That(destination.Select(static leaf => leaf.Path))
+            .IsEquivalentTo([new ConfigurationPath("app", "database", "server")])
+            .Because("the leaf path should be prefixed with all parent keys in order");
+    }
+
+    [Test]
+    [DisplayName("AppendNestedLeafDescriptors validates its arguments")]
+    [Description("Verifies that AppendNestedLeafDescriptors throws ArgumentNullException for null arguments.")]
+    public async Task AppendNestedLeafDescriptorsThrowsForNullArguments()
+    {
+        TestContext context = new();
+        HashSet<ConfigurationLeafDescriptor> destination = new();
+        ConfigurationLeafDescriptor[] leaves = [];
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(() => context.InvokeAppendNestedLeafDescriptors(null!, "key", leaves))
+                .Throws<ArgumentNullException>()
+                .Because("null destination should throw ArgumentNullException");
+
+            await Assert.That(() => context.InvokeAppendNestedLeafDescriptors(destination, (string)null!, leaves))
+                .Throws<ArgumentNullException>()
+                .Because("null parentKey should throw ArgumentNullException");
+
+            await Assert.That(() => context.InvokeAppendNestedLeafDescriptors(destination, (string[])null!, leaves))
+                .Throws<ArgumentNullException>()
+                .Because("null parentKeys should throw ArgumentNullException");
+
+            await Assert.That(() => context.InvokeAppendNestedLeafDescriptors(destination, "key", null!))
+                .Throws<ArgumentNullException>()
+                .Because("null nestedLeaves should throw ArgumentNullException");
+        }
+    }
+
     /// <summary>
     /// Test stub inheriting from ConfigurationObjectContextBase to expose protected helpers.
     /// </summary>
@@ -145,6 +225,12 @@ internal sealed class ConfigurationObjectContextBaseTests
         public override IReadOnlySet<ConfigurationPath> GetWritableConfigurationPaths()
         {
             return new HashSet<ConfigurationPath>();
+        }
+
+        /// <inheritdoc />
+        public override IReadOnlySet<ConfigurationLeafDescriptor> GetBindableConfigurationLeafDescriptors()
+        {
+            return new HashSet<ConfigurationLeafDescriptor>();
         }
 
         /// <inheritdoc />
@@ -178,6 +264,30 @@ internal sealed class ConfigurationObjectContextBaseTests
             IEnumerable<ConfigurationPath> nestedPaths)
         {
             AppendNestedPaths(destination, parentKeys, nestedPaths);
+        }
+
+        /// <summary>Invokes protected AppendNestedLeafDescriptors overload with single parent key.</summary>
+        /// <param name="destination">The destination set.</param>
+        /// <param name="parentKey">The parent key.</param>
+        /// <param name="nestedLeaves">The nested leaf descriptors.</param>
+        public void InvokeAppendNestedLeafDescriptors(
+            ISet<ConfigurationLeafDescriptor> destination,
+            string parentKey,
+            IEnumerable<ConfigurationLeafDescriptor> nestedLeaves)
+        {
+            AppendNestedLeafDescriptors(destination, parentKey, nestedLeaves);
+        }
+
+        /// <summary>Invokes protected AppendNestedLeafDescriptors overload with parent keys array.</summary>
+        /// <param name="destination">The destination set.</param>
+        /// <param name="parentKeys">The parent keys.</param>
+        /// <param name="nestedLeaves">The nested leaf descriptors.</param>
+        public void InvokeAppendNestedLeafDescriptors(
+            ISet<ConfigurationLeafDescriptor> destination,
+            string[] parentKeys,
+            IEnumerable<ConfigurationLeafDescriptor> nestedLeaves)
+        {
+            AppendNestedLeafDescriptors(destination, parentKeys, nestedLeaves);
         }
     }
 }

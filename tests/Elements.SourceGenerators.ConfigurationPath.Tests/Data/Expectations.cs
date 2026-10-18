@@ -44,6 +44,12 @@ internal static class Expectations
 
     public const string ConfigurationContextMethod = "ConfigurationContext(this global::Demo.Settings.Root instance)";
 
+    public const string LeafDescriptorMethod = "GetBindableConfigurationLeafDescriptors";
+
+    public const string LeafDescriptorCoreCall = LeafDescriptorMethod + "Core(visited)";
+
+    public const string NestedLeafDescriptorHelper = "AppendNestedLeafDescriptors(";
+
     public const string LazyCachedField = "private static readonly global::System.Lazy<";
 }
 // AI GENERATED END

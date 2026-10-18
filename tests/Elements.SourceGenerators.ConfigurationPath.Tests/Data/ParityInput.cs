@@ -263,6 +263,11 @@ internal static class ParityInput
             using System;
             using System.Linq;
 
+            public readonly record struct ConfigurationLeafDescriptor(
+                ConfigurationPath Path,
+                Type ConfigurationValueType,
+                string? Description = "");
+
             public readonly struct ConfigurationPath(params string[] segments) : IEquatable<ConfigurationPath>
             {
                 public string[] Segments { get; } = segments ?? [];
@@ -297,6 +302,30 @@ internal static class ParityInput
                 public abstract IReadOnlySet<ConfigurationPath> GetReadableConfigurationPaths();
 
                 public abstract IReadOnlySet<ConfigurationPath> GetWritableConfigurationPaths();
+
+                public abstract IReadOnlySet<ConfigurationLeafDescriptor> GetBindableConfigurationLeafDescriptors();
+
+                protected static void AppendNestedLeafDescriptors(
+                    ISet<ConfigurationLeafDescriptor> destination,
+                    string parentKey,
+                    IEnumerable<ConfigurationLeafDescriptor> nestedLeaves)
+                {
+                    AppendNestedLeafDescriptors(destination, new[] { parentKey }, nestedLeaves);
+                }
+
+                protected static void AppendNestedLeafDescriptors(
+                    ISet<ConfigurationLeafDescriptor> destination,
+                    string[] parentKeys,
+                    IEnumerable<ConfigurationLeafDescriptor> nestedLeaves)
+                {
+                    foreach (ConfigurationLeafDescriptor leaf in nestedLeaves)
+                    {
+                        destination.Add(new ConfigurationLeafDescriptor(
+                            new ConfigurationPath(parentKeys.Concat(leaf.Path.Segments).ToArray()),
+                            leaf.ConfigurationValueType,
+                            leaf.Description));
+                    }
+                }
 
                 public abstract IReadOnlyDictionary<string, object?> DumpConfigurationObject(
                     T instance,

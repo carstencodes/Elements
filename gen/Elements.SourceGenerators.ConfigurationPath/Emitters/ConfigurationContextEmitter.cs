@@ -95,6 +95,7 @@ internal static class ConfigurationContextEmitter
             paths.Delegations);
         ConfigurationPathMethodsEmitter.AppendMethod(source, WritablePathsMethodName, paths.WritableDirect,
             paths.Delegations);
+        ConfigurationLeafDescriptorMethodsEmitter.AppendMethod(source, paths.LeafDirect, paths.Delegations);
         ConfigurationDumpMethodEmitter.AppendMethods(source, type);
         AppendKeyHelpers(source);
         source.AppendLine("}");
@@ -294,13 +295,14 @@ internal static class ConfigurationContextEmitter
         {
             string key = ConfigurationPathGenerator.GetKeyName(property);
             bool isWritable = property.SetMethod?.DeclaredAccessibility == Accessibility.Public;
-            CollectTypePaths(property.Type, [key], paths, rootType, isWritable, activeTypes);
+            CollectTypePaths(property, property.Type, [key], paths, rootType, isWritable, activeTypes);
         }
 
         return paths;
     }
 
     /// <summary>Traverses property types to collect direct paths and child context delegations.</summary>
+    /// <param name="property">The property that owns the path; supplies the leaf description.</param>
     /// <param name="type">The current property or container element type.</param>
     /// <param name="prefix">The key prefix accumulated for this property.</param>
     /// <param name="paths">The destination path sets and delegations.</param>
@@ -308,6 +310,7 @@ internal static class ConfigurationContextEmitter
     /// <param name="isWritable">Whether this property path has a public setter.</param>
     /// <param name="activeTypes">Cycle guard set for expanding closed generic types.</param>
     private static void CollectTypePaths(
+        IPropertySymbol property,
         ITypeSymbol type,
         ImmutableArray<string> prefix,
         ContextPaths paths,
@@ -323,6 +326,7 @@ internal static class ConfigurationContextEmitter
 
         if (type is IArrayTypeSymbol arrayType)
         {
+            AddArrayLeaf(property, arrayType, prefix, paths);
             AddCollectionDelegations(arrayType.ElementType, prefix, paths, rootType);
             return;
         }
@@ -334,22 +338,19 @@ internal static class ConfigurationContextEmitter
 
         if (namedType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T)
         {
-            CollectTypePaths(namedType.TypeArguments[0], prefix, paths, rootType, false, activeTypes);
+            CollectTypePaths(property, namedType.TypeArguments[0], prefix, paths, rootType, false, activeTypes);
             return;
         }
 
         if (ConfigurationPathGenerator.IsSimpleType(namedType))
         {
+            AddLeaf(property, namedType, prefix, paths);
             return;
         }
 
         if (ConfigurationPathGenerator.TryGetCollectionValues(namedType, out ImmutableArray<ITypeSymbol> values))
         {
-            foreach (ITypeSymbol value in values)
-            {
-                AddCollectionDelegations(value, prefix, paths, rootType);
-            }
-
+            AddCollectionPaths(property, namedType, values, prefix, paths, rootType);
             return;
         }
 
@@ -368,6 +369,79 @@ internal static class ConfigurationContextEmitter
         string fieldName = ConfigurationDumpMethodEmitter.CreateContextFieldName(namedType);
         bool isUserContext = ConfigurationPathGenerator.FindExistingContext(namedType.OriginalDefinition) is not null;
         paths.Delegations.Add(new NestedPathDelegation(prefix.ToArray(), fieldName, isUserContext));
+    }
+
+    /// <summary>Records a leaf for simple-valued collections and delegations for model-valued ones.</summary>
+    /// <param name="property">The property that supplies the description.</param>
+    /// <param name="collectionType">The collection or dictionary type of the property.</param>
+    /// <param name="values">The element or dictionary value types.</param>
+    /// <param name="prefix">The key prefix accumulated for this property.</param>
+    /// <param name="paths">The destination path sets and delegations.</param>
+    /// <param name="rootType">The root context model type.</param>
+    private static void AddCollectionPaths(
+        IPropertySymbol property,
+        INamedTypeSymbol collectionType,
+        ImmutableArray<ITypeSymbol> values,
+        ImmutableArray<string> prefix,
+        ContextPaths paths,
+        INamedTypeSymbol rootType)
+    {
+        if (values.All(IsSimpleValue))
+        {
+            AddLeaf(property, collectionType, prefix, paths);
+        }
+
+        foreach (ITypeSymbol value in values)
+        {
+            AddCollectionDelegations(value, prefix, paths, rootType);
+        }
+    }
+
+    /// <summary>Records a bindable leaf for a property bound from a primitive configuration value.</summary>
+    /// <param name="property">The property that supplies the description.</param>
+    /// <param name="leafType">The leaf's value type; nullable value types are already unwrapped.</param>
+    /// <param name="prefix">The leaf's key path.</param>
+    /// <param name="paths">The destination path sets and delegations.</param>
+    private static void AddLeaf(
+        IPropertySymbol property,
+        ITypeSymbol leafType,
+        ImmutableArray<string> prefix,
+        ContextPaths paths)
+    {
+        paths.LeafDirect.Add(new LeafDescriptorEntry(
+            prefix.ToArray(),
+            leafType.ToDisplayString(FullyQualifiedFormat),
+            LeafDescriptionReader.GetDescription(property)));
+    }
+
+    /// <summary>Records an array leaf when it is a byte array or holds only simple values.</summary>
+    /// <param name="property">The property that supplies the description.</param>
+    /// <param name="arrayType">The array type of the property.</param>
+    /// <param name="prefix">The leaf's key path.</param>
+    /// <param name="paths">The destination path sets and delegations.</param>
+    private static void AddArrayLeaf(
+        IPropertySymbol property,
+        IArrayTypeSymbol arrayType,
+        ImmutableArray<string> prefix,
+        ContextPaths paths)
+    {
+        if (ConfigurationPathGenerator.IsByteArray(arrayType) || IsSimpleValue(arrayType.ElementType))
+        {
+            AddLeaf(property, arrayType, prefix, paths);
+        }
+    }
+
+    /// <summary>Checks whether a collection value is a simple type, optionally wrapped in a nullable.</summary>
+    /// <param name="type">The collection element or dictionary value type.</param>
+    /// <returns><see langword="true"/> when the value accepts a primitive configuration value.</returns>
+    private static bool IsSimpleValue(ITypeSymbol type)
+    {
+        if (type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullable)
+        {
+            return IsSimpleValue(nullable.TypeArguments[0]);
+        }
+
+        return type is INamedTypeSymbol named && ConfigurationPathGenerator.IsSimpleType(named);
     }
 
     /// <summary>Expands closed generic model properties and recurses through their bound types.</summary>
@@ -392,7 +466,8 @@ internal static class ConfigurationContextEmitter
         {
             string subKey = ConfigurationPathGenerator.GetKeyName(subProperty);
             bool subWritable = subProperty.SetMethod?.DeclaredAccessibility == Accessibility.Public;
-            CollectTypePaths(subProperty.Type, prefix.Add(subKey), paths, rootType, subWritable, activeTypes);
+            CollectTypePaths(
+                subProperty, subProperty.Type, prefix.Add(subKey), paths, rootType, subWritable, activeTypes);
         }
 
         activeTypes.Remove(namedType.OriginalDefinition);
@@ -419,7 +494,7 @@ internal static class ConfigurationContextEmitter
             string fieldName = ConfigurationDumpMethodEmitter.CreateContextFieldName(childModel);
             bool isUserContext =
                 ConfigurationPathGenerator.FindExistingContext(childModel.OriginalDefinition) is not null;
-            paths.Delegations.Add(new NestedPathDelegation(prefix.ToArray(), fieldName, isUserContext));
+            paths.Delegations.Add(new NestedPathDelegation(prefix.ToArray(), fieldName, isUserContext, true));
         }
     }
 
@@ -519,6 +594,9 @@ internal static class ConfigurationContextEmitter
 
         /// <summary>Gets direct property paths with public setters.</summary>
         public List<string[]> WritableDirect { get; } = [];
+
+        /// <summary>Gets direct bindable leaves, excluding object nodes.</summary>
+        public List<LeafDescriptorEntry> LeafDirect { get; } = [];
 
         /// <summary>Gets delegations to nested child context path methods.</summary>
         public List<NestedPathDelegation> Delegations { get; } = [];

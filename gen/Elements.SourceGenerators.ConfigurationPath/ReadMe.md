@@ -20,6 +20,14 @@ The generator discovers classes and structs marked with `[ConfigurationObject]`.
 - `GetReadableConfigurationPaths()` and `GetWritableConfigurationPaths()` implementations.
   Each returns the model's paths as arrays of path segments; writable paths omit read-only
   scalar properties.
+- `GetBindableConfigurationLeafDescriptors()` implementations. Each returns the leaves that accept
+  primitive values as `ConfigurationLeafDescriptor` entries (path, value type, description),
+  including leaves of nested models. Nested model nodes are omitted. Leaves are simple types
+  (primitives, enums, framework scalars, `byte[]`; `Nullable<T>` is reported as `T`) and
+  arrays, collections, or dictionaries of simple values (typed as the property type).
+  Collections of models are not leaves, and leaves inside their elements are not emitted
+  because no index or key is known at compile time. The description is the property's XML
+  `<summary>` with whitespace normalized, or the property name when no summary is available.
 - `DumpConfigurationObject(...)`, which flattens an instance into a dictionary keyed by
   colon-separated configuration paths.
 - Helpers for nested contexts and structural path comparison.
@@ -58,7 +66,9 @@ public sealed class DatabaseSettings
 The generator emits an internal context named `ConfigurationContextOfAppSettings` (and a
 context for `DatabaseSettings`). Its dump method produces keys such as `environment` and
 `database:server`. The generated context also reports readable and writable paths as segment
-arrays, such as `["database", "server"]`.
+arrays, such as `["database", "server"]`. Its leaf descriptors list `environment` and
+`database:server` as `string` leaves, with the property names `Environment` and `Server` as
+descriptions because the example properties have no XML summary.
 
 ## Why use it
 
@@ -116,6 +126,7 @@ ConfigurationContextOfAppSettings context = settings.GetConfigurationContext();
 // Alternatively: ConfigurationContextOfAppSettings context = settings.ConfigurationContext();
 
 IReadOnlySet<ConfigurationPath> writablePaths = context.GetWritableConfigurationPaths();
+IReadOnlySet<ConfigurationLeafDescriptor> leaves = context.GetBindableConfigurationLeafDescriptors();
 IReadOnlyDictionary<string, object?> values = context.DumpConfigurationObject(settings);
 ```
 
@@ -157,7 +168,7 @@ generated output—including the marker attribute and both generated contexts—
 </details>
 
 These `.txt` files are reference examples only; the project does not compile or include them.
-The generated contexts implement the abstract path and dump members from
+The generated contexts implement the abstract path, leaf descriptor, and dump members from
 `ConfigurationObjectContextBase<T>`. The complete output shows their recursive dump
-implementations, nested-context fields, path construction helpers, structural comparers, and
-the `BoundTypeContextExtensions` class.
+implementations, nested-context fields, leaf descriptor merging, path construction helpers,
+structural comparers, and the `BoundTypeContextExtensions` class.
