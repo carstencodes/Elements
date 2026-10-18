@@ -13,6 +13,8 @@ namespace HedgeCraft.Elements.IO;
 /// <summary>
 /// Represents a unified path abstraction that can identify a file, a directory, or a drive root.
 /// </summary>
+[SuppressMessage("Design", "S4050:Provide an implementation for: 'operator==' and 'operator!='.",
+    Justification = "Equality is based on the full path, and the default reference equality is sufficient for this class.")]
 public sealed class PathInfo : FileSystemInfo
 {
     /// <summary>
