@@ -4,11 +4,13 @@
 // Published under MIT License
 
 using System.Text;
+using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.CodeGeneration;
+using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters.Options;
 using Microsoft.CodeAnalysis;
 
-namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
+namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters;
 
-// AI GENERATED START - model: gpt-luna 5.6
+// AI GENERATED START - model: gemini-3.7-flash
 /// <summary>Emits indexed and dictionary loops used to flatten collection values.</summary>
 internal static class ConfigurationDumpCollectionEmitter
 {
@@ -44,12 +46,7 @@ internal static class ConfigurationDumpCollectionEmitter
         AppendLine(context.Source, options.Indent, "{");
         ConfigurationDumpValueEmitter.AppendDumpValue(
             context,
-            options with
-            {
-                Type = underlyingType,
-                ValueExpression = nullableValue,
-                Indent = options.Indent + 1,
-            });
+            options with { Type = underlyingType, ValueExpression = nullableValue, Indent = options.Indent + 1, });
         AppendLine(context.Source, options.Indent, "}");
     }
 
@@ -192,8 +189,8 @@ internal static class ConfigurationDumpCollectionEmitter
     private static bool IsNullableScalar(ITypeSymbol underlyingType)
     {
         return underlyingType.TypeKind == TypeKind.TypeParameter ||
-            underlyingType is INamedTypeSymbol namedType &&
-            ConfigurationPathGenerator.IsSimpleType(namedType);
+               underlyingType is INamedTypeSymbol namedType &&
+               ConfigurationPathGenerator.IsSimpleType(namedType);
     }
 
     /// <summary>Appends one source line using the emitter's four-space indentation convention.</summary>
@@ -202,7 +199,7 @@ internal static class ConfigurationDumpCollectionEmitter
     /// <param name="value">The generated C# line without leading indentation.</param>
     private static void AppendLine(StringBuilder source, int indent, string value)
     {
-        source.Append(' ', indent * 4).AppendLine(value);
+        source.IndentByLevel(indent).AppendLine(value);
     }
 }
 // AI GENERATED END

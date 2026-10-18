@@ -4,17 +4,15 @@
 // Published under MIT License
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 
-namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
+namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters;
 
-// AI GENERATED START - model: gpt-luna 5.6
+// AI GENERATED START - model: gemini-3.7-flash
 /// <summary>Emits the generated configuration dump API and its recursive value traversal.</summary>
 internal static class ConfigurationDumpMethodEmitter
 {

@@ -12,12 +12,13 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
 
-// AI GENERATED START - model: gpt-luna 5.6
+// AI GENERATED START - model: gemini-3.7-flash
 /// <summary>Discovers configuration object models and emits their local marker attribute and context shells.</summary>
 [Generator]
 public sealed class ConfigurationPathGenerator : IIncrementalGenerator
@@ -82,9 +83,13 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
     /// <returns>The marked named type, or <see langword="null"/> for unsupported declarations.</returns>
     private static INamedTypeSymbol? GetMarkedType(GeneratorSyntaxContext context, CancellationToken cancellationToken)
     {
-        return context.Node is BaseTypeDeclarationSyntax declaration
-            ? context.SemanticModel.GetDeclaredSymbol(declaration, cancellationToken) as INamedTypeSymbol
-            : null;
+        if (context.Node is BaseTypeDeclarationSyntax declaration &&
+            context.SemanticModel.GetDeclaredSymbol(declaration, cancellationToken) is { } symbol)
+        {
+            return symbol;
+        }
+
+        return null;
     }
 
     /// <summary>Extracts the final identifier from qualified, aliased, or simple attribute names.</summary>
@@ -97,7 +102,7 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
             IdentifierNameSyntax identifier => identifier.Identifier.ValueText,
             QualifiedNameSyntax qualified => GetRightmostName(qualified.Right),
             AliasQualifiedNameSyntax aliasQualified => GetRightmostName(aliasQualified.Name),
-            _ => string.Empty,
+            _ => string.Empty
         };
     }
 
@@ -121,8 +126,8 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         static bool IsNamespaceIdentifier(string segment)
         {
             return SyntaxFacts.IsValidIdentifier(segment) ||
-                SyntaxFacts.GetKeywordKind(segment) != SyntaxKind.None ||
-                SyntaxFacts.GetContextualKeywordKind(segment) != SyntaxKind.None;
+                   SyntaxFacts.GetKeywordKind(segment) != SyntaxKind.None ||
+                   SyntaxFacts.GetContextualKeywordKind(segment) != SyntaxKind.None;
         }
     }
 
@@ -143,6 +148,8 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
                      static type => type.ToDisplayString(FullyQualifiedFormat),
                      StringComparer.Ordinal))
         {
+            ValidateModel(context, type);
+
             if (FindExistingContext(type) is not null)
             {
                 continue;
@@ -155,6 +162,51 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         }
     }
 
+    /// <summary>Validates a model symbol and reports diagnostic warnings for unsupported configurations.</summary>
+    /// <param name="context">The source production context for reporting diagnostics.</param>
+    /// <param name="type">The model symbol to validate.</param>
+    private static void ValidateModel(SourceProductionContext context, INamedTypeSymbol type)
+    {
+        HashSet<string> seenKeys = new(StringComparer.OrdinalIgnoreCase);
+        foreach (IPropertySymbol property in GetBindableProperties(type))
+        {
+            string keyName = GetKeyName(property);
+            if (!seenKeys.Add(keyName))
+            {
+                Location location = property.Locations.FirstOrDefault() ?? Location.None;
+                context.ReportDiagnostic(
+                    Diagnostic.Create(
+                        DiagnosticDescriptors.DuplicateConfigurationKey,
+                        location,
+                        property.Name,
+                        keyName,
+                        type.ToDisplayString(FullyQualifiedFormat)));
+            }
+
+            if (property.Type is INamedTypeSymbol propertyNamedType)
+            {
+                INamedTypeSymbol? dictionary = GetDictionaryContract(propertyNamedType);
+                if (dictionary is not null)
+                {
+                    ITypeSymbol keyType = dictionary.TypeArguments[0];
+                    if (keyType.SpecialType != SpecialType.System_String &&
+                        keyType.TypeKind != TypeKind.Enum &&
+                        keyType is INamedTypeSymbol namedKeyType &&
+                        !IsSimpleType(namedKeyType))
+                    {
+                        Location location = property.Locations.FirstOrDefault() ?? Location.None;
+                        context.ReportDiagnostic(
+                            Diagnostic.Create(
+                                DiagnosticDescriptors.UnsupportedDictionaryKey,
+                                location,
+                                keyType.ToDisplayString(FullyQualifiedFormat),
+                                property.Name));
+                    }
+                }
+            }
+        }
+    }
+
     /// <summary>Adds non-scalar model types reachable through properties, arrays, and collection values.</summary>
     /// <param name="type">The current property or element type.</param>
     /// <param name="contextTypes">The set of model definitions that require generated contexts.</param>
@@ -164,15 +216,14 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         ISet<INamedTypeSymbol> contextTypes,
         ISet<INamedTypeSymbol> activeTypes)
     {
-        if (type is IArrayTypeSymbol arrayType)
+        switch (type)
         {
-            VisitArrayType(arrayType, contextTypes, activeTypes);
-            return;
-        }
-
-        if (type is INamedTypeSymbol namedType)
-        {
-            VisitNamedType(namedType, contextTypes, activeTypes);
+            case IArrayTypeSymbol arrayType:
+                VisitArrayType(arrayType, contextTypes, activeTypes);
+                break;
+            case INamedTypeSymbol namedType:
+                VisitNamedType(namedType, contextTypes, activeTypes);
+                break;
         }
     }
 
@@ -301,11 +352,11 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
     private static bool IsGenericDictionary(INamedTypeSymbol type)
     {
         return type.Arity == 2 &&
-            string.Equals(
-                type.ContainingNamespace.ToDisplayString(),
-                "System.Collections.Generic",
-                StringComparison.Ordinal) &&
-            type.MetadataName is "IDictionary`2" or "IReadOnlyDictionary`2" or "Dictionary`2";
+               string.Equals(
+                   type.ContainingNamespace.ToDisplayString(),
+                   "System.Collections.Generic",
+                   StringComparison.Ordinal) &&
+               type.MetadataName is "IDictionary`2" or "IReadOnlyDictionary`2" or "Dictionary`2";
     }
 
     /// <summary>Tests whether a named type is the framework's generic enumerable contract.</summary>
@@ -314,11 +365,11 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
     private static bool IsGenericEnumerable(INamedTypeSymbol type)
     {
         return type.Arity == 1 &&
-            string.Equals(
-                type.ContainingNamespace.ToDisplayString(),
-                "System.Collections.Generic",
-                StringComparison.Ordinal) &&
-            string.Equals(type.MetadataName, "IEnumerable`1", StringComparison.Ordinal);
+               string.Equals(
+                   type.ContainingNamespace.ToDisplayString(),
+                   "System.Collections.Generic",
+                   StringComparison.Ordinal) &&
+               string.Equals(type.MetadataName, "IEnumerable`1", StringComparison.Ordinal);
     }
 
     /// <summary>Checks for the CLR nullable-value-type wrapper rather than nullable-reference annotations.</summary>
@@ -336,7 +387,7 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
     /// <returns><see langword="true"/> only for a one-dimensional array of bytes.</returns>
     internal static bool IsByteArray(IArrayTypeSymbol type)
     {
-        return type.Rank == 1 && type.ElementType.SpecialType == SpecialType.System_Byte;
+        return type is { Rank: 1, ElementType.SpecialType: SpecialType.System_Byte };
     }
 
     /// <summary>Recognizes scalar types that are emitted as one configuration value instead of traversed.</summary>
@@ -399,9 +450,9 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         static bool IsBindableProperty(IPropertySymbol property)
         {
             return !property.IsStatic &&
-                !property.IsIndexer &&
-                property.GetMethod is not null &&
-                property.GetMethod.DeclaredAccessibility == Accessibility.Public;
+                   !property.IsIndexer &&
+                   property.GetMethod is not null &&
+                   property.GetMethod.DeclaredAccessibility == Accessibility.Public;
         }
     }
 
@@ -431,7 +482,7 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
             containingTypes.Push(current);
         }
 
-        return containingTypes.SelectMany(static current => current.TypeParameters).ToImmutableArray();
+        return [.. containingTypes.SelectMany(static current => current.TypeParameters)];
     }
 
     /// <summary>Collects constructed generic arguments from containing types through the supplied type.</summary>
@@ -445,7 +496,7 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
             containingTypes.Push(current);
         }
 
-        return containingTypes.SelectMany(static current => current.TypeArguments).ToImmutableArray();
+        return [.. containingTypes.SelectMany(static current => current.TypeArguments)];
     }
 
     /// <summary>Creates a stable sibling context name, including generic parameter names when needed.</summary>
@@ -492,9 +543,8 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
 
         constraints.AddRange(
             parameter.ConstraintTypes.Select(static type => type.ToDisplayString(FullyQualifiedFormat)));
-        if (parameter.HasConstructorConstraint &&
-            !parameter.HasUnmanagedTypeConstraint &&
-            !parameter.HasValueTypeConstraint)
+        if (parameter is
+            { HasConstructorConstraint: true, HasUnmanagedTypeConstraint: false, HasValueTypeConstraint: false })
         {
             constraints.Add("new()");
         }
@@ -510,7 +560,7 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
     internal static string EscapeIdentifier(string identifier)
     {
         return SyntaxFacts.GetKeywordKind(identifier) != SyntaxKind.None ||
-            SyntaxFacts.GetContextualKeywordKind(identifier) != SyntaxKind.None
+               SyntaxFacts.GetContextualKeywordKind(identifier) != SyntaxKind.None
             ? string.Concat("@", identifier)
             : identifier;
     }
@@ -545,9 +595,8 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
     /// <returns><see langword="true"/> when the declaration can represent a generated context.</returns>
     private static bool IsContextCandidate(INamedTypeSymbol contextType, int arity)
     {
-        return contextType.TypeKind == TypeKind.Class &&
-            !contextType.IsAbstract &&
-            contextType.TypeParameters.Length == arity;
+        return contextType is { TypeKind: TypeKind.Class, IsAbstract: false } &&
+               contextType.TypeParameters.Length == arity;
     }
 
     /// <summary>Checks whether a context derives from the supported base instantiated for the model.</summary>
@@ -580,10 +629,10 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
     private static bool IsContextBase(INamedTypeSymbol type)
     {
         return string.Equals(type.MetadataName, "ConfigurationObjectContextBase`1", StringComparison.Ordinal) &&
-            string.Equals(
-                type.ContainingNamespace.ToDisplayString(),
-                "HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts",
-                StringComparison.Ordinal);
+               string.Equals(
+                   type.ContainingNamespace.ToDisplayString(),
+                   "HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts",
+                   StringComparison.Ordinal);
     }
 }
 // AI GENERATED END

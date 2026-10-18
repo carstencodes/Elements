@@ -5,9 +5,9 @@
 
 using System.Text;
 
-namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
+namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters.Options;
 
-// AI GENERATED START - model: gpt-luna 5.6
+// AI GENERATED START - model: gemini-3.7-flash
 /// <summary>Shared mutable state for one generated configuration dump.</summary>
 internal sealed class DumpEmissionContext(StringBuilder source, string valuesName, string visitedName)
 {

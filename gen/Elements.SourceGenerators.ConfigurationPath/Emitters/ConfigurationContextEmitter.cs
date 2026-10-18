@@ -12,9 +12,9 @@ using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
+namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters;
 
-// AI GENERATED START - model: gpt-luna 5.6
+// AI GENERATED START - model: gemini-3.7-flash
 /// <summary>Builds the generated context type, its metadata, and helper implementations.</summary>
 internal static class ConfigurationContextEmitter
 {
@@ -265,10 +265,7 @@ internal static class ConfigurationContextEmitter
     private static ContextPaths CollectPaths(INamedTypeSymbol rootType)
     {
         ContextPaths paths = new();
-        HashSet<INamedTypeSymbol> activeTypes = new(SymbolEqualityComparer.Default)
-        {
-            rootType.OriginalDefinition,
-        };
+        HashSet<INamedTypeSymbol> activeTypes = new(SymbolEqualityComparer.Default) { rootType.OriginalDefinition, };
         CollectProperties(rootType, [], paths, activeTypes);
         return paths;
     }

@@ -6,9 +6,9 @@
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 
-namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
+namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters.Options;
 
-// AI GENERATED START - model: gpt-luna 5.6
+// AI GENERATED START - model: gemini-3.7-flash
 /// <summary>Options describing the element contracts exposed by one enumerable value.</summary>
 internal readonly record struct GenericCollectionValuesOptions(
     ImmutableArray<ITypeSymbol> ElementTypes,

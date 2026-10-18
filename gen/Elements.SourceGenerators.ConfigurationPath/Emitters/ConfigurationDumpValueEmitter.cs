@@ -6,12 +6,13 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters.Options;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
+namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters;
 
-// AI GENERATED START - model: gpt-luna 5.6
+// AI GENERATED START - model: gemini-3.7-flash
 /// <summary>Emits the recursive configuration values included in a generated dump.</summary>
 internal static class ConfigurationDumpValueEmitter
 {
@@ -25,7 +26,7 @@ internal static class ConfigurationDumpValueEmitter
             source,
             indent,
             "global::System.Collections.Generic.Dictionary<string, object?> values = new(" +
-                "global::System.StringComparer.Ordinal);");
+            "global::System.StringComparer.Ordinal);");
         DumpEmissionContext context = new(source, "values", "visited");
         foreach (IPropertySymbol property in ConfigurationPathGenerator.GetBindableProperties(type))
         {
@@ -57,8 +58,8 @@ internal static class ConfigurationDumpValueEmitter
             context.Source,
             options.Indent,
             string.Concat("var ", localName, " = ", options.InstanceExpression, ".")
-                + ConfigurationPathGenerator.EscapeIdentifier(options.Property.Name)
-                + ";");
+            + ConfigurationPathGenerator.EscapeIdentifier(options.Property.Name)
+            + ";");
         string keysExpression = CreateKeysExpression(options.ParentKeysExpression, options.Property);
         AppendDumpValue(
             context,
@@ -328,7 +329,7 @@ internal static class ConfigurationDumpValueEmitter
             }
 
             return type is INamedTypeSymbol namedType &&
-                namedType.TypeArguments.Any(ContainsTypeParameter);
+                   namedType.TypeArguments.Any(ContainsTypeParameter);
         }
     }
 
@@ -454,7 +455,7 @@ internal static class ConfigurationDumpValueEmitter
     private static bool IsSimpleReadOnlyProperty(IPropertySymbol property)
     {
         return IsSimpleProperty(property.Type) &&
-            property.SetMethod?.DeclaredAccessibility != Accessibility.Public;
+               property.SetMethod?.DeclaredAccessibility != Accessibility.Public;
     }
 
     /// <summary>Appends one source line using the emitter's four-space indentation convention.</summary>

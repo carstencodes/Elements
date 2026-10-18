@@ -6,21 +6,17 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts;
-using HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
 using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Tests.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
-using TUnit;
-using TUnit.Assertions;
 using DisplayNameAttribute = TUnit.Core.DisplayNameAttribute;
 using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
@@ -30,13 +26,22 @@ namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Tests;
 [DisplayName("Configuration Path Source Generator Tests")]
 [Description(
     "Validates source generator emission of configuration context classes, metadata paths, and runtime object dumping.")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Performance",
+    "CA1822:Mark members as static",
+    Justification = "TUnit test methods must be instance methods.")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Major Code Smell",
+    "S2325:Methods and properties that don't access instance data should be static",
+    Justification = "TUnit test methods must be instance methods.")]
 internal sealed class ConfigurationPathGeneratorTests
 {
     private static readonly ImmutableArray<MetadataReference> PlatformReferences =
-        ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!)
+    [
+        .. ((string)AppContext.GetData("TRUSTED_PLATFORM_ASSEMBLIES")!)
         .Split(Path.PathSeparator)
-        .Select(static path => (MetadataReference)MetadataReference.CreateFromFile(path))
-        .ToImmutableArray();
+        .Select(static path => MetadataReference.CreateFromFile(path))
+    ];
 
     [Test]
     [DisplayName("Emits marker attribute and generated code headers in configured root namespace")]
@@ -45,17 +50,7 @@ internal sealed class ConfigurationPathGeneratorTests
     public async Task EmitsConfigurationAttributeAndGeneratedCodeHeaders()
     {
         GeneratorRun run = RunGenerator(Input.NestedModels, "Demo.Settings.Attributes");
-        string generatorVersion = typeof(ConfigurationPathGenerator).Assembly
-                                      .GetCustomAttributes(
-                                          typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
-                                      .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
-                                      .FirstOrDefault()?.InformationalVersion
-                                  ?? typeof(ConfigurationPathGenerator).Assembly
-                                      .GetCustomAttributes(typeof(System.Reflection.AssemblyFileVersionAttribute),
-                                          false)
-                                      .OfType<System.Reflection.AssemblyFileVersionAttribute>()
-                                      .FirstOrDefault()?.Version
-                                  ?? "1.0.0.0-unknown";
+        string generatorVersion = GetGeneratorVersion();
 
         using (Assert.Multiple())
         {
@@ -367,6 +362,72 @@ internal sealed class ConfigurationPathGeneratorTests
         }
     }
 
+    [Test]
+    [DisplayName("Reports diagnostic warning on duplicate configuration key name")]
+    [Description(
+        "Verifies that the generator reports HC_CP001 diagnostic when multiple properties map to identical configuration keys.")]
+    public async Task ReportsDiagnosticOnDuplicateConfigurationKeyName()
+    {
+        const string source = """
+                              using System;
+                              using Demo.Settings.Attributes;
+                              using Microsoft.Extensions.Configuration;
+
+                              namespace Demo.Settings;
+
+                              [ConfigurationObject]
+                              public sealed class DuplicateKeyModel
+                              {
+                                  [ConfigurationKeyName("duplicate")]
+                                  public string First { get; set; } = string.Empty;
+
+                                  [ConfigurationKeyName("duplicate")]
+                                  public string Second { get; set; } = string.Empty;
+                              }
+                              """;
+
+        GeneratorRun run = RunGenerator(source, "Demo.Settings.Attributes");
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(run.Diagnostics.Any(static d =>
+                    string.Equals(d.Id, "HC_CP001", StringComparison.Ordinal)))
+                .IsTrue()
+                .Because("the generator should report HC_CP001 when duplicate configuration keys are detected");
+        }
+    }
+
+    [Test]
+    [DisplayName("Reports diagnostic warning on unsupported dictionary key type")]
+    [Description(
+        "Verifies that the generator reports HC_CP002 diagnostic when a dictionary key uses an unsupported type.")]
+    public async Task ReportsDiagnosticOnUnsupportedDictionaryKeyType()
+    {
+        const string source = """
+                              using System;
+                              using System.Collections.Generic;
+                              using Demo.Settings.Attributes;
+
+                              namespace Demo.Settings;
+
+                              [ConfigurationObject]
+                              public sealed class CustomKeyDictionaryModel
+                              {
+                                  public Dictionary<System.Threading.CancellationToken, string> CustomMap { get; set; } = new();
+                              }
+                              """;
+
+        GeneratorRun run = RunGenerator(source, "Demo.Settings.Attributes");
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(run.Diagnostics.Any(static d =>
+                    string.Equals(d.Id, "HC_CP002", StringComparison.Ordinal)))
+                .IsTrue()
+                .Because("the generator should report HC_CP002 when an unsupported dictionary key type is encountered");
+        }
+    }
+
     private static async Task AssertDefaultDump(
         IReadOnlyDictionary<string, object?> values,
         IReadOnlyDictionary<string, object?> allProperties)
@@ -481,6 +542,27 @@ internal sealed class ConfigurationPathGeneratorTests
         }
     }
 
+    private static string GetGeneratorVersion()
+    {
+        System.Reflection.Assembly assembly = typeof(ConfigurationPathGenerator).Assembly;
+        string? informationalVersion = assembly
+            .GetCustomAttributes(typeof(System.Reflection.AssemblyInformationalVersionAttribute), false)
+            .OfType<System.Reflection.AssemblyInformationalVersionAttribute>()
+            .FirstOrDefault()?.InformationalVersion;
+
+        if (informationalVersion is not null)
+        {
+            return informationalVersion;
+        }
+
+        string? fileVersion = assembly
+            .GetCustomAttributes(typeof(System.Reflection.AssemblyFileVersionAttribute), false)
+            .OfType<System.Reflection.AssemblyFileVersionAttribute>()
+            .FirstOrDefault()?.Version;
+
+        return fileVersion ?? "1.0.0.0-unknown";
+    }
+
     private static GeneratorRun RunGenerator(string source, string? rootNamespace)
     {
         CSharpParseOptions parseOptions = new(LanguageVersion.CSharp14);
@@ -504,6 +586,10 @@ internal sealed class ConfigurationPathGeneratorTests
             .Results
             .SelectMany(static result => result.GeneratedSources)
             .Select(static generated => generated.HintName)
+            .ToImmutableArray();
+        ImmutableArray<Diagnostic> generatorDiagnostics = driver.GetRunResult()
+            .Results
+            .SelectMany(static result => result.Diagnostics)
             .ToImmutableArray();
 
         string compilationErrors = string.Join(
@@ -532,14 +618,16 @@ internal sealed class ConfigurationPathGeneratorTests
             generatedSources,
             generatedHintNames,
             compilationErrors,
-            emitResult.Success ? output.ToArray() : []);
+            emitResult.Success ? output.ToArray() : [],
+            generatorDiagnostics);
     }
 
     private sealed record GeneratorRun(
         ImmutableArray<string> GeneratedSources,
         ImmutableArray<string> GeneratedHintNames,
         string CompilationErrors,
-        byte[] AssemblyImage);
+        byte[] AssemblyImage,
+        ImmutableArray<Diagnostic> Diagnostics);
 
     private sealed class TestAnalyzerConfigOptionsProvider : AnalyzerConfigOptionsProvider
     {
