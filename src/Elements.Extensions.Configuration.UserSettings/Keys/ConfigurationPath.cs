@@ -4,6 +4,7 @@
 //  Published under MIT License
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using MicrosoftConfigurationPath = Microsoft.Extensions.Configuration.ConfigurationPath;
 
@@ -18,7 +19,7 @@ namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys;
 /// where each segment represents a level in the hierarchy. The structure supports
 /// path concatenation and equality comparisons.
 /// </remarks>
-public readonly struct ConfigurationPath(params string[] segments) : IEquatable<ConfigurationPath>
+public readonly struct ConfigurationPath(params string[] segments) : IEquatable<ConfigurationPath>, IEnumerable<string>
 {
     /// <summary>
     /// Gets an array of strings representing the individual segments of the configuration path.
@@ -70,6 +71,15 @@ public readonly struct ConfigurationPath(params string[] segments) : IEquatable<
     }
 
     /// <summary>
+    /// Returns an enumerator that iterates through the segments of the configuration path.
+    /// </summary>
+    /// <returns>An enumerator that can be used to iterate through the segments of the configuration path.</returns>
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return this.Segments.GetEnumerator();
+    }
+
+    /// <summary>
     /// Determines whether the specified <see cref="ConfigurationPath"/> is equal to the current instance.
     /// </summary>
     /// <param name="other">
@@ -86,6 +96,15 @@ public readonly struct ConfigurationPath(params string[] segments) : IEquatable<
         string[] right = other.Segments ?? [];
         return System.Linq.Enumerable.SequenceEqual(left, right, StringComparer.Ordinal);
         // AI GENERATED END
+    }
+
+    /// <summary>
+    /// Returns an enumerator that iterates through the segments of the configuration path.
+    /// </summary>
+    /// <returns>An enumerator for the <see cref="Segments"/> of the configuration path.</returns>
+    public IEnumerator<string> GetEnumerator()
+    {
+        return ((IEnumerable<string>)this.Segments).GetEnumerator();
     }
 
     /// <summary>

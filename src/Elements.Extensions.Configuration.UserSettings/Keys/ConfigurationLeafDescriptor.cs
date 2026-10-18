@@ -47,6 +47,56 @@ public readonly struct ConfigurationLeafDescriptor(
     public Type ConfigurationValueType { get; } = configurationValueType;
 
     /// <summary>
+    /// Deconstructs the current instance into its path, configuration value type, and description.
+    /// </summary>
+    /// <param name="path">
+    /// The path of the configuration leaf as a <c>ConfigurationPath</c>.
+    /// </param>
+    /// <param name="configurationValueType">
+    /// The type of the configuration value represented by the descriptor.
+    /// </param>
+    /// <param name="description">
+    /// The optional description associated with the configuration leaf.
+    /// </param>
+    public void Deconstruct(out ConfigurationPath path, out Type configurationValueType, out string? description)
+    {
+        path = this.Path;
+        configurationValueType = this.ConfigurationValueType;
+        description = this.Description;
+    }
+
+    /// <summary>
+    /// Deconstructs the current instance into its <c>Path</c>
+    /// and <c>ConfigurationValueType</c>.
+    /// </summary>
+    /// <param name="path">
+    /// The path representing the hierarchical location of the configuration leaf.
+    /// </param>
+    /// <param name="configurationValueType">
+    /// The type of value associated with the configuration leaf.
+    /// </param>
+    public void Deconstruct(out ConfigurationPath path, out Type configurationValueType)
+    {
+        path = this.Path;
+        configurationValueType = this.ConfigurationValueType;
+    }
+
+    /// <summary>
+    /// Deconstructs the current instance into its path segments and configuration value type.
+    /// </summary>
+    /// <param name="segments">
+    /// An array of strings representing the segments of the configuration path.
+    /// </param>
+    /// <param name="configurationValueType">
+    /// The type of the configuration value associated with the current instance.
+    /// </param>
+    public void Deconstruct(out string[] segments, out Type configurationValueType)
+    {
+        segments = this.Path.Segments;
+        configurationValueType = this.ConfigurationValueType;
+    }
+
+    /// <summary>
     /// Returns a string representation of the current instance.
     /// </summary>
     /// <returns>
