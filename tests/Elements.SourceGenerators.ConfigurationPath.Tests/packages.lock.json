@@ -286,7 +286,10 @@
         }
       },
       "HedgeCraft.Elements.Extensions.Configuration.UserSettings": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Abstractions": "[10.0.12, )"
+        }
       },
       "HedgeCraft.Elements.SourceGenerators.ConfigurationPath": {
         "type": "Project",
@@ -657,7 +660,10 @@
         }
       },
       "HedgeCraft.Elements.Extensions.Configuration.UserSettings": {
-        "type": "Project"
+        "type": "Project",
+        "dependencies": {
+          "Microsoft.Extensions.Configuration.Abstractions": "[10.0.12, )"
+        }
       },
       "HedgeCraft.Elements.SourceGenerators.ConfigurationPath": {
         "type": "Project",

@@ -70,16 +70,45 @@ internal static class Input
                                            }
                                        }
 
+                                       namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys
+                                       {
+                                           using System;
+                                           using System.Linq;
+
+                                           public readonly struct ConfigurationPath(params string[] segments) : IEquatable<ConfigurationPath>
+                                           {
+                                               public string[] Segments { get; } = segments ?? [];
+
+                                               public bool Equals(ConfigurationPath other) =>
+                                                   (Segments ?? []).SequenceEqual(other.Segments ?? [], StringComparer.Ordinal);
+
+                                               public override bool Equals(object? obj) => obj is ConfigurationPath other && Equals(other);
+
+                                               public override int GetHashCode()
+                                               {
+                                                   HashCode hash = new();
+                                                   foreach (string segment in Segments ?? [])
+                                                   {
+                                                       hash.Add(segment, StringComparer.Ordinal);
+                                                   }
+
+                                                   return hash.ToHashCode();
+                                               }
+                                           }
+                                       }
+
                                        namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts
                                        {
                                            using System;
                                            using System.Collections.Generic;
+                                           using System.Linq;
+                                           using HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys;
 
                                            public abstract class ConfigurationObjectContextBase<T>
                                            {
-                                               public abstract IReadOnlySet<string[]> GetReadableConfigurationPaths();
+                                               public abstract IReadOnlySet<ConfigurationPath> GetReadableConfigurationPaths();
 
-                                               public abstract IReadOnlySet<string[]> GetWritableConfigurationPaths();
+                                               public abstract IReadOnlySet<ConfigurationPath> GetWritableConfigurationPaths();
 
                                                public abstract IReadOnlyDictionary<string, object?> DumpConfigurationObject(
                                                    T instance,
@@ -87,30 +116,24 @@ internal static class Input
                                                    params string[] parentKeys);
 
                                                protected static void AppendNestedPaths(
-                                                   ISet<string[]> destination,
+                                                   ISet<ConfigurationPath> destination,
                                                    string parentKey,
-                                                   IEnumerable<string[]> nestedPaths)
+                                                   IEnumerable<ConfigurationPath> nestedPaths)
                                                {
-                                                   foreach (string[] path in nestedPaths)
+                                                   foreach (ConfigurationPath path in nestedPaths)
                                                    {
-                                                       string[] combined = new string[path.Length + 1];
-                                                       combined[0] = parentKey;
-                                                       Array.Copy(path, 0, combined, 1, path.Length);
-                                                       destination.Add(combined);
+                                                       destination.Add(new ConfigurationPath(new[] { parentKey }.Concat(path.Segments).ToArray()));
                                                    }
                                                }
 
                                                protected static void AppendNestedPaths(
-                                                   ISet<string[]> destination,
+                                                   ISet<ConfigurationPath> destination,
                                                    string[] parentKeys,
-                                                   IEnumerable<string[]> nestedPaths)
+                                                   IEnumerable<ConfigurationPath> nestedPaths)
                                                {
-                                                   foreach (string[] path in nestedPaths)
+                                                   foreach (ConfigurationPath path in nestedPaths)
                                                    {
-                                                       string[] combined = new string[parentKeys.Length + path.Length];
-                                                       Array.Copy(parentKeys, 0, combined, 0, parentKeys.Length);
-                                                       Array.Copy(path, 0, combined, parentKeys.Length, path.Length);
-                                                       destination.Add(combined);
+                                                       destination.Add(new ConfigurationPath(parentKeys.Concat(path.Segments).ToArray()));
                                                    }
                                                }
                                            }
@@ -129,16 +152,45 @@ internal static class Input
                                                 }
                                             }
 
+                                            namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys
+                                            {
+                                                using System;
+                                                using System.Linq;
+
+                                                public readonly struct ConfigurationPath(params string[] segments) : IEquatable<ConfigurationPath>
+                                                {
+                                                    public string[] Segments { get; } = segments ?? [];
+
+                                                    public bool Equals(ConfigurationPath other) =>
+                                                        (Segments ?? []).SequenceEqual(other.Segments ?? [], StringComparer.Ordinal);
+
+                                                    public override bool Equals(object? obj) => obj is ConfigurationPath other && Equals(other);
+
+                                                    public override int GetHashCode()
+                                                    {
+                                                        HashCode hash = new();
+                                                        foreach (string segment in Segments ?? [])
+                                                        {
+                                                            hash.Add(segment, StringComparer.Ordinal);
+                                                        }
+
+                                                        return hash.ToHashCode();
+                                                    }
+                                                }
+                                            }
+
                                             namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts
                                             {
                                                 using System;
                                                 using System.Collections.Generic;
+                                                using System.Linq;
+                                                using HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys;
 
                                                 public abstract class ConfigurationObjectContextBase<T>
                                                 {
-                                                    public abstract IReadOnlySet<string[]> GetReadableConfigurationPaths();
+                                                    public abstract IReadOnlySet<ConfigurationPath> GetReadableConfigurationPaths();
 
-                                                    public abstract IReadOnlySet<string[]> GetWritableConfigurationPaths();
+                                                    public abstract IReadOnlySet<ConfigurationPath> GetWritableConfigurationPaths();
 
                                                     public abstract IReadOnlyDictionary<string, object?> DumpConfigurationObject(
                                                         T instance,
@@ -146,30 +198,24 @@ internal static class Input
                                                         params string[] parentKeys);
 
                                                     protected static void AppendNestedPaths(
-                                                        ISet<string[]> destination,
+                                                        ISet<ConfigurationPath> destination,
                                                         string parentKey,
-                                                        IEnumerable<string[]> nestedPaths)
+                                                        IEnumerable<ConfigurationPath> nestedPaths)
                                                     {
-                                                        foreach (string[] path in nestedPaths)
+                                                        foreach (ConfigurationPath path in nestedPaths)
                                                         {
-                                                            string[] combined = new string[path.Length + 1];
-                                                            combined[0] = parentKey;
-                                                            Array.Copy(path, 0, combined, 1, path.Length);
-                                                            destination.Add(combined);
+                                                            destination.Add(new ConfigurationPath(new[] { parentKey }.Concat(path.Segments).ToArray()));
                                                         }
                                                     }
 
                                                     protected static void AppendNestedPaths(
-                                                        ISet<string[]> destination,
+                                                        ISet<ConfigurationPath> destination,
                                                         string[] parentKeys,
-                                                        IEnumerable<string[]> nestedPaths)
+                                                        IEnumerable<ConfigurationPath> nestedPaths)
                                                     {
-                                                        foreach (string[] path in nestedPaths)
+                                                        foreach (ConfigurationPath path in nestedPaths)
                                                         {
-                                                            string[] combined = new string[parentKeys.Length + path.Length];
-                                                            Array.Copy(parentKeys, 0, combined, 0, parentKeys.Length);
-                                                            Array.Copy(path, 0, combined, parentKeys.Length, path.Length);
-                                                            destination.Add(combined);
+                                                            destination.Add(new ConfigurationPath(parentKeys.Concat(path.Segments).ToArray()));
                                                         }
                                                     }
                                                 }
@@ -181,6 +227,7 @@ internal static class Input
                                           {
                                               using System.Collections.Generic;
                                               using Demo.Context.Attributes;
+                                              using HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys;
 
                                               [ConfigurationObject]
                                               public class Root
@@ -196,9 +243,9 @@ internal static class Input
                                               internal sealed class ExistingChildContext :
                                                   HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts.ConfigurationObjectContextBase<Child>
                                               {
-                                                  public override IReadOnlySet<string[]> GetReadableConfigurationPaths() => new HashSet<string[]>();
+                                                  public override IReadOnlySet<ConfigurationPath> GetReadableConfigurationPaths() => new HashSet<ConfigurationPath>();
 
-                                                  public override IReadOnlySet<string[]> GetWritableConfigurationPaths() => new HashSet<string[]>();
+                                                  public override IReadOnlySet<ConfigurationPath> GetWritableConfigurationPaths() => new HashSet<ConfigurationPath>();
 
                                                   public override IReadOnlyDictionary<string, object?> DumpConfigurationObject(
                                                       Child instance,
@@ -211,16 +258,45 @@ internal static class Input
                                           {
                                           }
 
+                                          namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys
+                                          {
+                                              using System;
+                                              using System.Linq;
+
+                                              public readonly struct ConfigurationPath(params string[] segments) : IEquatable<ConfigurationPath>
+                                              {
+                                                  public string[] Segments { get; } = segments ?? [];
+
+                                                  public bool Equals(ConfigurationPath other) =>
+                                                      (Segments ?? []).SequenceEqual(other.Segments ?? [], StringComparer.Ordinal);
+
+                                                  public override bool Equals(object? obj) => obj is ConfigurationPath other && Equals(other);
+
+                                                  public override int GetHashCode()
+                                                  {
+                                                      HashCode hash = new();
+                                                      foreach (string segment in Segments ?? [])
+                                                      {
+                                                          hash.Add(segment, StringComparer.Ordinal);
+                                                      }
+
+                                                      return hash.ToHashCode();
+                                                  }
+                                              }
+                                          }
+
                                           namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts
                                           {
                                               using System;
                                               using System.Collections.Generic;
+                                              using System.Linq;
+                                              using HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys;
 
                                               public abstract class ConfigurationObjectContextBase<T>
                                               {
-                                                  public abstract IReadOnlySet<string[]> GetReadableConfigurationPaths();
+                                                  public abstract IReadOnlySet<ConfigurationPath> GetReadableConfigurationPaths();
 
-                                                  public abstract IReadOnlySet<string[]> GetWritableConfigurationPaths();
+                                                  public abstract IReadOnlySet<ConfigurationPath> GetWritableConfigurationPaths();
 
                                                   public abstract IReadOnlyDictionary<string, object?> DumpConfigurationObject(
                                                       T instance,
@@ -228,30 +304,24 @@ internal static class Input
                                                       params string[] parentKeys);
 
                                                   protected static void AppendNestedPaths(
-                                                      ISet<string[]> destination,
+                                                      ISet<ConfigurationPath> destination,
                                                       string parentKey,
-                                                      IEnumerable<string[]> nestedPaths)
+                                                      IEnumerable<ConfigurationPath> nestedPaths)
                                                   {
-                                                      foreach (string[] path in nestedPaths)
+                                                      foreach (ConfigurationPath path in nestedPaths)
                                                       {
-                                                          string[] combined = new string[path.Length + 1];
-                                                          combined[0] = parentKey;
-                                                          Array.Copy(path, 0, combined, 1, path.Length);
-                                                          destination.Add(combined);
+                                                          destination.Add(new ConfigurationPath(new[] { parentKey }.Concat(path.Segments).ToArray()));
                                                       }
                                                   }
 
                                                   protected static void AppendNestedPaths(
-                                                      ISet<string[]> destination,
+                                                      ISet<ConfigurationPath> destination,
                                                       string[] parentKeys,
-                                                      IEnumerable<string[]> nestedPaths)
+                                                      IEnumerable<ConfigurationPath> nestedPaths)
                                                   {
-                                                      foreach (string[] path in nestedPaths)
+                                                      foreach (ConfigurationPath path in nestedPaths)
                                                       {
-                                                          string[] combined = new string[parentKeys.Length + path.Length];
-                                                          Array.Copy(parentKeys, 0, combined, 0, parentKeys.Length);
-                                                          Array.Copy(path, 0, combined, parentKeys.Length, path.Length);
-                                                          destination.Add(combined);
+                                                          destination.Add(new ConfigurationPath(parentKeys.Concat(path.Segments).ToArray()));
                                                       }
                                                   }
                                               }
@@ -285,16 +355,45 @@ internal static class Input
                                               }
                                           }
 
+                                          namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys
+                                          {
+                                              using System;
+                                              using System.Linq;
+
+                                              public readonly struct ConfigurationPath(params string[] segments) : IEquatable<ConfigurationPath>
+                                              {
+                                                  public string[] Segments { get; } = segments ?? [];
+
+                                                  public bool Equals(ConfigurationPath other) =>
+                                                      (Segments ?? []).SequenceEqual(other.Segments ?? [], StringComparer.Ordinal);
+
+                                                  public override bool Equals(object? obj) => obj is ConfigurationPath other && Equals(other);
+
+                                                  public override int GetHashCode()
+                                                  {
+                                                      HashCode hash = new();
+                                                      foreach (string segment in Segments ?? [])
+                                                      {
+                                                          hash.Add(segment, StringComparer.Ordinal);
+                                                      }
+
+                                                      return hash.ToHashCode();
+                                                  }
+                                              }
+                                          }
+
                                           namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts
                                           {
                                               using System;
                                               using System.Collections.Generic;
+                                              using System.Linq;
+                                              using HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys;
 
                                               public abstract class ConfigurationObjectContextBase<T>
                                               {
-                                                  public abstract IReadOnlySet<string[]> GetReadableConfigurationPaths();
+                                                  public abstract IReadOnlySet<ConfigurationPath> GetReadableConfigurationPaths();
 
-                                                  public abstract IReadOnlySet<string[]> GetWritableConfigurationPaths();
+                                                  public abstract IReadOnlySet<ConfigurationPath> GetWritableConfigurationPaths();
 
                                                   public abstract IReadOnlyDictionary<string, object?> DumpConfigurationObject(
                                                       T instance,
@@ -302,30 +401,24 @@ internal static class Input
                                                       params string[] parentKeys);
 
                                                   protected static void AppendNestedPaths(
-                                                      ISet<string[]> destination,
+                                                      ISet<ConfigurationPath> destination,
                                                       string parentKey,
-                                                      IEnumerable<string[]> nestedPaths)
+                                                      IEnumerable<ConfigurationPath> nestedPaths)
                                                   {
-                                                      foreach (string[] path in nestedPaths)
+                                                      foreach (ConfigurationPath path in nestedPaths)
                                                       {
-                                                          string[] combined = new string[path.Length + 1];
-                                                          combined[0] = parentKey;
-                                                          Array.Copy(path, 0, combined, 1, path.Length);
-                                                          destination.Add(combined);
+                                                          destination.Add(new ConfigurationPath(new[] { parentKey }.Concat(path.Segments).ToArray()));
                                                       }
                                                   }
 
                                                   protected static void AppendNestedPaths(
-                                                      ISet<string[]> destination,
+                                                      ISet<ConfigurationPath> destination,
                                                       string[] parentKeys,
-                                                      IEnumerable<string[]> nestedPaths)
+                                                      IEnumerable<ConfigurationPath> nestedPaths)
                                                   {
-                                                      foreach (string[] path in nestedPaths)
+                                                      foreach (ConfigurationPath path in nestedPaths)
                                                       {
-                                                          string[] combined = new string[parentKeys.Length + path.Length];
-                                                          Array.Copy(parentKeys, 0, combined, 0, parentKeys.Length);
-                                                          Array.Copy(path, 0, combined, parentKeys.Length, path.Length);
-                                                          destination.Add(combined);
+                                                          destination.Add(new ConfigurationPath(parentKeys.Concat(path.Segments).ToArray()));
                                                       }
                                                   }
                                               }
@@ -345,16 +438,45 @@ internal static class Input
                                                       }
                                                   }
 
+                                                  namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys
+                                                  {
+                                                      using System;
+                                                      using System.Linq;
+
+                                                      public readonly struct ConfigurationPath(params string[] segments) : IEquatable<ConfigurationPath>
+                                                      {
+                                                          public string[] Segments { get; } = segments ?? [];
+
+                                                          public bool Equals(ConfigurationPath other) =>
+                                                              (Segments ?? []).SequenceEqual(other.Segments ?? [], StringComparer.Ordinal);
+
+                                                          public override bool Equals(object? obj) => obj is ConfigurationPath other && Equals(other);
+
+                                                          public override int GetHashCode()
+                                                          {
+                                                              HashCode hash = new();
+                                                              foreach (string segment in Segments ?? [])
+                                                              {
+                                                                  hash.Add(segment, StringComparer.Ordinal);
+                                                              }
+
+                                                              return hash.ToHashCode();
+                                                          }
+                                                      }
+                                                  }
+
                                                   namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts
                                                   {
                                                       using System;
                                                       using System.Collections.Generic;
+                                                      using System.Linq;
+                                                      using HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys;
 
                                                       public abstract class ConfigurationObjectContextBase<T>
                                                       {
-                                                          public abstract IReadOnlySet<string[]> GetReadableConfigurationPaths();
+                                                          public abstract IReadOnlySet<ConfigurationPath> GetReadableConfigurationPaths();
 
-                                                          public abstract IReadOnlySet<string[]> GetWritableConfigurationPaths();
+                                                          public abstract IReadOnlySet<ConfigurationPath> GetWritableConfigurationPaths();
 
                                                           public abstract IReadOnlyDictionary<string, object?> DumpConfigurationObject(
                                                               T instance,
@@ -376,16 +498,45 @@ internal static class Input
                                                      }
                                                  }
 
+                                                 namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys
+                                                 {
+                                                     using System;
+                                                     using System.Linq;
+
+                                                     public readonly struct ConfigurationPath(params string[] segments) : IEquatable<ConfigurationPath>
+                                                     {
+                                                         public string[] Segments { get; } = segments ?? [];
+
+                                                         public bool Equals(ConfigurationPath other) =>
+                                                             (Segments ?? []).SequenceEqual(other.Segments ?? [], StringComparer.Ordinal);
+
+                                                         public override bool Equals(object? obj) => obj is ConfigurationPath other && Equals(other);
+
+                                                         public override int GetHashCode()
+                                                         {
+                                                             HashCode hash = new();
+                                                             foreach (string segment in Segments ?? [])
+                                                             {
+                                                                 hash.Add(segment, StringComparer.Ordinal);
+                                                             }
+
+                                                             return hash.ToHashCode();
+                                                         }
+                                                     }
+                                                 }
+
                                                  namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts
                                                  {
                                                      using System;
                                                      using System.Collections.Generic;
+                                                     using System.Linq;
+                                                     using HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys;
 
                                                      public abstract class ConfigurationObjectContextBase<T>
                                                      {
-                                                         public abstract IReadOnlySet<string[]> GetReadableConfigurationPaths();
+                                                         public abstract IReadOnlySet<ConfigurationPath> GetReadableConfigurationPaths();
 
-                                                         public abstract IReadOnlySet<string[]> GetWritableConfigurationPaths();
+                                                         public abstract IReadOnlySet<ConfigurationPath> GetWritableConfigurationPaths();
 
                                                          public abstract IReadOnlyDictionary<string, object?> DumpConfigurationObject(
                                                              T instance,
@@ -418,16 +569,45 @@ internal static class Input
                                                      }
                                                  }
 
+                                                 namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys
+                                                 {
+                                                     using System;
+                                                     using System.Linq;
+
+                                                     public readonly struct ConfigurationPath(params string[] segments) : IEquatable<ConfigurationPath>
+                                                     {
+                                                         public string[] Segments { get; } = segments ?? [];
+
+                                                         public bool Equals(ConfigurationPath other) =>
+                                                             (Segments ?? []).SequenceEqual(other.Segments ?? [], StringComparer.Ordinal);
+
+                                                         public override bool Equals(object? obj) => obj is ConfigurationPath other && Equals(other);
+
+                                                         public override int GetHashCode()
+                                                         {
+                                                             HashCode hash = new();
+                                                             foreach (string segment in Segments ?? [])
+                                                             {
+                                                                 hash.Add(segment, StringComparer.Ordinal);
+                                                             }
+
+                                                             return hash.ToHashCode();
+                                                         }
+                                                     }
+                                                 }
+
                                                  namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts
                                                  {
                                                      using System;
                                                      using System.Collections.Generic;
+                                                     using System.Linq;
+                                                     using HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys;
 
                                                      public abstract class ConfigurationObjectContextBase<T>
                                                      {
-                                                         public abstract IReadOnlySet<string[]> GetReadableConfigurationPaths();
+                                                         public abstract IReadOnlySet<ConfigurationPath> GetReadableConfigurationPaths();
 
-                                                         public abstract IReadOnlySet<string[]> GetWritableConfigurationPaths();
+                                                         public abstract IReadOnlySet<ConfigurationPath> GetWritableConfigurationPaths();
 
                                                          public abstract IReadOnlyDictionary<string, object?> DumpConfigurationObject(
                                                              T instance,

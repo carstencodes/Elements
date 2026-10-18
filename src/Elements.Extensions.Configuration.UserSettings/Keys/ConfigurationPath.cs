@@ -18,7 +18,7 @@ namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys;
 /// where each segment represents a level in the hierarchy. The structure supports
 /// path concatenation and equality comparisons.
 /// </remarks>
-public readonly struct ConfigurationPath(params string[] segments): IEquatable<ConfigurationPath>
+public readonly struct ConfigurationPath(params string[] segments) : IEquatable<ConfigurationPath>
 {
     /// <summary>
     /// Gets an array of strings representing the individual segments of the configuration path.
@@ -27,8 +27,9 @@ public readonly struct ConfigurationPath(params string[] segments): IEquatable<C
     /// Each segment in the path represents a distinct level or key within the configuration hierarchy.
     /// This property can be used to retrieve or manipulate the structure of the configuration path.
     /// </summary>
-    public string[] Segments { get; } = segments;
+    public string[] Segments { get; } = segments ?? [];
 
+    // AI GENERATED START - model: gemini-3.7-flash
     /// <summary>
     /// Appends the specified child paths to the current configuration path.
     /// </summary>
@@ -38,11 +39,22 @@ public readonly struct ConfigurationPath(params string[] segments): IEquatable<C
     public IEnumerable<ConfigurationPath> Append(IEnumerable<ConfigurationPath> childPaths)
     {
         ArgumentNullException.ThrowIfNull(childPaths);
+        return this.AppendCore(childPaths);
+    }
+
+    /// <summary>
+    /// Iterates over child paths and yields concatenated <see cref="ConfigurationPath"/> instances.
+    /// </summary>
+    /// <param name="childPaths">An enumerable collection of child paths to append.</param>
+    /// <returns>An enumerable collection of concatenated configuration paths.</returns>
+    private IEnumerable<ConfigurationPath> AppendCore(IEnumerable<ConfigurationPath> childPaths)
+    {
         foreach (ConfigurationPath child in childPaths)
         {
-            yield return new ConfigurationPath([.. this.Segments, .. child.Segments]);
+            yield return new ConfigurationPath([.. this.Segments ?? [], .. child.Segments ?? []]);
         }
     }
+    // AI GENERATED END
 
     /// <summary>
     /// Converts the configuration path into a string representation by joining its segments
@@ -54,7 +66,7 @@ public readonly struct ConfigurationPath(params string[] segments): IEquatable<C
     /// </returns>
     public override string ToString()
     {
-        return string.Join(MicrosoftConfigurationPath.KeyDelimiter, this.Segments);
+        return string.Join(MicrosoftConfigurationPath.KeyDelimiter, this.Segments ?? []);
     }
 
     /// <summary>
@@ -68,7 +80,12 @@ public readonly struct ConfigurationPath(params string[] segments): IEquatable<C
     /// </returns>
     public bool Equals(ConfigurationPath other)
     {
-        return this.Segments.Equals(other.Segments);
+        // AI GENERATED START - model: Claude Sonnet 5.5
+        // A default struct has null segments; treat it as an empty path.
+        string[] left = this.Segments ?? [];
+        string[] right = other.Segments ?? [];
+        return System.Linq.Enumerable.SequenceEqual(left, right, StringComparer.Ordinal);
+        // AI GENERATED END
     }
 
     /// <summary>
@@ -92,7 +109,15 @@ public readonly struct ConfigurationPath(params string[] segments): IEquatable<C
     /// </returns>
     public override int GetHashCode()
     {
-        return this.Segments.GetHashCode();
+        // AI GENERATED START - model: Claude Sonnet 5.5
+        HashCode hash = new();
+        foreach (string segment in this.Segments ?? [])
+        {
+            hash.Add(segment, StringComparer.Ordinal);
+        }
+
+        return hash.ToHashCode();
+        // AI GENERATED END
     }
 
     /// Represents an equality operator for comparing two instances of the ConfigurationPath structure.

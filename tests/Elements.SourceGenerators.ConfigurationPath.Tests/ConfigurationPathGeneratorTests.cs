@@ -23,6 +23,8 @@ using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Tests;
 
+using ConfigurationPath = HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath;
+
 // AI GENERATED START - model: gemini-3.7-flash
 [DisplayName("Configuration Path Source Generator Tests")]
 [Description(
@@ -333,12 +335,12 @@ internal sealed class ConfigurationPathGeneratorTests
             .Build();
         ConfigurationBinder.Bind(configuration, root);
 
-        IReadOnlySet<string[]> writablePaths =
-            (IReadOnlySet<string[]>)contextType
+        IReadOnlySet<ConfigurationPath> writablePaths =
+            ToConfigurationPaths(contextType
                 .GetMethod(nameof(ConfigurationObjectContextBase<object>.GetWritableConfigurationPaths))!
-                .Invoke(Activator.CreateInstance(contextType, nonPublic: true), null)!;
+                .Invoke(Activator.CreateInstance(contextType, nonPublic: true), null)!);
         HashSet<string> generatedPaths = writablePaths
-            .Select(static path => string.Join(":", path))
+            .Select(static path => path.ToString())
             .ToHashSet(StringComparer.Ordinal);
         object child = rootType.GetProperty(nameof(TestRootModel.Child))!.GetValue(root)!;
         Dictionary<string, bool> binderResults = new(StringComparer.Ordinal)
@@ -439,20 +441,20 @@ internal sealed class ConfigurationPathGeneratorTests
     [DisplayName("Generated context paths use structural comparer for set lookup")]
     [Description(
         "Verifies that the generated context path sets use structural comparison to correctly match equivalent path segment arrays.")]
-    public async Task GeneratedContextPathsUseStructuralComparerForSetLookup()
+    public async Task GeneratedContextPathsUseValueEqualityForSetLookup()
     {
         GeneratorRun run = RunGenerator(Input.NestedModels, "Demo.Settings.Attributes");
         System.Reflection.Assembly assembly = System.Reflection.Assembly.Load(run.AssemblyImage);
         Type contextType = assembly.GetType("Demo.Settings.ConfigurationContextOfRoot")!;
         object context = Activator.CreateInstance(contextType, nonPublic: true)!;
 
-        IReadOnlySet<string[]> readable =
-            (IReadOnlySet<string[]>)contextType
+        IReadOnlySet<ConfigurationPath> readable =
+            ToConfigurationPaths(contextType
                 .GetMethod(nameof(ConfigurationObjectContextBase<object>.GetReadableConfigurationPaths))!
-                .Invoke(context, null)!;
+                .Invoke(context, null)!);
 
-        string[] equivalentArray = ["renamed", nameof(TestChildModel.Name)];
-        string[] differentArray = ["renamed", "NonExistent"];
+        ConfigurationPath equivalentArray = new("renamed", nameof(TestChildModel.Name));
+        ConfigurationPath differentArray = new("renamed", "NonExistent");
 
         using (Assert.Multiple())
         {
@@ -752,33 +754,47 @@ internal sealed class ConfigurationPathGeneratorTests
         }
     }
 
+    /// <summary>
+    /// Converts the generated set, whose element type is compiled into the dynamic assembly, into runtime paths.
+    /// </summary>
+    /// <param name="generatedPaths">The set returned by a generated context.</param>
+    /// <returns>A set of runtime <see cref="ConfigurationPath"/> values.</returns>
+    private static IReadOnlySet<ConfigurationPath> ToConfigurationPaths(object generatedPaths)
+    {
+        return ((System.Collections.IEnumerable)generatedPaths)
+            .Cast<object>()
+            .Select(static item => item.GetType().GetProperty("Segments")!.GetValue(item))
+            .Select(static segments => new ConfigurationPath((string[])segments!))
+            .ToHashSet();
+    }
+
     private static async Task AssertPathMetadata(Type contextType, object context)
     {
-        IReadOnlySet<string[]> readable =
-            (IReadOnlySet<string[]>)contextType
+        IReadOnlySet<ConfigurationPath> readable =
+            ToConfigurationPaths(contextType
                 .GetMethod(nameof(ConfigurationObjectContextBase<object>.GetReadableConfigurationPaths))!
-                .Invoke(context, null)!;
-        IReadOnlySet<string[]> writable =
-            (IReadOnlySet<string[]>)contextType
+                .Invoke(context, null)!);
+        IReadOnlySet<ConfigurationPath> writable =
+            ToConfigurationPaths(contextType
                 .GetMethod(nameof(ConfigurationObjectContextBase<object>.GetWritableConfigurationPaths))!
-                .Invoke(context, null)!;
+                .Invoke(context, null)!);
 
         using (Assert.Multiple())
         {
-            await Assert.That(readable.Contains(["renamed", nameof(TestChildModel.Name)]))
+            await Assert.That(readable.Contains(new ConfigurationPath("renamed", nameof(TestChildModel.Name))))
                 .IsTrue()
                 .Because("readable configuration paths should include renamed:Name path");
 
-            await Assert.That(readable.Contains(
-                    [nameof(TestRootModel.Box), nameof(TestBoxModel<object>.Value), nameof(TestChildModel.Name)]))
+            await Assert.That(readable.Contains(new ConfigurationPath(
+                    nameof(TestRootModel.Box), nameof(TestBoxModel<object>.Value), nameof(TestChildModel.Name))))
                 .IsTrue()
                 .Because("readable configuration paths should include Box:Value:Name path");
 
-            await Assert.That(writable.Contains(["renamed", nameof(TestChildModel.Name)]))
+            await Assert.That(writable.Contains(new ConfigurationPath("renamed", nameof(TestChildModel.Name))))
                 .IsTrue()
                 .Because("writable configuration paths should include renamed:Name path");
 
-            await Assert.That(writable.Contains(["renamed"]))
+            await Assert.That(writable.Contains(new ConfigurationPath("renamed")))
                 .IsFalse()
                 .Because("writable configuration paths should exclude intermediate complex container paths");
         }

@@ -12,6 +12,8 @@ using DescriptionAttribute = System.ComponentModel.DescriptionAttribute;
 
 namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Tests;
 
+using ConfigurationPath = HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath;
+
 // AI GENERATED START - model: gemini-3.7-flash
 /// <summary>
 /// Validates helper methods and base class logic on <see cref="ConfigurationObjectContextBase{TBoundType}"/>.
@@ -34,11 +36,11 @@ internal sealed class ConfigurationObjectContextBaseTests
     public async Task AppendNestedPathsWithSingleKeyPrefixesPathsCorrectly()
     {
         TestContext context = new();
-        HashSet<string[]> destination = new(new TestPathComparer());
-        string[][] nestedPaths =
+        HashSet<ConfigurationPath> destination = new();
+        ConfigurationPath[] nestedPaths =
         [
-            ["server"],
-            ["credentials", "user"],
+            new("server"),
+            new("credentials", "user"),
         ];
 
         context.InvokeAppendNestedPaths(destination, "database", nestedPaths);
@@ -49,11 +51,11 @@ internal sealed class ConfigurationObjectContextBaseTests
                 .IsEqualTo(2)
                 .Because("destination set should contain exactly two prefixed path entries");
 
-            await Assert.That(destination.Contains(["database", "server"]))
+            await Assert.That(destination.Contains(new ConfigurationPath("database", "server")))
                 .IsTrue()
                 .Because("destination set should contain the single-level nested path prefixed with parent key");
 
-            await Assert.That(destination.Contains(["database", "credentials", "user"]))
+            await Assert.That(destination.Contains(new ConfigurationPath("database", "credentials", "user")))
                 .IsTrue()
                 .Because("destination set should contain the multi-level nested path prefixed with parent key");
         }
@@ -65,11 +67,11 @@ internal sealed class ConfigurationObjectContextBaseTests
     public async Task AppendNestedPathsWithMultipleKeysPrefixesPathsCorrectly()
     {
         TestContext context = new();
-        HashSet<string[]> destination = new(new TestPathComparer());
-        string[][] nestedPaths =
+        HashSet<ConfigurationPath> destination = new();
+        ConfigurationPath[] nestedPaths =
         [
-            ["host"],
-            ["auth", "token"],
+            new("host"),
+            new("auth", "token"),
         ];
 
         context.InvokeAppendNestedPaths(destination, ["services", "database"], nestedPaths);
@@ -80,11 +82,11 @@ internal sealed class ConfigurationObjectContextBaseTests
                 .IsEqualTo(2)
                 .Because("destination set should contain exactly two prefixed path entries");
 
-            await Assert.That(destination.Contains(["services", "database", "host"]))
+            await Assert.That(destination.Contains(new ConfigurationPath("services", "database", "host")))
                 .IsTrue()
                 .Because("destination set should contain the path prefixed with multiple parent keys");
 
-            await Assert.That(destination.Contains(["services", "database", "auth", "token"]))
+            await Assert.That(destination.Contains(new ConfigurationPath("services", "database", "auth", "token")))
                 .IsTrue()
                 .Because("destination set should contain the multi-level path prefixed with multiple parent keys");
         }
@@ -96,9 +98,9 @@ internal sealed class ConfigurationObjectContextBaseTests
     public async Task AppendNestedPathsThrowsOnNullArguments()
     {
         TestContext context = new();
-        HashSet<string[]> validDestination = new(new TestPathComparer());
+        HashSet<ConfigurationPath> validDestination = new();
         string[] validKeys = ["parent"];
-        string[][] validPaths = [["child"]];
+        ConfigurationPath[] validPaths = [new("child")];
 
         using (Assert.Multiple())
         {
@@ -134,15 +136,15 @@ internal sealed class ConfigurationObjectContextBaseTests
     private sealed class TestContext : ConfigurationObjectContextBase<object>
     {
         /// <inheritdoc />
-        public override IReadOnlySet<string[]> GetReadableConfigurationPaths()
+        public override IReadOnlySet<ConfigurationPath> GetReadableConfigurationPaths()
         {
-            return new HashSet<string[]>(new TestPathComparer());
+            return new HashSet<ConfigurationPath>();
         }
 
         /// <inheritdoc />
-        public override IReadOnlySet<string[]> GetWritableConfigurationPaths()
+        public override IReadOnlySet<ConfigurationPath> GetWritableConfigurationPaths()
         {
-            return new HashSet<string[]>(new TestPathComparer());
+            return new HashSet<ConfigurationPath>();
         }
 
         /// <inheritdoc />
@@ -159,9 +161,9 @@ internal sealed class ConfigurationObjectContextBaseTests
         /// <param name="parentKey">The parent key.</param>
         /// <param name="nestedPaths">The nested paths.</param>
         public void InvokeAppendNestedPaths(
-            ISet<string[]> destination,
+            ISet<ConfigurationPath> destination,
             string parentKey,
-            IEnumerable<string[]> nestedPaths)
+            IEnumerable<ConfigurationPath> nestedPaths)
         {
             AppendNestedPaths(destination, parentKey, nestedPaths);
         }
@@ -171,55 +173,11 @@ internal sealed class ConfigurationObjectContextBaseTests
         /// <param name="parentKeys">The parent keys.</param>
         /// <param name="nestedPaths">The nested paths.</param>
         public void InvokeAppendNestedPaths(
-            ISet<string[]> destination,
+            ISet<ConfigurationPath> destination,
             string[] parentKeys,
-            IEnumerable<string[]> nestedPaths)
+            IEnumerable<ConfigurationPath> nestedPaths)
         {
             AppendNestedPaths(destination, parentKeys, nestedPaths);
-        }
-    }
-
-    /// <summary>Path comparer for test sets.</summary>
-    private sealed class TestPathComparer : IEqualityComparer<string[]>
-    {
-        /// <inheritdoc />
-        public bool Equals(string[]? left, string[]? right)
-        {
-            if (ReferenceEquals(left, right))
-            {
-                return true;
-            }
-
-            if (left is null || right is null || left.Length != right.Length)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < left.Length; i++)
-            {
-                if (!StringComparer.Ordinal.Equals(left[i], right[i]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        /// <inheritdoc />
-        public int GetHashCode(string[] obj)
-        {
-            ArgumentNullException.ThrowIfNull(obj);
-            unchecked
-            {
-                int hash = 17;
-                foreach (string item in obj)
-                {
-                    hash = (hash * 31) + StringComparer.Ordinal.GetHashCode(item);
-                }
-
-                return hash;
-            }
         }
     }
 }

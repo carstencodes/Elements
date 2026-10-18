@@ -107,6 +107,7 @@ way to retrieve a context is via the generated extension methods on the model in
 ```csharp
 using System.Collections.Generic;
 using ExampleApp.Configuration;
+using HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys;
 
 AppSettings settings = new();
 
@@ -114,7 +115,7 @@ AppSettings settings = new();
 ConfigurationContextOfAppSettings context = settings.GetConfigurationContext();
 // Alternatively: ConfigurationContextOfAppSettings context = settings.ConfigurationContext();
 
-IReadOnlySet<string[]> writablePaths = context.GetWritableConfigurationPaths();
+IReadOnlySet<ConfigurationPath> writablePaths = context.GetWritableConfigurationPaths();
 IReadOnlyDictionary<string, object?> values = context.DumpConfigurationObject(settings);
 ```
 

@@ -29,29 +29,26 @@ internal sealed partial class ConfigurationContextOfAppSettings : global::HedgeC
 {
     private static readonly global::ExampleApp.Configuration.ConfigurationContextOfDatabaseSettings __nestedContext_global__ExampleApp_Configuration_DatabaseSettings_0A1C73492A67 = new();
 
-    public override global::System.Collections.Generic.IReadOnlySet<string[]> GetReadableConfigurationPaths()
+    public override global::System.Collections.Generic.IReadOnlySet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath> GetReadableConfigurationPaths()
     {
         return this.GetReadableConfigurationPathsCore(new global::System.Collections.Generic.HashSet<object>(
             global::System.Collections.Generic.ReferenceEqualityComparer.Instance));
     }
 
-    internal global::System.Collections.Generic.IReadOnlySet<string[]> GetReadableConfigurationPathsCore(global::System.Collections.Generic.HashSet<object> visited)
+    internal global::System.Collections.Generic.IReadOnlySet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath> GetReadableConfigurationPathsCore(global::System.Collections.Generic.HashSet<object> visited)
     {
         if (!visited.Add(this))
         {
-            return new global::System.Collections.Generic.HashSet<string[]>(
-                new ConfigurationPathComparer());
+            return new global::System.Collections.Generic.HashSet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath>();
         }
 
         try
         {
-            global::System.Collections.Generic.HashSet<string[]> paths = new(
-                new string[][]
-                {
-                    new string[] { "database" },
-                    new string[] { "environment" },
-                },
-                new ConfigurationPathComparer());
+            global::System.Collections.Generic.HashSet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath> paths = new()
+            {
+                new global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath("database"),
+                new global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath("environment"),
+            };
 
             AppendNestedPaths(
                 paths,
@@ -66,29 +63,26 @@ internal sealed partial class ConfigurationContextOfAppSettings : global::HedgeC
         }
     }
 
-    public override global::System.Collections.Generic.IReadOnlySet<string[]> GetWritableConfigurationPaths()
+    public override global::System.Collections.Generic.IReadOnlySet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath> GetWritableConfigurationPaths()
     {
         return this.GetWritableConfigurationPathsCore(new global::System.Collections.Generic.HashSet<object>(
             global::System.Collections.Generic.ReferenceEqualityComparer.Instance));
     }
 
-    internal global::System.Collections.Generic.IReadOnlySet<string[]> GetWritableConfigurationPathsCore(global::System.Collections.Generic.HashSet<object> visited)
+    internal global::System.Collections.Generic.IReadOnlySet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath> GetWritableConfigurationPathsCore(global::System.Collections.Generic.HashSet<object> visited)
     {
         if (!visited.Add(this))
         {
-            return new global::System.Collections.Generic.HashSet<string[]>(
-                new ConfigurationPathComparer());
+            return new global::System.Collections.Generic.HashSet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath>();
         }
 
         try
         {
-            global::System.Collections.Generic.HashSet<string[]> paths = new(
-                new string[][]
-                {
-                    new string[] { "database" },
-                    new string[] { "environment" },
-                },
-                new ConfigurationPathComparer());
+            global::System.Collections.Generic.HashSet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath> paths = new()
+            {
+                new global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath("database"),
+                new global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath("environment"),
+            };
 
             AppendNestedPaths(
                 paths,
@@ -155,46 +149,6 @@ internal sealed partial class ConfigurationContextOfAppSettings : global::HedgeC
         global::System.Array.Copy(nextKeys, 0, result, parentKeys.Length, nextKeys.Length);
         return result;
     }
-
-    private sealed class ConfigurationPathComparer : global::System.Collections.Generic.IEqualityComparer<string[]>
-    {
-        public bool Equals(string[]? left, string[]? right)
-        {
-            if (global::System.Object.ReferenceEquals(left, right))
-            {
-                return true;
-            }
-
-            if (left is null || right is null || left.Length != right.Length)
-            {
-                return false;
-            }
-
-            for (int index = 0; index < left.Length; index++)
-            {
-                if (!global::System.StringComparer.Ordinal.Equals(left[index], right[index]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public int GetHashCode(string[] path)
-        {
-            unchecked
-            {
-                int hash = 17;
-                foreach (string key in path)
-                {
-                    hash = (hash * 31) + global::System.StringComparer.Ordinal.GetHashCode(key);
-                }
-
-                return hash;
-            }
-        }
-    }
 }
 
 // <auto-generated />
@@ -212,32 +166,28 @@ namespace ExampleApp.Configuration;
     "HedgeCraft.Elements.SourceGenerators.ConfigurationPath", "1.0.0.0")]
 internal sealed partial class ConfigurationContextOfDatabaseSettings : global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts.ConfigurationObjectContextBase<global::ExampleApp.Configuration.DatabaseSettings>
 {
-    public override global::System.Collections.Generic.IReadOnlySet<string[]> GetReadableConfigurationPaths()
+    public override global::System.Collections.Generic.IReadOnlySet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath> GetReadableConfigurationPaths()
     {
-        return new global::System.Collections.Generic.HashSet<string[]>(
-            new string[][]
-            {
-                new string[] { "server" },
-            },
-            new ConfigurationPathComparer());
+        return new global::System.Collections.Generic.HashSet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath>
+        {
+            new global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath("server"),
+        };
     }
 
-    internal global::System.Collections.Generic.IReadOnlySet<string[]> GetReadableConfigurationPathsCore(global::System.Collections.Generic.HashSet<object> visited)
+    internal global::System.Collections.Generic.IReadOnlySet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath> GetReadableConfigurationPathsCore(global::System.Collections.Generic.HashSet<object> visited)
     {
         return this.GetReadableConfigurationPaths();
     }
 
-    public override global::System.Collections.Generic.IReadOnlySet<string[]> GetWritableConfigurationPaths()
+    public override global::System.Collections.Generic.IReadOnlySet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath> GetWritableConfigurationPaths()
     {
-        return new global::System.Collections.Generic.HashSet<string[]>(
-            new string[][]
-            {
-                new string[] { "server" },
-            },
-            new ConfigurationPathComparer());
+        return new global::System.Collections.Generic.HashSet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath>
+        {
+            new global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath("server"),
+        };
     }
 
-    internal global::System.Collections.Generic.IReadOnlySet<string[]> GetWritableConfigurationPathsCore(global::System.Collections.Generic.HashSet<object> visited)
+    internal global::System.Collections.Generic.IReadOnlySet<global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath> GetWritableConfigurationPathsCore(global::System.Collections.Generic.HashSet<object> visited)
     {
         return this.GetWritableConfigurationPaths();
     }
@@ -285,46 +235,6 @@ internal sealed partial class ConfigurationContextOfDatabaseSettings : global::H
         global::System.Array.Copy(parentKeys, result, parentKeys.Length);
         global::System.Array.Copy(nextKeys, 0, result, parentKeys.Length, nextKeys.Length);
         return result;
-    }
-
-    private sealed class ConfigurationPathComparer : global::System.Collections.Generic.IEqualityComparer<string[]>
-    {
-        public bool Equals(string[]? left, string[]? right)
-        {
-            if (global::System.Object.ReferenceEquals(left, right))
-            {
-                return true;
-            }
-
-            if (left is null || right is null || left.Length != right.Length)
-            {
-                return false;
-            }
-
-            for (int index = 0; index < left.Length; index++)
-            {
-                if (!global::System.StringComparer.Ordinal.Equals(left[index], right[index]))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        public int GetHashCode(string[] path)
-        {
-            unchecked
-            {
-                int hash = 17;
-                foreach (string key in path)
-                {
-                    hash = (hash * 31) + global::System.StringComparer.Ordinal.GetHashCode(key);
-                }
-
-                return hash;
-            }
-        }
     }
 }
 

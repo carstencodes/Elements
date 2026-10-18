@@ -24,6 +24,10 @@ internal static class ConfigurationPathMethodsEmitter
     private static readonly string HashSetTypeName =
         $"global::{typeof(HashSet<object>).Namespace}.{nameof(HashSet<object>)}";
 
+    /// <summary>The fully qualified type name of the ConfigurationPath struct.</summary>
+    private const string PathTypeName =
+        "global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys.ConfigurationPath";
+
     /// <summary>The fully qualified property name of ReferenceEqualityComparer.Instance.</summary>
     private static readonly string ReferenceEqualityComparerInstanceProperty =
         $"global::{typeof(EqualityComparer<object>).Namespace}.ReferenceEqualityComparer.Instance";
@@ -62,7 +66,7 @@ internal static class ConfigurationPathMethodsEmitter
         source.IndentByLevel(1)
             .Append("public override ")
             .Append(ReadOnlySetTypeName)
-            .Append("<string[]> ")
+            .Append('<').Append(PathTypeName).Append("> ")
             .Append(methodName)
             .AppendLine("()");
         source.IndentByLevel(1).AppendLine("{");
@@ -102,7 +106,7 @@ internal static class ConfigurationPathMethodsEmitter
         source.IndentByLevel(1)
             .Append("internal ")
             .Append(ReadOnlySetTypeName)
-            .Append("<string[]> ")
+            .Append('<').Append(PathTypeName).Append("> ")
             .Append(coreMethodName)
             .Append("(")
             .Append(HashSetTypeName)
@@ -141,17 +145,15 @@ internal static class ConfigurationPathMethodsEmitter
         source.IndentByLevel(3)
             .Append("return new ")
             .Append(HashSetTypeName)
-            .AppendLine("<string[]>(");
-        source.IndentByLevel(4).AppendLine("new ConfigurationPathComparer());");
+            .Append('<').Append(PathTypeName).AppendLine(">();");
         source.IndentByLevel(2).AppendLine("}");
         source.AppendLine();
         source.IndentByLevel(2).AppendLine("try");
         source.IndentByLevel(2).AppendLine("{");
         source.IndentByLevel(3)
             .Append(HashSetTypeName)
-            .AppendLine("<string[]> paths = new(");
-        AppendPathArrayElements(source, paths);
-        source.IndentByLevel(4).AppendLine("new ConfigurationPathComparer());");
+            .Append('<').Append(PathTypeName).AppendLine("> paths = new()");
+        AppendPathElements(source, paths, 3, ";");
         source.AppendLine();
 
         foreach (NestedPathDelegation delegation in delegations)
@@ -206,32 +208,35 @@ internal static class ConfigurationPathMethodsEmitter
         source.IndentByLevel(2)
             .Append("return new ")
             .Append(HashSetTypeName)
-            .AppendLine("<string[]>(");
-        AppendPathArrayElements(source, paths);
-        source.IndentByLevel(3).AppendLine("new ConfigurationPathComparer());");
+            .Append('<').Append(PathTypeName).AppendLine(">");
+        AppendPathElements(source, paths, 2, ";");
         source.IndentByLevel(1).AppendLine("}");
         source.AppendLine();
     }
 
-    /// <summary>Emits the string array elements defining the initial path set.</summary>
-    /// <param name="source">The source buffer receiving the path arrays.</param>
+    /// <summary>Emits a collection initializer containing the initial path set.</summary>
+    /// <param name="source">The source buffer receiving the path initializers.</param>
     /// <param name="paths">The collection of string segment arrays to emit.</param>
-    private static void AppendPathArrayElements(
+    /// <param name="level">The indentation level of the initializer braces.</param>
+    /// <param name="terminator">The text appended after the closing brace.</param>
+    private static void AppendPathElements(
         StringBuilder source,
-        IReadOnlyCollection<string[]> paths)
+        IReadOnlyCollection<string[]> paths,
+        int level,
+        string terminator)
     {
-        source.IndentByLevel(3).AppendLine("new string[][]");
-        source.IndentByLevel(3).AppendLine("{");
+        source.IndentByLevel(level).AppendLine("{");
         foreach (string[] path in paths)
         {
-            source.IndentByLevel(4)
-                .Append("new string[] { ")
+            source.IndentByLevel(level + 1)
+                .Append("new ")
+                .Append(PathTypeName)
+                .Append('(')
                 .Append(string.Join(", ", path.Select(static key => SymbolDisplay.FormatLiteral(key, true))))
-                .AppendLine(" },");
+                .AppendLine("),");
         }
 
-        // Arrays otherwise compare by reference, so the generated set uses a structural path comparer.
-        source.IndentByLevel(3).AppendLine("},");
+        source.IndentByLevel(level).Append('}').AppendLine(terminator);
     }
 }
 // AI GENERATED END

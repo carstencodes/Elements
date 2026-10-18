@@ -44,18 +44,6 @@ internal static class ConfigurationContextEmitter
     private static readonly string ArrayCopyMethod =
         $"global::{typeof(Array).FullName}.{nameof(Array.Copy)}";
 
-    /// <summary>The fully qualified generic type name of IEqualityComparer.</summary>
-    private static readonly string EqualityComparerTypeName =
-        $"global::{typeof(IEqualityComparer<object>).Namespace}.{nameof(IEqualityComparer<object>)}";
-
-    /// <summary>The fully qualified method name of Object.ReferenceEquals.</summary>
-    private static readonly string ObjectReferenceEqualsMethod =
-        $"global::{typeof(object).FullName}.{nameof(object.ReferenceEquals)}";
-
-    /// <summary>The fully qualified property name of StringComparer.Ordinal.</summary>
-    private static readonly string StringComparerOrdinalProperty =
-        $"global::{typeof(StringComparer).FullName}.{nameof(StringComparer.Ordinal)}";
-
     /// <summary>
     /// Formats symbols so generated declarations do not depend on the consumer's using directives.
     /// </summary>
@@ -109,7 +97,6 @@ internal static class ConfigurationContextEmitter
             paths.Delegations);
         ConfigurationDumpMethodEmitter.AppendMethods(source, type);
         AppendKeyHelpers(source);
-        AppendPathComparer(source);
         source.AppendLine("}");
         return source.ToString();
     }
@@ -491,69 +478,6 @@ internal static class ConfigurationContextEmitter
         source.IndentByLevel(2).AppendLine("return result;");
         source.IndentByLevel(1).AppendLine("}");
         source.AppendLine();
-    }
-
-    /// <summary>
-    /// Emits structural array equality because consumer code cannot access the runtime assembly's internal comparer.
-    /// </summary>
-    /// <param name="source">The source buffer receiving the comparer declaration.</param>
-    private static void AppendPathComparer(StringBuilder source)
-    {
-        source.IndentByLevel(1)
-            .Append("private sealed class ConfigurationPathComparer : ")
-            .Append(EqualityComparerTypeName)
-            .AppendLine("<string[]>");
-        source.IndentByLevel(1).AppendLine("{");
-        source.IndentByLevel(2).AppendLine("public bool Equals(string[]? left, string[]? right)");
-        source.IndentByLevel(2).AppendLine("{");
-        source.IndentByLevel(3)
-            .Append("if (")
-            .Append(ObjectReferenceEqualsMethod)
-            .AppendLine("(left, right))");
-        source.IndentByLevel(3).AppendLine("{");
-        source.IndentByLevel(4).AppendLine("return true;");
-        source.IndentByLevel(3).AppendLine("}");
-        source.AppendLine();
-        source.IndentByLevel(3).AppendLine("if (left is null || right is null || left.Length != right.Length)");
-        source.IndentByLevel(3).AppendLine("{");
-        source.IndentByLevel(4).AppendLine("return false;");
-        source.IndentByLevel(3).AppendLine("}");
-        source.AppendLine();
-        source.IndentByLevel(3).AppendLine("for (int index = 0; index < left.Length; index++)");
-        source.IndentByLevel(3).AppendLine("{");
-        source.IndentByLevel(4)
-            .Append("if (!")
-            .Append(StringComparerOrdinalProperty)
-            .Append('.')
-            .Append(nameof(StringComparer.Ordinal.Equals))
-            .AppendLine("(left[index], right[index]))");
-        source.IndentByLevel(4).AppendLine("{");
-        source.IndentByLevel(5).AppendLine("return false;");
-        source.IndentByLevel(4).AppendLine("}");
-        source.IndentByLevel(3).AppendLine("}");
-        source.AppendLine();
-        source.IndentByLevel(3).AppendLine("return true;");
-        source.IndentByLevel(2).AppendLine("}");
-        source.AppendLine();
-        source.IndentByLevel(2).AppendLine("public int GetHashCode(string[] path)");
-        source.IndentByLevel(2).AppendLine("{");
-        source.IndentByLevel(3).AppendLine("unchecked");
-        source.IndentByLevel(3).AppendLine("{");
-        source.IndentByLevel(4).AppendLine("int hash = 17;");
-        source.IndentByLevel(4).AppendLine("foreach (string key in path)");
-        source.IndentByLevel(4).AppendLine("{");
-        source.IndentByLevel(5)
-            .Append("hash = (hash * 31) + ")
-            .Append(StringComparerOrdinalProperty)
-            .Append('.')
-            .Append(nameof(StringComparer.Ordinal.GetHashCode))
-            .AppendLine("(key);");
-        source.IndentByLevel(5).AppendLine("}");
-        source.AppendLine();
-        source.IndentByLevel(4).AppendLine("return hash;");
-        source.IndentByLevel(3).AppendLine("}");
-        source.IndentByLevel(2).AppendLine("}");
-        source.IndentByLevel(1).AppendLine("}");
     }
 
     /// <summary>

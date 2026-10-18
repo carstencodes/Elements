@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using HedgeCraft.Elements.Extensions.Configuration.UserSettings.Keys;
 
 namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts;
 
@@ -19,23 +20,23 @@ public abstract class ConfigurationObjectContextBase<TBoundType>
     /// When overridden in a derived class, gets the read-only set of configuration paths that are readable.
     /// </summary>
     /// <returns>A read-only set containing the readable configuration path segments.</returns>
-    public abstract IReadOnlySet<string[]> GetReadableConfigurationPaths();
+    public abstract IReadOnlySet<ConfigurationPath> GetReadableConfigurationPaths();
 
     /// <summary>
     /// When overridden in a derived class, gets the read-only set of configuration paths that are writable.
     /// </summary>
     /// <returns>A read-only set containing the writable configuration path segments.</returns>
-    public abstract IReadOnlySet<string[]> GetWritableConfigurationPaths();
+    public abstract IReadOnlySet<ConfigurationPath> GetWritableConfigurationPaths();
 
     /// <summary>
     /// Gets the set of all configuration paths, combining both readable and writable paths.
     /// </summary>
     /// <returns>A read-only set containing all unique readable and writable configuration path segments.</returns>
-    public IReadOnlySet<string[]> GetConfigurationPaths()
+    public IReadOnlySet<ConfigurationPath> GetConfigurationPaths()
     {
-        IReadOnlySet<string[]> readablePaths = this.GetReadableConfigurationPaths();
-        IReadOnlySet<string[]> writablePaths = this.GetWritableConfigurationPaths();
-        HashSet<string[]> allPaths = new(readablePaths, new ConfigurationPathComparer());
+        IReadOnlySet<ConfigurationPath> readablePaths = this.GetReadableConfigurationPaths();
+        IReadOnlySet<ConfigurationPath> writablePaths = this.GetWritableConfigurationPaths();
+        HashSet<ConfigurationPath> allPaths = new(readablePaths);
         allPaths.UnionWith(writablePaths);
         return allPaths;
     }
@@ -66,21 +67,15 @@ public abstract class ConfigurationObjectContextBase<TBoundType>
     /// Thrown when <paramref name="destination"/>, <paramref name="parentKey"/>, or <paramref name="nestedPaths"/> is <see langword="null"/>.
     /// </exception>
     protected static void AppendNestedPaths(
-        ISet<string[]> destination,
+        ISet<ConfigurationPath> destination,
         string parentKey,
-        IEnumerable<string[]> nestedPaths)
+        IEnumerable<ConfigurationPath> nestedPaths)
     {
         ArgumentNullException.ThrowIfNull(destination);
         ArgumentNullException.ThrowIfNull(parentKey);
         ArgumentNullException.ThrowIfNull(nestedPaths);
 
-        foreach (string[] path in nestedPaths)
-        {
-            string[] combined = new string[path.Length + 1];
-            combined[0] = parentKey;
-            Array.Copy(path, 0, combined, 1, path.Length);
-            destination.Add(combined);
-        }
+        destination.UnionWith(new ConfigurationPath(parentKey).Append(nestedPaths));
     }
 
     /// <summary>
@@ -93,21 +88,15 @@ public abstract class ConfigurationObjectContextBase<TBoundType>
     /// Thrown when <paramref name="destination"/>, <paramref name="parentKeys"/>, or <paramref name="nestedPaths"/> is <see langword="null"/>.
     /// </exception>
     protected static void AppendNestedPaths(
-        ISet<string[]> destination,
+        ISet<ConfigurationPath> destination,
         string[] parentKeys,
-        IEnumerable<string[]> nestedPaths)
+        IEnumerable<ConfigurationPath> nestedPaths)
     {
         ArgumentNullException.ThrowIfNull(destination);
         ArgumentNullException.ThrowIfNull(parentKeys);
         ArgumentNullException.ThrowIfNull(nestedPaths);
 
-        foreach (string[] path in nestedPaths)
-        {
-            string[] combined = new string[parentKeys.Length + path.Length];
-            Array.Copy(parentKeys, 0, combined, 0, parentKeys.Length);
-            Array.Copy(path, 0, combined, parentKeys.Length, path.Length);
-            destination.Add(combined);
-        }
+        destination.UnionWith(new ConfigurationPath(parentKeys).Append(nestedPaths));
     }
     // AI GENERATED END
 }
