@@ -66,6 +66,7 @@ This repository is a .NET solution with some Rust-backed native assets and code 
 - `tests` may reference `gen`.
 - Keep dependency direction explicit and acyclic: prefer lower-level abstractions in `shared` or `gen` and consume them from `src` or `tests`, rather than creating circular or sibling references.
 - Do not introduce new project-to-project dependencies that violate the above layering rules.
+- `InternalsVisibleTo` MUST NOT be used anywhere in the repository. Exposing internals to test projects or sibling libraries obscures design defects and weakens encapsulation boundaries.
 
 ## Complexity and size conventions
 
