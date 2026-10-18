@@ -411,6 +411,11 @@ FodyWeavers.xsd
 
 /target
 
+
+# Added by Coding Agents
+
+.junie/
+
 # docfx related folders
 api/
 _site/
