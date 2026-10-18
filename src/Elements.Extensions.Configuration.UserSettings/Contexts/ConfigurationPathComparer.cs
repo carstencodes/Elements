@@ -8,7 +8,7 @@ using System.Collections.Generic;
 
 namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts;
 
-// AI GENERATED START - model: Copilot
+// AI GENERATED START - model: GPT luna 5.6
 /// <summary>
 /// Compares sequences of configuration path segments for equality and computes their hash codes using ordinal string comparison.
 /// </summary>
