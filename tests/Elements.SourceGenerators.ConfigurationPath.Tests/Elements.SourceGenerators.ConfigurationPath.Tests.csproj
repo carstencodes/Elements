@@ -3,5 +3,6 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
     <ProjectReference Include="../../gen/Elements.SourceGenerators.ConfigurationPath/Elements.SourceGenerators.ConfigurationPath.csproj" />
+    <ProjectReference Include="../../src/Elements.Extensions.Configuration.UserSettings/Elements.Extensions.Configuration.UserSettings.csproj" />
   </ItemGroup>
 </Project>

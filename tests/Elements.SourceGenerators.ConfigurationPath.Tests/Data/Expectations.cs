@@ -34,7 +34,7 @@ internal static class Expectations
 
     public const string DefinitionList = "<dl>";
 
-    public const string ReadOnlyPropertyTerm = "<dt>ReadOnlyName</dt>";
+    public const string ReadOnlyPropertyTerm = $"<dt>{nameof(TestRootModel.ReadOnlyName)}</dt>";
 
     public const string ChildContextReference = "<see cref=";
 }

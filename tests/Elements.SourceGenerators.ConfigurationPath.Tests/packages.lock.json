@@ -279,6 +279,9 @@
           "TUnit.Core": "1.72.16"
         }
       },
+      "HedgeCraft.Elements.Extensions.Configuration.UserSettings": {
+        "type": "Project"
+      },
       "HedgeCraft.Elements.SourceGenerators.ConfigurationPath": {
         "type": "Project",
         "dependencies": {
@@ -640,6 +643,9 @@
           "System.Threading.Channels": "9.0.0",
           "TUnit.Core": "1.72.16"
         }
+      },
+      "HedgeCraft.Elements.Extensions.Configuration.UserSettings": {
+        "type": "Project"
       },
       "HedgeCraft.Elements.SourceGenerators.ConfigurationPath": {
         "type": "Project",
