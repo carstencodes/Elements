@@ -23,6 +23,8 @@ public static partial class ServiceCollectionExtensions
     public static IServiceCollection AddKeysForKeyedServices<TService>(this IServiceCollection services, ServiceLifetime lifetime = ServiceLifetime.Singleton)
         where TService : notnull
     {
+        ArgumentNullException.ThrowIfNull(services);
+
         services.Add(new ServiceDescriptor(
             typeof(IKeyedServiceCollection<TService>),
             typeof(KeyedServiceCollection<TService>),

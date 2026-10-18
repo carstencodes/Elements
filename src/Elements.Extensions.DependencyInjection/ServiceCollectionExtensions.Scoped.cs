@@ -25,7 +25,7 @@ public static partial class ServiceCollectionExtensions
     {
         return services
             .AddSingleton(factory)
-            .AddScoped<IServiceFactory<TService, T1>, ServiceFactory<TService, T1>>();
+            .AddScoped<IServiceFactory<TService, T1>, ServiceFactory1<TService, T1>>();
     }
 
     /// <summary>
@@ -44,7 +44,7 @@ public static partial class ServiceCollectionExtensions
     {
         return services
             .AddSingleton(factory)
-            .AddScoped<IServiceFactory<TService, T1, T2>, ServiceFactory<TService, T1, T2>>();
+            .AddScoped<IServiceFactory<TService, T1, T2>, ServiceFactory2<TService, T1, T2>>();
     }
 
     /// <summary>
@@ -65,7 +65,7 @@ public static partial class ServiceCollectionExtensions
     {
         return services
             .AddSingleton(factory)
-            .AddScoped<IServiceFactory<TService, T1, T2, T3>, ServiceFactory<TService, T1, T2, T3>>();
+            .AddScoped<IServiceFactory<TService, T1, T2, T3>, ServiceFactory3<TService, T1, T2, T3>>();
     }
 
     /// <summary>
@@ -88,7 +88,7 @@ public static partial class ServiceCollectionExtensions
     {
         return services
             .AddSingleton(factory)
-            .AddScoped<IServiceFactory<TService, T1, T2, T3, T4>, ServiceFactory<TService, T1, T2, T3, T4>>();
+            .AddScoped<IServiceFactory<TService, T1, T2, T3, T4>, ServiceFactory4<TService, T1, T2, T3, T4>>();
     }
 
     /// <summary>
@@ -113,7 +113,7 @@ public static partial class ServiceCollectionExtensions
     {
         return services
             .AddSingleton(factory)
-            .AddScoped<IServiceFactory<TService, T1, T2, T3, T4, T5>, ServiceFactory<TService, T1, T2, T3, T4, T5>>();
+            .AddScoped<IServiceFactory<TService, T1, T2, T3, T4, T5>, ServiceFactory5<TService, T1, T2, T3, T4, T5>>();
     }
 
     /// <summary>
@@ -140,7 +140,7 @@ public static partial class ServiceCollectionExtensions
     {
         return services
             .AddSingleton(factory)
-            .AddScoped<IServiceFactory<TService, T1, T2, T3, T4, T5, T6>, ServiceFactory<TService, T1, T2, T3, T4, T5, T6>>();
+            .AddScoped<IServiceFactory<TService, T1, T2, T3, T4, T5, T6>, ServiceFactory6<TService, T1, T2, T3, T4, T5, T6>>();
     }
 
     /// <summary>
@@ -170,6 +170,6 @@ public static partial class ServiceCollectionExtensions
     {
         return services
             .AddSingleton(factory)
-            .AddScoped<IServiceFactory<TService, T1, T2, T3, T4, T5, T6, T7>, ServiceFactory<TService, T1, T2, T3, T4, T5, T6, T7>>();
+            .AddScoped<IServiceFactory<TService, T1, T2, T3, T4, T5, T6, T7>, ServiceFactory7<TService, T1, T2, T3, T4, T5, T6, T7>>();
     }
 }
