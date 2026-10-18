@@ -26,6 +26,8 @@ public static class ServiceScopeExtensions
         where TService : notnull
         where T1 : notnull
     {
+        ArgumentNullException.ThrowIfNull(scope);
+
         Func<T1, TService> serviceFactory = scope.ServiceProvider.FindRequiredServiceFactory<TService, T1>();
         return serviceFactory(arg1);
     }
@@ -46,6 +48,8 @@ public static class ServiceScopeExtensions
         where T1 : notnull
         where T2 : notnull
     {
+        ArgumentNullException.ThrowIfNull(scope);
+
         Func<T1, T2, TService> serviceFactory = scope.ServiceProvider.FindRequiredServiceFactory<TService, T1, T2>();
         return serviceFactory(arg1, arg2);
     }
@@ -69,6 +73,8 @@ public static class ServiceScopeExtensions
         where T2 : notnull
         where T3 : notnull
     {
+        ArgumentNullException.ThrowIfNull(scope);
+
         Func<T1, T2, T3, TService> serviceFactory = scope.ServiceProvider.FindRequiredServiceFactory<TService, T1, T2, T3>();
         return serviceFactory(arg1, arg2, arg3);
     }
@@ -95,6 +101,8 @@ public static class ServiceScopeExtensions
         where T3 : notnull
         where T4 : notnull
     {
+        ArgumentNullException.ThrowIfNull(scope);
+
         Func<T1, T2, T3, T4, TService> serviceFactory = scope.ServiceProvider.FindRequiredServiceFactory<TService, T1, T2, T3, T4>();
         return serviceFactory(arg1, arg2, arg3, arg4);
     }
@@ -124,6 +132,8 @@ public static class ServiceScopeExtensions
         where T4 : notnull
         where T5 : notnull
     {
+        ArgumentNullException.ThrowIfNull(scope);
+
         Func<T1, T2, T3, T4, T5, TService> serviceFactory = scope.ServiceProvider.FindRequiredServiceFactory<TService, T1, T2, T3, T4, T5>();
         return serviceFactory(arg1, arg2, arg3, arg4, arg5);
     }
@@ -156,6 +166,8 @@ public static class ServiceScopeExtensions
         where T5 : notnull
         where T6 : notnull
     {
+        ArgumentNullException.ThrowIfNull(scope);
+
         Func<T1, T2, T3, T4, T5, T6, TService> serviceFactory = scope.ServiceProvider.FindRequiredServiceFactory<TService, T1, T2, T3, T4, T5, T6>();
         return serviceFactory(arg1, arg2, arg3, arg4, arg5, arg6);
     }
@@ -191,6 +203,8 @@ public static class ServiceScopeExtensions
         where T6 : notnull
         where T7 : notnull
     {
+        ArgumentNullException.ThrowIfNull(scope);
+
         Func<T1, T2, T3, T4, T5, T6, T7, TService> serviceFactory = scope.ServiceProvider.FindRequiredServiceFactory<TService, T1, T2, T3, T4, T5, T6, T7>();
         return serviceFactory(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
     }
