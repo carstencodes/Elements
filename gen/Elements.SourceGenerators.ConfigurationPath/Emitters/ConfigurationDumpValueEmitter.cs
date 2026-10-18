@@ -6,6 +6,7 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.CodeGeneration;
 using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters.Options;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,6 +17,20 @@ namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters;
 /// <summary>Emits the recursive configuration values included in a generated dump.</summary>
 internal static class ConfigurationDumpValueEmitter
 {
+    private const string ConsiderWritableCondition = "if (!considerWritablePropertiesOnly)";
+
+    private const string ValuesVariableName = "values";
+
+    private const string VisitedVariableName = "visited";
+
+    private const string InstanceParameterName = "instance";
+
+    private const string ParentKeysParameterName = "parentKeys";
+
+    private const string DumpMethodName = "DumpConfigurationObject";
+
+    private const string DumpCoreMethodName = "DumpConfigurationObjectCore";
+
     /// <summary>Emits a dump body that applies the writable-only option before reading simple properties.</summary>
     /// <param name="source">The source buffer receiving generated statements.</param>
     /// <param name="type">The model whose bindable properties are visited.</param>
@@ -27,15 +42,15 @@ internal static class ConfigurationDumpValueEmitter
             indent,
             "global::System.Collections.Generic.Dictionary<string, object?> values = new(" +
             "global::System.StringComparer.Ordinal);");
-        DumpEmissionContext context = new(source, "values", "visited");
+        DumpEmissionContext context = new(source, ValuesVariableName, VisitedVariableName);
         foreach (IPropertySymbol property in ConfigurationPathGenerator.GetBindableProperties(type))
         {
-            PropertyValueOptions options = new(property, "instance", "parentKeys", indent);
+            PropertyValueOptions options = new(property, InstanceParameterName, ParentKeysParameterName, indent);
             // Only simple read-only values are omitted: retaining models and collections preserves their child paths.
             if (IsSimpleProperty(property.Type) &&
                 property.SetMethod?.DeclaredAccessibility != Accessibility.Public)
             {
-                AppendLine(source, indent, "if (!considerWritablePropertiesOnly)");
+                AppendLine(source, indent, ConsiderWritableCondition);
                 AppendLine(source, indent, "{");
                 AppendDumpProperty(context, options with { Indent = indent + 1 });
                 AppendLine(source, indent, "}");
@@ -250,7 +265,7 @@ internal static class ConfigurationDumpValueEmitter
                 options.Indent);
             if (IsSimpleReadOnlyProperty(property))
             {
-                AppendLine(context.Source, options.Indent, "if (!considerWritablePropertiesOnly)");
+                AppendLine(context.Source, options.Indent, ConsiderWritableCondition);
                 AppendLine(context.Source, options.Indent, "{");
                 AppendInlineGenericProperty(
                     context,
@@ -342,7 +357,7 @@ internal static class ConfigurationDumpValueEmitter
         string contextVariable = ConfigurationDumpMethodEmitter.CreateContextFieldName(modelType);
         bool existingContext = ConfigurationPathGenerator.FindExistingContext(modelType.OriginalDefinition) is not null;
         // User-provided contexts expose only the public API; generated contexts share the parent's cycle set.
-        string methodName = existingContext ? "DumpConfigurationObject" : "DumpConfigurationObjectCore";
+        string methodName = existingContext ? DumpMethodName : DumpCoreMethodName;
         string arguments = CreateContextArguments(context, options, existingContext);
         int bodyIndent = options.Indent;
         if (modelType.IsReferenceType)
@@ -464,7 +479,7 @@ internal static class ConfigurationDumpValueEmitter
     /// <param name="value">The generated C# line without leading indentation.</param>
     private static void AppendLine(StringBuilder source, int indent, string value)
     {
-        source.Append(' ', indent * 4).AppendLine(value);
+        source.IndentByLevel(indent).AppendLine(value);
     }
 
     private readonly record struct PropertyValueOptions(

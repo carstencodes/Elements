@@ -9,6 +9,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.CodeGeneration;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
@@ -21,6 +22,14 @@ internal static class ConfigurationContextEmitter
     /// <summary>Names the runtime base class implemented by every generated configuration context.</summary>
     private const string ContextBaseType =
         "global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts.ConfigurationObjectContextBase";
+
+    private const string GeneratorName = "HedgeCraft.Elements.SourceGenerators.ConfigurationPath";
+
+    private const string ReadablePathsMethodName = "GetReadableConfigurationPaths";
+
+    private const string WritablePathsMethodName = "GetWritableConfigurationPaths";
+
+    private const string GlobalPrefix = "global::";
 
     /// <summary>
     /// Formats symbols so generated declarations do not depend on the consumer's using directives.
@@ -50,8 +59,8 @@ internal static class ConfigurationContextEmitter
 
         AppendContextDocumentation(source, type);
         source.AppendLine("[global::System.CodeDom.Compiler.GeneratedCodeAttribute(");
-        source.Append("    ")
-            .Append(SymbolDisplay.FormatLiteral("HedgeCraft.Elements.SourceGenerators.ConfigurationPath", true))
+        source.IndentByLevel(1)
+            .Append(SymbolDisplay.FormatLiteral(GeneratorName, true))
             .Append(", ")
             .Append(SymbolDisplay.FormatLiteral(GeneratorMetadata.Version, true))
             .AppendLine(")]");
@@ -69,8 +78,8 @@ internal static class ConfigurationContextEmitter
 
         source.AppendLine("{");
         AppendNestedContextFields(source, type);
-        ConfigurationPathMethodsEmitter.AppendMethod(source, "GetReadableConfigurationPaths", paths.Readable);
-        ConfigurationPathMethodsEmitter.AppendMethod(source, "GetWritableConfigurationPaths", paths.Writable);
+        ConfigurationPathMethodsEmitter.AppendMethod(source, ReadablePathsMethodName, paths.Readable);
+        ConfigurationPathMethodsEmitter.AppendMethod(source, WritablePathsMethodName, paths.Writable);
         ConfigurationDumpMethodEmitter.AppendMethods(source, type);
         AppendKeyHelpers(source);
         AppendPathComparer(source);
@@ -190,7 +199,8 @@ internal static class ConfigurationContextEmitter
                      static model => model.ToDisplayString(FullyQualifiedFormat),
                      StringComparer.Ordinal))
         {
-            source.Append("    private static readonly ")
+            source.IndentByLevel(1)
+                .Append("private static readonly ")
                 .Append(ConfigurationDumpMethodEmitter.CreateContextReference(model))
                 .Append(' ')
                 .Append(ConfigurationDumpMethodEmitter.CreateContextFieldName(model))
@@ -354,16 +364,19 @@ internal static class ConfigurationContextEmitter
     private static void AppendKeyHelpers(StringBuilder source)
     {
         // Allocate a new array because nested traversal must not overwrite keys shared by sibling properties.
-        source.Append("    private static string[] AppendKeys(string[] parentKeys, ")
+        source.IndentByLevel(1)
+            .Append("private static string[] AppendKeys(string[] parentKeys, ")
             .AppendLine("params string[] nextKeys)");
-        source.AppendLine("    {");
-        source.Append("        string[] result = new string[parentKeys.Length + ")
+        source.IndentByLevel(1).AppendLine("{");
+        source.IndentByLevel(2)
+            .Append("string[] result = new string[parentKeys.Length + ")
             .AppendLine("nextKeys.Length];");
-        source.AppendLine("        global::System.Array.Copy(parentKeys, result, parentKeys.Length);");
-        source.Append("        global::System.Array.Copy(nextKeys, 0, result, parentKeys.Length, ")
+        source.IndentByLevel(2).AppendLine("global::System.Array.Copy(parentKeys, result, parentKeys.Length);");
+        source.IndentByLevel(2)
+            .Append("global::System.Array.Copy(nextKeys, 0, result, parentKeys.Length, ")
             .AppendLine("nextKeys.Length);");
-        source.AppendLine("        return result;");
-        source.AppendLine("    }");
+        source.IndentByLevel(2).AppendLine("return result;");
+        source.IndentByLevel(1).AppendLine("}");
         source.AppendLine();
     }
 
@@ -373,48 +386,51 @@ internal static class ConfigurationContextEmitter
     /// <param name="source">The source buffer receiving the comparer declaration.</param>
     private static void AppendPathComparer(StringBuilder source)
     {
-        source.Append("    private sealed class ConfigurationPathComparer : ")
+        source.IndentByLevel(1)
+            .Append("private sealed class ConfigurationPathComparer : ")
             .AppendLine("global::System.Collections.Generic.IEqualityComparer<string[]>");
-        source.AppendLine("    {");
-        source.AppendLine("        public bool Equals(string[]? left, string[]? right)");
-        source.AppendLine("        {");
-        source.AppendLine("            if (global::System.Object.ReferenceEquals(left, right))");
-        source.AppendLine("            {");
-        source.AppendLine("                return true;");
-        source.AppendLine("            }");
+        source.IndentByLevel(1).AppendLine("{");
+        source.IndentByLevel(2).AppendLine("public bool Equals(string[]? left, string[]? right)");
+        source.IndentByLevel(2).AppendLine("{");
+        source.IndentByLevel(3).AppendLine("if (global::System.Object.ReferenceEquals(left, right))");
+        source.IndentByLevel(3).AppendLine("{");
+        source.IndentByLevel(4).AppendLine("return true;");
+        source.IndentByLevel(3).AppendLine("}");
         source.AppendLine();
-        source.AppendLine("            if (left is null || right is null || left.Length != right.Length)");
-        source.AppendLine("            {");
-        source.AppendLine("                return false;");
-        source.AppendLine("            }");
+        source.IndentByLevel(3).AppendLine("if (left is null || right is null || left.Length != right.Length)");
+        source.IndentByLevel(3).AppendLine("{");
+        source.IndentByLevel(4).AppendLine("return false;");
+        source.IndentByLevel(3).AppendLine("}");
         source.AppendLine();
-        source.AppendLine("            for (int index = 0; index < left.Length; index++)");
-        source.AppendLine("            {");
-        source.Append("                if (!global::System.StringComparer.Ordinal.Equals(")
+        source.IndentByLevel(3).AppendLine("for (int index = 0; index < left.Length; index++)");
+        source.IndentByLevel(3).AppendLine("{");
+        source.IndentByLevel(4)
+            .Append("if (!global::System.StringComparer.Ordinal.Equals(")
             .AppendLine("left[index], right[index]))");
-        source.AppendLine("                {");
-        source.AppendLine("                    return false;");
-        source.AppendLine("                }");
-        source.AppendLine("            }");
+        source.IndentByLevel(4).AppendLine("{");
+        source.IndentByLevel(5).AppendLine("return false;");
+        source.IndentByLevel(4).AppendLine("}");
+        source.IndentByLevel(3).AppendLine("}");
         source.AppendLine();
-        source.AppendLine("            return true;");
-        source.AppendLine("        }");
+        source.IndentByLevel(3).AppendLine("return true;");
+        source.IndentByLevel(2).AppendLine("}");
         source.AppendLine();
-        source.AppendLine("        public int GetHashCode(string[] path)");
-        source.AppendLine("        {");
-        source.AppendLine("            unchecked");
-        source.AppendLine("            {");
-        source.AppendLine("                int hash = 17;");
-        source.AppendLine("                foreach (string key in path)");
-        source.AppendLine("                {");
-        source.Append("                    hash = (hash * 31) + ")
+        source.IndentByLevel(2).AppendLine("public int GetHashCode(string[] path)");
+        source.IndentByLevel(2).AppendLine("{");
+        source.IndentByLevel(3).AppendLine("unchecked");
+        source.IndentByLevel(3).AppendLine("{");
+        source.IndentByLevel(4).AppendLine("int hash = 17;");
+        source.IndentByLevel(4).AppendLine("foreach (string key in path)");
+        source.IndentByLevel(4).AppendLine("{");
+        source.IndentByLevel(5)
+            .Append("hash = (hash * 31) + ")
             .AppendLine("global::System.StringComparer.Ordinal.GetHashCode(key);");
-        source.AppendLine("                }");
+        source.IndentByLevel(5).AppendLine("}");
         source.AppendLine();
-        source.AppendLine("                return hash;");
-        source.AppendLine("            }");
-        source.AppendLine("        }");
-        source.AppendLine("    }");
+        source.IndentByLevel(4).AppendLine("return hash;");
+        source.IndentByLevel(3).AppendLine("}");
+        source.IndentByLevel(2).AppendLine("}");
+        source.IndentByLevel(1).AppendLine("}");
     }
 
     /// <summary>
@@ -426,7 +442,7 @@ internal static class ConfigurationContextEmitter
     {
         return type.ContainingNamespace.IsGlobalNamespace
             ? string.Empty
-            : type.ContainingNamespace.ToDisplayString(FullyQualifiedFormat).Substring("global::".Length);
+            : type.ContainingNamespace.ToDisplayString(FullyQualifiedFormat).Substring(GlobalPrefix.Length);
     }
 
     /// <summary>Appends escaped generic type parameter identifiers when the generated context is generic.</summary>

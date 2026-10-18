@@ -4,6 +4,7 @@
 // Published under MIT License
 
 using System.Text;
+using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.CodeGeneration;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
@@ -14,6 +15,8 @@ namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters;
 /// <summary>Emits the marker attribute consumed by the configuration path generator.</summary>
 internal static class ConfigurationObjectAttributeEmitter
 {
+    private const string GeneratorName = "HedgeCraft.Elements.SourceGenerators.ConfigurationPath";
+
     /// <summary>Registers the source file that declares the marker attribute for consumer model types.</summary>
     /// <param name="context">The source-production context used to add generated code.</param>
     /// <param name="rootNamespace">The validated consumer namespace for the attribute.</param>
@@ -26,8 +29,8 @@ internal static class ConfigurationObjectAttributeEmitter
         source.Append("namespace ").Append(rootNamespace).AppendLine(";");
         source.AppendLine();
         source.AppendLine("[global::System.CodeDom.Compiler.GeneratedCodeAttribute(");
-        source.Append("    ")
-            .Append(SymbolDisplay.FormatLiteral("HedgeCraft.Elements.SourceGenerators.ConfigurationPath", true))
+        source.IndentByLevel(1)
+            .Append(SymbolDisplay.FormatLiteral(GeneratorName, true))
             .Append(", ")
             .Append(SymbolDisplay.FormatLiteral(GeneratorMetadata.Version, true))
             .AppendLine(")]");

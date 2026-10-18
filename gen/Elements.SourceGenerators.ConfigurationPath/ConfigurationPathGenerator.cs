@@ -29,6 +29,12 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
     /// <summary>Identifies the framework attribute that overrides a property's configuration key.</summary>
     private const string KeyNameAttribute = "Microsoft.Extensions.Configuration.ConfigurationKeyNameAttribute";
 
+    private const string CollectionsGenericNamespace = "System.Collections.Generic";
+
+    private const string ContextsNamespace = "HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts";
+
+    private const string ContextBaseMetadataName = "ConfigurationObjectContextBase`1";
+
     /// <summary>Formats type symbols with global qualification so emitted code is unambiguous.</summary>
     private static readonly SymbolDisplayFormat FullyQualifiedFormat = SymbolDisplayFormat.FullyQualifiedFormat;
 
@@ -354,7 +360,7 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         return type.Arity == 2 &&
                string.Equals(
                    type.ContainingNamespace.ToDisplayString(),
-                   "System.Collections.Generic",
+                   CollectionsGenericNamespace,
                    StringComparison.Ordinal) &&
                type.MetadataName is "IDictionary`2" or "IReadOnlyDictionary`2" or "Dictionary`2";
     }
@@ -367,7 +373,7 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
         return type.Arity == 1 &&
                string.Equals(
                    type.ContainingNamespace.ToDisplayString(),
-                   "System.Collections.Generic",
+                   CollectionsGenericNamespace,
                    StringComparison.Ordinal) &&
                string.Equals(type.MetadataName, "IEnumerable`1", StringComparison.Ordinal);
     }
@@ -628,10 +634,10 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
     /// <returns><see langword="true"/> when the type is the supported configuration context base.</returns>
     private static bool IsContextBase(INamedTypeSymbol type)
     {
-        return string.Equals(type.MetadataName, "ConfigurationObjectContextBase`1", StringComparison.Ordinal) &&
+        return string.Equals(type.MetadataName, ContextBaseMetadataName, StringComparison.Ordinal) &&
                string.Equals(
                    type.ContainingNamespace.ToDisplayString(),
-                   "HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts",
+                   ContextsNamespace,
                    StringComparison.Ordinal);
     }
 }

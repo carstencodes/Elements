@@ -8,6 +8,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.CodeGeneration;
 using Microsoft.CodeAnalysis;
 
 namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters;
@@ -16,6 +17,10 @@ namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters;
 /// <summary>Emits the generated configuration dump API and its recursive value traversal.</summary>
 internal static class ConfigurationDumpMethodEmitter
 {
+    private const string GlobalPrefix = "global::";
+
+    private const string NestedContextPrefix = "__nestedContext_";
+
     /// <summary>Formats model types consistently in emitted signatures and nested context references.</summary>
     private static readonly SymbolDisplayFormat FullyQualifiedFormat = SymbolDisplayFormat.FullyQualifiedFormat;
 
@@ -42,19 +47,20 @@ internal static class ConfigurationDumpMethodEmitter
     /// <param name="modelType">The fully qualified model type used in the method signature.</param>
     private static void AppendPublicDumpMethod(StringBuilder source, string modelType)
     {
-        source.Append("    public override global::System.Collections.Generic.IReadOnlyDictionary<string, object?> ")
+        source.IndentByLevel(1)
+            .Append("public override global::System.Collections.Generic.IReadOnlyDictionary<string, object?> ")
             .Append("DumpConfigurationObject(")
             .Append(modelType)
             .AppendLine(" instance, bool considerWritablePropertiesOnly = true, params string[] parentKeys)");
-        source.AppendLine("    {");
-        source.AppendLine("        string[] keys = parentKeys ?? global::System.Array.Empty<string>();");
-        source.AppendLine("        return this.DumpConfigurationObjectCore(");
-        source.AppendLine("            instance,");
-        source.AppendLine("            considerWritablePropertiesOnly,");
-        source.AppendLine("            keys,");
-        source.AppendLine("            new global::System.Collections.Generic.HashSet<object>(");
-        source.AppendLine("                global::System.Collections.Generic.ReferenceEqualityComparer.Instance));");
-        source.AppendLine("    }");
+        source.IndentByLevel(1).AppendLine("{");
+        source.IndentByLevel(2).AppendLine("string[] keys = parentKeys ?? global::System.Array.Empty<string>();");
+        source.IndentByLevel(2).AppendLine("return this.DumpConfigurationObjectCore(");
+        source.IndentByLevel(3).AppendLine("instance,");
+        source.IndentByLevel(3).AppendLine("considerWritablePropertiesOnly,");
+        source.IndentByLevel(3).AppendLine("keys,");
+        source.IndentByLevel(3).AppendLine("new global::System.Collections.Generic.HashSet<object>(");
+        source.IndentByLevel(4).AppendLine("global::System.Collections.Generic.ReferenceEqualityComparer.Instance));");
+        source.IndentByLevel(1).AppendLine("}");
         source.AppendLine();
     }
 
@@ -67,28 +73,30 @@ internal static class ConfigurationDumpMethodEmitter
         INamedTypeSymbol type,
         string modelType)
     {
-        source.Append("    internal global::System.Collections.Generic.IReadOnlyDictionary<string, object?> ")
+        source.IndentByLevel(1)
+            .Append("internal global::System.Collections.Generic.IReadOnlyDictionary<string, object?> ")
             .Append("DumpConfigurationObjectCore(")
             .Append(modelType)
             .AppendLine(
                 " instance, bool considerWritablePropertiesOnly, string[] parentKeys, " +
                 "global::System.Collections.Generic.HashSet<object> visited)");
-        source.AppendLine("    {");
+        source.IndentByLevel(1).AppendLine("{");
         if (type.IsReferenceType)
         {
-            source.AppendLine("        if (instance is null)");
-            source.AppendLine("        {");
-            source.AppendLine("            throw new global::System.ArgumentNullException(nameof(instance));");
-            source.AppendLine("        }");
+            source.IndentByLevel(2).AppendLine("if (instance is null)");
+            source.IndentByLevel(2).AppendLine("{");
+            source.IndentByLevel(3).AppendLine("throw new global::System.ArgumentNullException(nameof(instance));");
+            source.IndentByLevel(2).AppendLine("}");
             source.AppendLine();
-            source.AppendLine("        if (!visited.Add(instance))");
-            source.AppendLine("        {");
-            source.AppendLine("            return new global::System.Collections.Generic.Dictionary<string, object?>(");
-            source.AppendLine("                global::System.StringComparer.Ordinal);");
-            source.AppendLine("        }");
+            source.IndentByLevel(2).AppendLine("if (!visited.Add(instance))");
+            source.IndentByLevel(2).AppendLine("{");
+            source.IndentByLevel(3)
+                .AppendLine("return new global::System.Collections.Generic.Dictionary<string, object?>(");
+            source.IndentByLevel(4).AppendLine("global::System.StringComparer.Ordinal);");
+            source.IndentByLevel(2).AppendLine("}");
             source.AppendLine();
-            source.AppendLine("        try");
-            source.AppendLine("        {");
+            source.IndentByLevel(2).AppendLine("try");
+            source.IndentByLevel(2).AppendLine("{");
         }
 
         int bodyIndent = type.IsReferenceType ? 3 : 2;
@@ -96,14 +104,14 @@ internal static class ConfigurationDumpMethodEmitter
 
         if (type.IsReferenceType)
         {
-            source.AppendLine("        }");
-            source.AppendLine("        finally");
-            source.AppendLine("        {");
-            source.AppendLine("            visited.Remove(instance);");
-            source.AppendLine("        }");
+            source.IndentByLevel(2).AppendLine("}");
+            source.IndentByLevel(2).AppendLine("finally");
+            source.IndentByLevel(2).AppendLine("{");
+            source.IndentByLevel(3).AppendLine("visited.Remove(instance);");
+            source.IndentByLevel(2).AppendLine("}");
         }
 
-        source.AppendLine("    }");
+        source.IndentByLevel(1).AppendLine("}");
         source.AppendLine();
     }
 
@@ -127,7 +135,7 @@ internal static class ConfigurationDumpMethodEmitter
             definition,
             ConfigurationPathGenerator.GetTypeParameters(definition));
         StringBuilder reference = new();
-        reference.Append("global::");
+        reference.Append(GlobalPrefix);
         if (namespaceName.Length > 0)
         {
             reference.Append(namespaceName).Append('.');
@@ -152,7 +160,7 @@ internal static class ConfigurationDumpMethodEmitter
     internal static string CreateContextFieldName(INamedTypeSymbol modelType)
     {
         string symbolName = modelType.ToDisplayString(FullyQualifiedFormat);
-        StringBuilder fieldName = new("__nestedContext_");
+        StringBuilder fieldName = new(NestedContextPrefix);
         foreach (char character in symbolName)
         {
             fieldName.Append(char.IsLetterOrDigit(character) ? character : '_');
@@ -171,7 +179,7 @@ internal static class ConfigurationDumpMethodEmitter
     {
         return type.ContainingNamespace.IsGlobalNamespace
             ? string.Empty
-            : type.ContainingNamespace.ToDisplayString(FullyQualifiedFormat).Substring("global::".Length);
+            : type.ContainingNamespace.ToDisplayString(FullyQualifiedFormat).Substring(GlobalPrefix.Length);
     }
 }
 // AI GENERATED END

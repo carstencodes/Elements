@@ -14,6 +14,8 @@ namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters;
 /// <summary>Emits indexed and dictionary loops used to flatten collection values.</summary>
 internal static class ConfigurationDumpCollectionEmitter
 {
+    private const string InvariantCulture = "global::System.Globalization.CultureInfo.InvariantCulture";
+
     /// <summary>Emits a collection traversal loop, choosing indexed keys or dictionary-entry keys.</summary>
     /// <param name="context">Shared source and traversal state for the dump.</param>
     /// <param name="options">The collection shape and generated expressions.</param>
@@ -132,7 +134,9 @@ internal static class ConfigurationDumpCollectionEmitter
                 options.KeysExpression,
                 ", global::System.Convert.ToString(",
                 entryName,
-                ".Key, global::System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty);"));
+                ".Key, ",
+                InvariantCulture,
+                ") ?? string.Empty);"));
         ConfigurationDumpValueEmitter.AppendDumpValue(
             context,
             new DumpValueOptions(
@@ -171,7 +175,9 @@ internal static class ConfigurationDumpCollectionEmitter
                 options.KeysExpression,
                 ", ",
                 indexName,
-                ".ToString(global::System.Globalization.CultureInfo.InvariantCulture));"));
+                ".ToString(",
+                InvariantCulture,
+                "));"));
         ConfigurationDumpValueEmitter.AppendDumpValue(
             context,
             new DumpValueOptions(

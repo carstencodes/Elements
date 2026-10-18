@@ -11,6 +11,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts;
+using HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
 using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Tests.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.CodeAnalysis;
@@ -391,9 +392,10 @@ internal sealed class ConfigurationPathGeneratorTests
         using (Assert.Multiple())
         {
             await Assert.That(run.Diagnostics.Any(static d =>
-                    string.Equals(d.Id, "HC_CP001", StringComparison.Ordinal)))
+                    string.Equals(d.Id, DiagnosticDescriptors.DuplicateConfigurationKey.Id, StringComparison.Ordinal)))
                 .IsTrue()
-                .Because("the generator should report HC_CP001 when duplicate configuration keys are detected");
+                .Because(
+                    "the generator should report duplicate configuration key diagnostic when duplicate keys are detected");
         }
     }
 
@@ -422,9 +424,10 @@ internal sealed class ConfigurationPathGeneratorTests
         using (Assert.Multiple())
         {
             await Assert.That(run.Diagnostics.Any(static d =>
-                    string.Equals(d.Id, "HC_CP002", StringComparison.Ordinal)))
+                    string.Equals(d.Id, DiagnosticDescriptors.UnsupportedDictionaryKey.Id, StringComparison.Ordinal)))
                 .IsTrue()
-                .Because("the generator should report HC_CP002 when an unsupported dictionary key type is encountered");
+                .Because(
+                    "the generator should report unsupported dictionary key diagnostic when an unsupported key type is encountered");
         }
     }
 

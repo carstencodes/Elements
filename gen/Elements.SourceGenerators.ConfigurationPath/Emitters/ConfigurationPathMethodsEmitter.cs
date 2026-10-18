@@ -6,6 +6,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.CodeGeneration;
 using Microsoft.CodeAnalysis.CSharp;
 
 namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters;
@@ -25,24 +26,26 @@ internal static class ConfigurationPathMethodsEmitter
         string methodName,
         IReadOnlyCollection<string[]> paths)
     {
-        source.Append("    public override global::System.Collections.Generic.IReadOnlySet<string[]> ")
+        source.IndentByLevel(1)
+            .Append("public override global::System.Collections.Generic.IReadOnlySet<string[]> ")
             .Append(methodName)
             .AppendLine("()");
-        source.AppendLine("    {");
-        source.AppendLine("        return new global::System.Collections.Generic.HashSet<string[]>(");
-        source.AppendLine("            new string[][]");
-        source.AppendLine("            {");
+        source.IndentByLevel(1).AppendLine("{");
+        source.IndentByLevel(2).AppendLine("return new global::System.Collections.Generic.HashSet<string[]>(");
+        source.IndentByLevel(3).AppendLine("new string[][]");
+        source.IndentByLevel(3).AppendLine("{");
         foreach (string[] path in paths)
         {
-            source.Append("                new string[] { ")
+            source.IndentByLevel(4)
+                .Append("new string[] { ")
                 .Append(string.Join(", ", path.Select(static key => SymbolDisplay.FormatLiteral(key, true))))
                 .AppendLine(" },");
         }
 
         // Arrays otherwise compare by reference, so the generated set uses a structural path comparer.
-        source.AppendLine("            },");
-        source.AppendLine("            new ConfigurationPathComparer());");
-        source.AppendLine("    }");
+        source.IndentByLevel(3).AppendLine("},");
+        source.IndentByLevel(3).AppendLine("new ConfigurationPathComparer());");
+        source.IndentByLevel(1).AppendLine("}");
         source.AppendLine();
     }
 }
