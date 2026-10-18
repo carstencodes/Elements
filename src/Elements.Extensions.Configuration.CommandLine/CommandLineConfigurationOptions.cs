@@ -34,6 +34,9 @@ public sealed class CommandLineConfigurationOptions : IFormatProviderSource
     /// <returns>The current configuration options instance.</returns>
     public CommandLineConfigurationOptions Add<T>(IEnumerable<string> keys, Action<IOptionBuilder<T>> configureOption, string optionName) where T : notnull
     {
+        ArgumentNullException.ThrowIfNull(keys);
+        ArgumentNullException.ThrowIfNull(configureOption);
+
         string key = ConfigurationPath.Combine(keys);
         return this.Add(key, configureOption, optionName);
     }
@@ -48,6 +51,9 @@ public sealed class CommandLineConfigurationOptions : IFormatProviderSource
     /// <returns>The current configuration options instance.</returns>
     public CommandLineConfigurationOptions Add<T>(IEnumerable<string> keys, Action<Option<T>> configureOption, string optionName) where T : notnull
     {
+        ArgumentNullException.ThrowIfNull(keys);
+        ArgumentNullException.ThrowIfNull(configureOption);
+
         string key = ConfigurationPath.Combine(keys);
         return this.Add(key, configureOption, optionName);
     }
@@ -62,6 +68,9 @@ public sealed class CommandLineConfigurationOptions : IFormatProviderSource
     /// <returns>The current configuration options instance.</returns>
     public CommandLineConfigurationOptions Add<T>(string key, Action<IOptionBuilder<T>> configureOption, string optionName) where T : notnull
     {
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(configureOption);
+
         OptionBuilder<T> builder = new(optionName);
         configureOption(builder);
         return this.Add(key, builder.Build());
@@ -77,6 +86,9 @@ public sealed class CommandLineConfigurationOptions : IFormatProviderSource
     /// <returns>The current configuration options instance.</returns>
     public CommandLineConfigurationOptions Add<T>(string key, Action<Option<T>> configureOption, string optionName) where T : notnull
     {
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(configureOption);
+
         Option<T> option = new Option<T>(optionName);
         configureOption(option);
         return this.Add(key, option);
@@ -91,6 +103,9 @@ public sealed class CommandLineConfigurationOptions : IFormatProviderSource
     /// <returns>The current configuration options instance.</returns>
     public CommandLineConfigurationOptions Add<T>(IEnumerable<string> keys, Option<T> option) where T : notnull
     {
+        ArgumentNullException.ThrowIfNull(keys);
+        ArgumentNullException.ThrowIfNull(option);
+
         string key = ConfigurationPath.Combine(keys);
         return this.Add(key, option);
     }
@@ -104,6 +119,9 @@ public sealed class CommandLineConfigurationOptions : IFormatProviderSource
     /// <returns>The current configuration options instance.</returns>
     public CommandLineConfigurationOptions Add<T>(string key, Option<T> option) where T : notnull
     {
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(option);
+
         option.Recursive = true;
         this.options.Add(key, new OptionHolder<T>(option, this));
         return this;

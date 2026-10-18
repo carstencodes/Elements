@@ -48,15 +48,16 @@ public static partial class ServiceCollectionExtensions
         where TInterface : notnull
         where TComposite : class, TInterface
     {
-        IReadOnlyCollection<ServiceDescriptor>
-            replacedDescriptors = services.GetExistingServiceDescriptors<TInterface>();
+        ArgumentNullException.ThrowIfNull(services);
+
+        ServiceDescriptor[] replacedDescriptors = services.GetExistingServiceDescriptors<TInterface>();
         foreach (ServiceDescriptor descriptor in replacedDescriptors)
         {
             services.Remove(descriptor);
         }
 
         ServiceLifetime selectedLifetime = ServiceLifetime.Singleton;
-        if (replacedDescriptors.Count > 0)
+        if (replacedDescriptors.Length > 0)
         {
             selectedLifetime = replacedDescriptors.Max(d => d.Lifetime);
         }
@@ -91,7 +92,7 @@ public static partial class ServiceCollectionExtensions
         services.AddComposite<TInterface, TComposite>(objectFactory);
     }
 
-    private static IReadOnlyCollection<ServiceDescriptor> GetExistingServiceDescriptors<TInterface>(
+    private static ServiceDescriptor[] GetExistingServiceDescriptors<TInterface>(
         this IServiceCollection services)
     {
         return services.Where(s => s.ServiceType == typeof(TInterface)).ToArray();

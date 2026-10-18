@@ -16,9 +16,11 @@ public readonly struct HandlerChainLink : IHandler<HandlerChainLink>, IEquatable
     private readonly Func<bool> canHandleRequest;
 
     /// <summary>
-    /// Represents an empty or terminal handler link.
+    /// Creates a new instance of the <see cref="HandlerChainLink"/> struct that represents an empty or terminal handler link.
     /// </summary>
-    public static readonly HandlerChainLink None = new(Nothing, Never);
+    public HandlerChainLink() : this(Nothing, () => false)
+    {
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="HandlerChainLink"/> struct with handler delegates and a successor link.
@@ -28,7 +30,7 @@ public readonly struct HandlerChainLink : IHandler<HandlerChainLink>, IEquatable
     /// <param name="next">The next handler link in the chain.</param>
     public HandlerChainLink(Action handleRequest, Func<bool> canHandleRequest, HandlerChainLink next) : this(handleRequest, canHandleRequest)
     {
-        this.Next = next;
+        this.NextHandler = next;
     }
 
     /// <summary>
@@ -54,18 +56,18 @@ public readonly struct HandlerChainLink : IHandler<HandlerChainLink>, IEquatable
     /// <summary>
     /// Handles the current request or forwards it to the successor link in the chain.
     /// </summary>
-    /// <exception cref="HandlerBase.HandlerReachedEndOfChainException">Thrown when no link in the chain can handle the request.</exception>
+    /// <exception cref="HandlerReachedEndOfChainException">Thrown when no link in the chain can handle the request.</exception>
     public void HandleCurrentRequest()
     {
         if (this.CanHandleCurrentRequest())
         {
-            this.HandleCurrentRequest();
+            this.handleRequest();
             return;
         }
 
-        if (!HandlerChainLink.None.Equals(this.Next))
+        if (!this.NextHandler.IsNone())
         {
-            this.Next.HandleCurrentRequest();
+            this.NextHandler.HandleCurrentRequest();
             return;
         }
 
@@ -75,7 +77,7 @@ public readonly struct HandlerChainLink : IHandler<HandlerChainLink>, IEquatable
     /// <summary>
     /// Gets the next handler link in the chain.
     /// </summary>
-    public IHandler<HandlerChainLink> Next { get; } = None;
+    public IHandler<HandlerChainLink> NextHandler { get; } = new HandlerChainLink();
 
     /// <summary>
     /// Indicates whether the current link is equal to another link.
@@ -84,7 +86,7 @@ public readonly struct HandlerChainLink : IHandler<HandlerChainLink>, IEquatable
     /// <returns><see langword="true"/> if equal; otherwise, <see langword="false"/>.</returns>
     bool IEquatable<HandlerChainLink>.Equals(HandlerChainLink other)
     {
-        return this.handleRequest.Equals(other.handleRequest) && this.canHandleRequest.Equals(other.canHandleRequest) && this.Next.Equals(other.Next);
+        return this.handleRequest.Equals(other.handleRequest) && this.canHandleRequest.Equals(other.canHandleRequest) && this.NextHandler.Equals(other.NextHandler);
     }
 
     /// <summary>
@@ -103,12 +105,7 @@ public readonly struct HandlerChainLink : IHandler<HandlerChainLink>, IEquatable
     /// <returns>A hash code integer.</returns>
     public override int GetHashCode()
     {
-        return HashCode.Combine(this.handleRequest, this.canHandleRequest, this.Next);
-    }
-
-    private static bool Never()
-    {
-        return false;
+        return HashCode.Combine(this.handleRequest, this.canHandleRequest, this.NextHandler);
     }
 
     private static void Nothing()

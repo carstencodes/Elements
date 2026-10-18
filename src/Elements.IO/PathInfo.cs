@@ -3,7 +3,9 @@
 // (C) 2023-2026 Carsten Igel.
 // Published under MIT License
 
+using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
 namespace HedgeCraft.Elements.IO;
@@ -11,6 +13,8 @@ namespace HedgeCraft.Elements.IO;
 /// <summary>
 /// Represents a unified path abstraction that can identify a file, a directory, or a drive root.
 /// </summary>
+[SuppressMessage("Design", "S4050:Provide an implementation for: 'operator==' and 'operator!='.",
+    Justification = "Equality is based on the full path, and the default reference equality is sufficient for this class.")]
 public sealed class PathInfo : FileSystemInfo
 {
     /// <summary>
@@ -35,6 +39,7 @@ public sealed class PathInfo : FileSystemInfo
     /// <param name="fileSystemEntry">The existing file system info entry.</param>
     public PathInfo(FileSystemInfo fileSystemEntry)
     {
+        ArgumentNullException.ThrowIfNull(fileSystemEntry);
         this.FullPath = fileSystemEntry.FullName;
         this.Name = fileSystemEntry.Name;
     }
@@ -45,6 +50,7 @@ public sealed class PathInfo : FileSystemInfo
     /// <param name="rootDrive">The drive information.</param>
     public PathInfo(DriveInfo rootDrive)
     {
+        ArgumentNullException.ThrowIfNull(rootDrive);
         this.FullPath = rootDrive.RootDirectory.FullName;
         this.Name = rootDrive.Name;
     }
@@ -133,6 +139,26 @@ public sealed class PathInfo : FileSystemInfo
     }
 
     /// <summary>
+    /// Determines whether the specified object is a <see cref="PathInfo"/> with the same full path.
+    /// </summary>
+    /// <param name="obj">The object to compare.</param>
+    /// <returns><see langword="true"/> if the object is equal to this instance; otherwise, <see langword="false"/>.</returns>
+    public override bool Equals(object? obj)
+    {
+        return obj is PathInfo other
+            && string.Equals(this.FullName, other.FullName, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// Returns a hash code based on the full path.
+    /// </summary>
+    /// <returns>The hash code of the full path.</returns>
+    public override int GetHashCode()
+    {
+        return StringComparer.Ordinal.GetHashCode(this.FullName);
+    }
+
+    /// <summary>
     /// Returns a <see cref="FileInfo"/> representing the current path.
     /// </summary>
     /// <returns>A new <see cref="FileInfo"/> instance.</returns>
@@ -158,6 +184,7 @@ public sealed class PathInfo : FileSystemInfo
     /// <returns>A new <see cref="PathInfo"/> representing the combined path.</returns>
     public static PathInfo Divide(PathInfo path, string child)
     {
+        ArgumentNullException.ThrowIfNull(path);
         return path.Combine(child);
     }
 }

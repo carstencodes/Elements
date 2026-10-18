@@ -28,7 +28,9 @@ public sealed class CommandLineConfigurationProvider() : IConfigurationProvider
     public IEnumerable<string> GetChildKeys(IEnumerable<string> earlierKeys, string? parentPath)
     {
         /* AI Generated content using CoPilot Free with public code filter enabled */
-        ISet<string> childKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        ArgumentNullException.ThrowIfNull(earlierKeys);
+
+        HashSet<string> childKeys = new(StringComparer.OrdinalIgnoreCase);
 
         foreach (string key in earlierKeys)
         {
@@ -87,6 +89,7 @@ public sealed class CommandLineConfigurationProvider() : IConfigurationProvider
     /// <param name="value">The configuration value to set, or <see langword="null"/> to remove the key.</param>
     public void Set(string key, string? value)
     {
+        ArgumentNullException.ThrowIfNull(key);
         if (value is not null)
         {
             this.configurationValues[key] = value;
@@ -107,6 +110,7 @@ public sealed class CommandLineConfigurationProvider() : IConfigurationProvider
     /// <returns><see langword="true"/> if the configuration key exists; otherwise, <see langword="false"/>.</returns>
     public bool TryGet(string key, [NotNullWhen(true)] out string? value)
     {
+        ArgumentNullException.ThrowIfNull(key);
         return this.configurationValues.TryGetValue(key, out value);
     }
 }

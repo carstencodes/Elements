@@ -14,21 +14,6 @@ namespace HedgeCraft.Elements.ComponentModel.Patterns.Behavioral.ChainOfResponsi
 public abstract class HandlerBase
 {
     /// <summary>
-    /// Represents the exception thrown when a request reaches the end of the chain of responsibility without being handled.
-    /// </summary>
-    /// <param name="innerException">The exception that is the cause of the current exception.</param>
-    public sealed class HandlerReachedEndOfChainException(Exception innerException)
-        : Exception("The handler has no other handler in its chain", innerException)
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HandlerReachedEndOfChainException"/> class.
-        /// </summary>
-        public HandlerReachedEndOfChainException() : this(null!)
-        {
-        }
-    }
-
-    /// <summary>
     /// Stops request handling by throwing an end-of-chain exception.
     /// </summary>
     /// <exception cref="HandlerReachedEndOfChainException">Always thrown to signal the end of the handler chain.</exception>

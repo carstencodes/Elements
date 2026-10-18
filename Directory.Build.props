@@ -25,6 +25,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <LangVersion>14</LangVersion>
     <LatestTargetFramework>net10.0</LatestTargetFramework>
     <ElementTargetFrameworksToUse>$(LatestTargetFramework);net8.0</ElementTargetFrameworksToUse>
     <TargetFrameworks>$(ElementTargetFrameworksToUse)</TargetFrameworks>
@@ -57,6 +58,10 @@
     <AnalysisMode>All</AnalysisMode>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <ErrorLog>$(SarifResultsPath)$(MSBuildProjectName).sarif;version=2.1</ErrorLog>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(CI)' == 'true'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup>

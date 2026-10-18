@@ -121,7 +121,7 @@ public class ScribanTemplateGenerator : IIncrementalGenerator
 , StringComparer.Ordinal).ToImmutableArray();
         });
 
-        context.RegisterSourceOutput(matchedPairs, this.GenerateSourceForScribanCsFiles);
+        context.RegisterSourceOutput(matchedPairs, GenerateSourceForScribanCsFiles);
 
         static string AdditionalTextToName(AdditionalText fileDescriptor)
         {
@@ -129,7 +129,7 @@ public class ScribanTemplateGenerator : IIncrementalGenerator
         }
     }
 
-    private void GenerateSourceForScribanCsFiles(SourceProductionContext context, ImmutableArray<(AdditionalText, AdditionalText)> sourcesAndConfigs)
+    private static void GenerateSourceForScribanCsFiles(SourceProductionContext context, ImmutableArray<(AdditionalText, AdditionalText)> sourcesAndConfigs)
     {
         foreach (var sourceAndConfig in sourcesAndConfigs)
         {
@@ -290,7 +290,8 @@ public class ScribanTemplateGenerator : IIncrementalGenerator
     {
         try
         {
-            string text = configFile.GetText(cancellationToken)?.ToString() ?? throw new ArgumentException($"{configFile.Path} could not be read.");
+            string text = configFile.GetText(cancellationToken)?.ToString()
+                ?? throw new ArgumentException($"{configFile.Path} could not be read.", nameof(configFile));
 
             ReadOnlyMemory<char> readerText = text.AsMemory();
             JsonDocumentOptions options = new()

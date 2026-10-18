@@ -23,6 +23,9 @@ public static class ConfigurationBuilderExtensions
     /// <returns>The same <see cref="IConfigurationBuilder"/> instance.</returns>
     public static IConfigurationBuilder AddCommandLine(this IConfigurationBuilder builder, RootCommand command, Action<CommandLineConfigurationOptions> configureOptions)
     {
+        ArgumentNullException.ThrowIfNull(builder);
+        ArgumentNullException.ThrowIfNull(command);
+        ArgumentNullException.ThrowIfNull(configureOptions);
         CommandLineConfigurationOptions options = new();
         configureOptions(options);
         CommandLineConfigurationSource source = new CommandLineConfigurationSource(command);
@@ -38,6 +41,7 @@ public static class ConfigurationBuilderExtensions
     /// <returns>The same <see cref="IConfigurationBuilder"/> instance.</returns>
     public static IConfigurationBuilder AddCommandLine(this IConfigurationBuilder builder, Action<CommandLineConfigurationSource>? configureSource)
     {
+        ArgumentNullException.ThrowIfNull(builder);
         return builder.Add(configureSource);
     }
 }
