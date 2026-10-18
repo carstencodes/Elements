@@ -13,6 +13,8 @@ namespace HedgeCraft.Elements.Extensions.DependencyInjection.Factories;
 /// </summary>
 /// <typeparam name="TService">The service type.</typeparam>
 /// <typeparam name="T">The first argument type.</typeparam>
+[SuppressMessage("Performance", "CA1812:Avoid uninstantiated internal classes",
+    Justification = "Internal factory of the IServiceFactory family, instantiated via dependency injection.")]
 internal sealed class ServiceFactory<TService, T> : IServiceFactory<TService, T>
 {
     private readonly IServiceProvider provider;
