@@ -148,32 +148,6 @@ public sealed class PathInfo : FileSystemInfo
     }
 
     /// <summary>
-    /// Determines whether two <see cref="PathInfo"/> instances refer to the same full path.
-    /// </summary>
-    /// <param name="left">The first path info.</param>
-    /// <param name="right">The second path info.</param>
-    /// <returns><see langword="true"/> if both paths are equal; otherwise, <see langword="false"/>.</returns>
-    [SuppressMessage("Major Code Smell", "S3875:\"operator==\" should not be overloaded on reference types",
-        Justification = "Value equality on the full path is required by S4050; the operators delegate to Equals and keep comparisons consistent with it.")]
-    public static bool operator ==(PathInfo? left, PathInfo? right)
-    {
-        return left is null ? right is null : left.Equals(right);
-    }
-
-    /// <summary>
-    /// Determines whether two <see cref="PathInfo"/> instances refer to different full paths.
-    /// </summary>
-    /// <param name="left">The first path info.</param>
-    /// <param name="right">The second path info.</param>
-    /// <returns><see langword="true"/> if the paths differ; otherwise, <see langword="false"/>.</returns>
-    [SuppressMessage("Major Code Smell", "S3875:\"operator==\" should not be overloaded on reference types",
-        Justification = "Paired with operator== as required by S4050; delegates to Equals.")]
-    public static bool operator !=(PathInfo? left, PathInfo? right)
-    {
-        return !(left == right);
-    }
-
-    /// <summary>
     /// Returns a hash code based on the full path.
     /// </summary>
     /// <returns>The hash code of the full path.</returns>
