@@ -59,6 +59,10 @@
     <ErrorLog>$(SarifResultsPath)$(MSBuildProjectName).sarif;version=2.1</ErrorLog>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(CI)' == 'true'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
   <PropertyGroup>
     <MinVerTagPrefix>v</MinVerTagPrefix>
     <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
