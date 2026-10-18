@@ -29,10 +29,14 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
     /// <summary>Identifies the framework attribute that overrides a property's configuration key.</summary>
     private const string KeyNameAttribute = "Microsoft.Extensions.Configuration.ConfigurationKeyNameAttribute";
 
-    private const string CollectionsGenericNamespace = "System.Collections.Generic";
+    /// <summary>The namespace containing generic collection interfaces and classes.</summary>
+    private static readonly string CollectionsGenericNamespace =
+        typeof(System.Collections.Generic.List<object>).Namespace!;
 
+    /// <summary>The namespace containing runtime configuration context base classes.</summary>
     private const string ContextsNamespace = "HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts";
 
+    /// <summary>The metadata name of the generic configuration context base class.</summary>
     private const string ContextBaseMetadataName = "ConfigurationObjectContextBase`1";
 
     /// <summary>Formats type symbols with global qualification so emitted code is unambiguous.</summary>

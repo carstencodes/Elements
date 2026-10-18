@@ -15,6 +15,14 @@ namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters;
 /// <summary>Emits the readable and writable configuration path methods for a context.</summary>
 internal static class ConfigurationPathMethodsEmitter
 {
+    /// <summary>The fully qualified generic type name of IReadOnlySet.</summary>
+    private static readonly string ReadOnlySetTypeName =
+        $"global::{typeof(ISet<object>).Namespace}.IReadOnlySet";
+
+    /// <summary>The fully qualified generic type name of HashSet.</summary>
+    private static readonly string HashSetTypeName =
+        $"global::{typeof(HashSet<object>).Namespace}.{nameof(HashSet<object>)}";
+
     /// <summary>
     /// Appends a generated method that returns its configuration paths as an immutable-by-contract set.
     /// </summary>
@@ -27,11 +35,16 @@ internal static class ConfigurationPathMethodsEmitter
         IReadOnlyCollection<string[]> paths)
     {
         source.IndentByLevel(1)
-            .Append("public override global::System.Collections.Generic.IReadOnlySet<string[]> ")
+            .Append("public override ")
+            .Append(ReadOnlySetTypeName)
+            .Append("<string[]> ")
             .Append(methodName)
             .AppendLine("()");
         source.IndentByLevel(1).AppendLine("{");
-        source.IndentByLevel(2).AppendLine("return new global::System.Collections.Generic.HashSet<string[]>(");
+        source.IndentByLevel(2)
+            .Append("return new ")
+            .Append(HashSetTypeName)
+            .AppendLine("<string[]>(");
         source.IndentByLevel(3).AppendLine("new string[][]");
         source.IndentByLevel(3).AppendLine("{");
         foreach (string[] path in paths)

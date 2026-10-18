@@ -3,6 +3,8 @@
 // (C) 2023-2026 Carsten Igel.
 // Published under MIT License
 
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
@@ -17,19 +19,42 @@ namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters;
 /// <summary>Emits the recursive configuration values included in a generated dump.</summary>
 internal static class ConfigurationDumpValueEmitter
 {
+    /// <summary>The condition guarding read-only simple properties.</summary>
     private const string ConsiderWritableCondition = "if (!considerWritablePropertiesOnly)";
 
+    /// <summary>The variable name holding the flattened configuration values dictionary.</summary>
     private const string ValuesVariableName = "values";
 
+    /// <summary>The variable name holding the reference-cycle guard set.</summary>
     private const string VisitedVariableName = "visited";
 
+    /// <summary>The parameter name of the model instance being dumped.</summary>
     private const string InstanceParameterName = "instance";
 
+    /// <summary>The parameter name holding ancestor configuration key segments.</summary>
     private const string ParentKeysParameterName = "parentKeys";
 
+    /// <summary>The name of the public dump method.</summary>
     private const string DumpMethodName = "DumpConfigurationObject";
 
+    /// <summary>The name of the internal core dump method.</summary>
     private const string DumpCoreMethodName = "DumpConfigurationObjectCore";
+
+    /// <summary>The fully qualified generic type name of Dictionary.</summary>
+    private static readonly string DictionaryTypeName =
+        $"global::{typeof(Dictionary<object, object>).Namespace}.{nameof(Dictionary<object, object>)}";
+
+    /// <summary>The fully qualified property name of StringComparer.Ordinal.</summary>
+    private static readonly string StringComparerOrdinalProperty =
+        $"global::{typeof(StringComparer).FullName}.{nameof(StringComparer.Ordinal)}";
+
+    /// <summary>The fully qualified generic type name of KeyValuePair.</summary>
+    private static readonly string KeyValuePairTypeName =
+        $"global::{typeof(KeyValuePair<object, object>).Namespace}.{nameof(KeyValuePair<object, object>)}";
+
+    /// <summary>The fully qualified method name of string.Join.</summary>
+    private static readonly string StringJoinMethod =
+        $"global::{typeof(string).FullName}.{nameof(string.Join)}";
 
     /// <summary>Emits a dump body that applies the writable-only option before reading simple properties.</summary>
     /// <param name="source">The source buffer receiving generated statements.</param>
@@ -40,8 +65,11 @@ internal static class ConfigurationDumpValueEmitter
         AppendLine(
             source,
             indent,
-            "global::System.Collections.Generic.Dictionary<string, object?> values = new(" +
-            "global::System.StringComparer.Ordinal);");
+            string.Concat(
+                DictionaryTypeName,
+                "<string, object?> values = new(",
+                StringComparerOrdinalProperty,
+                ");"));
         DumpEmissionContext context = new(source, ValuesVariableName, VisitedVariableName);
         foreach (IPropertySymbol property in ConfigurationPathGenerator.GetBindableProperties(type))
         {
@@ -101,6 +129,10 @@ internal static class ConfigurationDumpValueEmitter
         AppendScalar(context, options);
     }
 
+    /// <summary>Emits array value traversal or byte-array scalar assignment.</summary>
+    /// <param name="context">Shared source and traversal state for the dump.</param>
+    /// <param name="options">The array value and its generated expressions.</param>
+    /// <param name="arrayType">The array symbol representing the value type.</param>
     private static void AppendArrayValue(
         DumpEmissionContext context,
         DumpValueOptions options,
@@ -179,6 +211,10 @@ internal static class ConfigurationDumpValueEmitter
         return false;
     }
 
+    /// <summary>Emits dictionary traversal using the dictionary's value type.</summary>
+    /// <param name="context">Shared source and traversal state for the dump.</param>
+    /// <param name="options">The dictionary value and its generated expressions.</param>
+    /// <param name="dictionary">The resolved dictionary interface contract.</param>
     private static void AppendDictionaryCollection(
         DumpEmissionContext context,
         DumpValueOptions options,
@@ -380,6 +416,11 @@ internal static class ConfigurationDumpValueEmitter
         }
     }
 
+    /// <summary>Creates the argument list for a child context dump invocation.</summary>
+    /// <param name="context">Shared source and traversal state for the dump.</param>
+    /// <param name="options">The nested model's dump options.</param>
+    /// <param name="existingContext">Whether the target context is an existing user-provided context.</param>
+    /// <returns>A comma-separated argument string for the context call.</returns>
     private static string CreateContextArguments(
         DumpEmissionContext context,
         DumpValueOptions options,
@@ -405,7 +446,9 @@ internal static class ConfigurationDumpValueEmitter
             context.Source,
             options.Indent,
             string.Concat(
-                "foreach (global::System.Collections.Generic.KeyValuePair<string, object?> ",
+                "foreach (",
+                KeyValuePairTypeName,
+                "<string, object?> ",
                 entryVariable,
                 " in ",
                 options.ContextVariable,
@@ -432,13 +475,19 @@ internal static class ConfigurationDumpValueEmitter
             options.Indent,
             string.Concat(
                 context.ValuesName,
-                "[global::System.String.Join(\":\", ",
+                "[",
+                StringJoinMethod,
+                "(\":\", ",
                 options.KeysExpression,
                 ")] = ",
                 options.ValueExpression,
                 ";"));
     }
 
+    /// <summary>Creates an expression appending the property's configuration key to the ancestor path.</summary>
+    /// <param name="parentKeysExpression">The C# expression representing the parent key path.</param>
+    /// <param name="property">The property whose configuration key is appended.</param>
+    /// <returns>A C# invocation expression producing the combined key path.</returns>
     private static string CreateKeysExpression(string parentKeysExpression, IPropertySymbol property)
     {
         return string.Concat(
@@ -449,6 +498,9 @@ internal static class ConfigurationDumpValueEmitter
             ")");
     }
 
+    /// <summary>Determines whether a type symbol represents a nullable value type.</summary>
+    /// <param name="type">The type symbol to check.</param>
+    /// <returns><see langword="true"/> if the type is <see cref="Nullable{T}"/>; otherwise, <see langword="false"/>.</returns>
     private static bool IsNullableValueType(INamedTypeSymbol type)
     {
         return type.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
@@ -467,6 +519,9 @@ internal static class ConfigurationDumpValueEmitter
         return type is INamedTypeSymbol simpleType && ConfigurationPathGenerator.IsSimpleType(simpleType);
     }
 
+    /// <summary>Determines whether a property is a scalar type without a public setter.</summary>
+    /// <param name="property">The property symbol to check.</param>
+    /// <returns><see langword="true"/> if the property is a read-only scalar; otherwise, <see langword="false"/>.</returns>
     private static bool IsSimpleReadOnlyProperty(IPropertySymbol property)
     {
         return IsSimpleProperty(property.Type) &&
@@ -482,12 +537,22 @@ internal static class ConfigurationDumpValueEmitter
         source.IndentByLevel(indent).AppendLine(value);
     }
 
+    /// <summary>Options for traversing and dumping a property of a model.</summary>
+    /// <param name="Property">The property symbol being evaluated.</param>
+    /// <param name="InstanceExpression">The C# expression accessing the containing instance.</param>
+    /// <param name="ParentKeysExpression">The C# expression accessing the parent key path.</param>
+    /// <param name="Indent">The indentation level for emitted statements.</param>
     private readonly record struct PropertyValueOptions(
         IPropertySymbol Property,
         string InstanceExpression,
         string ParentKeysExpression,
         int Indent);
 
+    /// <summary>Options for invoking a child configuration context.</summary>
+    /// <param name="ContextVariable">The variable or field name holding the context instance.</param>
+    /// <param name="MethodName">The dump method name to invoke on the context.</param>
+    /// <param name="Arguments">The comma-separated argument list passed to the dump method.</param>
+    /// <param name="Indent">The indentation level for emitted statements.</param>
     private readonly record struct ContextCallOptions(
         string ContextVariable,
         string MethodName,

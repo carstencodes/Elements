@@ -3,6 +3,8 @@
 // (C) 2023-2026 Carsten Igel.
 // Published under MIT License
 
+using System;
+using System.CodeDom.Compiler;
 using System.Text;
 using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.CodeGeneration;
 using Microsoft.CodeAnalysis;
@@ -15,7 +17,24 @@ namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters;
 /// <summary>Emits the marker attribute consumed by the configuration path generator.</summary>
 internal static class ConfigurationObjectAttributeEmitter
 {
+    /// <summary>The name of the source generator reported in generated code attributes.</summary>
     private const string GeneratorName = "HedgeCraft.Elements.SourceGenerators.ConfigurationPath";
+
+    /// <summary>The fully qualified type name of the GeneratedCode attribute.</summary>
+    private static readonly string GeneratedCodeAttributeName =
+        $"global::{typeof(GeneratedCodeAttribute).FullName}";
+
+    /// <summary>The fully qualified type name of the AttributeUsage attribute.</summary>
+    private static readonly string AttributeUsageAttributeName =
+        $"global::{typeof(AttributeUsageAttribute).FullName}";
+
+    /// <summary>The fully qualified type name of AttributeTargets.</summary>
+    private static readonly string AttributeTargetsTypeName =
+        $"global::{typeof(AttributeTargets).FullName}";
+
+    /// <summary>The fully qualified type name of Attribute.</summary>
+    private static readonly string AttributeTypeName =
+        $"global::{typeof(Attribute).FullName}";
 
     /// <summary>Registers the source file that declares the marker attribute for consumer model types.</summary>
     /// <param name="context">The source-production context used to add generated code.</param>
@@ -28,17 +47,22 @@ internal static class ConfigurationObjectAttributeEmitter
         source.AppendLine("#nullable enable");
         source.Append("namespace ").Append(rootNamespace).AppendLine(";");
         source.AppendLine();
-        source.AppendLine("[global::System.CodeDom.Compiler.GeneratedCodeAttribute(");
+        source.Append('[').Append(GeneratedCodeAttributeName).AppendLine("(");
         source.IndentByLevel(1)
             .Append(SymbolDisplay.FormatLiteral(GeneratorName, true))
             .Append(", ")
             .Append(SymbolDisplay.FormatLiteral(GeneratorMetadata.Version, true))
             .AppendLine(")]");
-        source.Append("[global::System.AttributeUsage(")
-            .Append("global::System.AttributeTargets.Class | ")
-            .Append("global::System.AttributeTargets.Struct, Inherited = false)]")
+        source.Append('[')
+            .Append(AttributeUsageAttributeName)
+            .Append('(')
+            .Append(AttributeTargetsTypeName).Append('.').Append(nameof(AttributeTargets.Class))
+            .Append(" | ")
+            .Append(AttributeTargetsTypeName).Append('.').Append(nameof(AttributeTargets.Struct))
+            .Append(", Inherited = false)]")
             .AppendLine();
-        source.AppendLine("public sealed class ConfigurationObjectAttribute : global::System.Attribute");
+        source.Append("public sealed class ConfigurationObjectAttribute : ")
+            .AppendLine(AttributeTypeName);
         source.AppendLine("{");
         source.AppendLine("}");
 

@@ -4,6 +4,7 @@
 // Published under MIT License
 
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Security.Cryptography;
@@ -17,9 +18,39 @@ namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters;
 /// <summary>Emits the generated configuration dump API and its recursive value traversal.</summary>
 internal static class ConfigurationDumpMethodEmitter
 {
+    /// <summary>The C# global namespace prefix.</summary>
     private const string GlobalPrefix = "global::";
 
+    /// <summary>The prefix used for cached nested context field identifiers.</summary>
     private const string NestedContextPrefix = "__nestedContext_";
+
+    /// <summary>The fully qualified generic type name of IReadOnlyDictionary.</summary>
+    private static readonly string ReadOnlyDictionaryTypeName =
+        $"global::{typeof(IReadOnlyDictionary<object, object>).Namespace}.{nameof(IReadOnlyDictionary<object, object>)}";
+
+    /// <summary>The fully qualified generic type name of Dictionary.</summary>
+    private static readonly string DictionaryTypeName =
+        $"global::{typeof(Dictionary<object, object>).Namespace}.{nameof(Dictionary<object, object>)}";
+
+    /// <summary>The fully qualified generic type name of HashSet.</summary>
+    private static readonly string HashSetTypeName =
+        $"global::{typeof(HashSet<object>).Namespace}.{nameof(HashSet<object>)}";
+
+    /// <summary>The fully qualified property name of ReferenceEqualityComparer.Instance.</summary>
+    private static readonly string ReferenceEqualityComparerInstanceProperty =
+        $"global::{typeof(EqualityComparer<object>).Namespace}.ReferenceEqualityComparer.Instance";
+
+    /// <summary>The fully qualified method name of Array.Empty.</summary>
+    private static readonly string ArrayEmptyMethod =
+        $"global::{typeof(Array).FullName}.{nameof(Array.Empty)}";
+
+    /// <summary>The fully qualified type name of ArgumentNullException.</summary>
+    private static readonly string ArgumentNullExceptionTypeName =
+        $"global::{typeof(ArgumentNullException).FullName}";
+
+    /// <summary>The fully qualified property name of StringComparer.Ordinal.</summary>
+    private static readonly string StringComparerOrdinalProperty =
+        $"global::{typeof(StringComparer).FullName}.{nameof(StringComparer.Ordinal)}";
 
     /// <summary>Formats model types consistently in emitted signatures and nested context references.</summary>
     private static readonly SymbolDisplayFormat FullyQualifiedFormat = SymbolDisplayFormat.FullyQualifiedFormat;
@@ -48,18 +79,28 @@ internal static class ConfigurationDumpMethodEmitter
     private static void AppendPublicDumpMethod(StringBuilder source, string modelType)
     {
         source.IndentByLevel(1)
-            .Append("public override global::System.Collections.Generic.IReadOnlyDictionary<string, object?> ")
+            .Append("public override ")
+            .Append(ReadOnlyDictionaryTypeName)
+            .Append("<string, object?> ")
             .Append("DumpConfigurationObject(")
             .Append(modelType)
             .AppendLine(" instance, bool considerWritablePropertiesOnly = true, params string[] parentKeys)");
         source.IndentByLevel(1).AppendLine("{");
-        source.IndentByLevel(2).AppendLine("string[] keys = parentKeys ?? global::System.Array.Empty<string>();");
+        source.IndentByLevel(2)
+            .Append("string[] keys = parentKeys ?? ")
+            .Append(ArrayEmptyMethod)
+            .AppendLine("<string>();");
         source.IndentByLevel(2).AppendLine("return this.DumpConfigurationObjectCore(");
         source.IndentByLevel(3).AppendLine("instance,");
         source.IndentByLevel(3).AppendLine("considerWritablePropertiesOnly,");
         source.IndentByLevel(3).AppendLine("keys,");
-        source.IndentByLevel(3).AppendLine("new global::System.Collections.Generic.HashSet<object>(");
-        source.IndentByLevel(4).AppendLine("global::System.Collections.Generic.ReferenceEqualityComparer.Instance));");
+        source.IndentByLevel(3)
+            .Append("new ")
+            .Append(HashSetTypeName)
+            .AppendLine("<object>(");
+        source.IndentByLevel(4)
+            .Append(ReferenceEqualityComparerInstanceProperty)
+            .AppendLine("));");
         source.IndentByLevel(1).AppendLine("}");
         source.AppendLine();
     }
@@ -74,25 +115,34 @@ internal static class ConfigurationDumpMethodEmitter
         string modelType)
     {
         source.IndentByLevel(1)
-            .Append("internal global::System.Collections.Generic.IReadOnlyDictionary<string, object?> ")
+            .Append("internal ")
+            .Append(ReadOnlyDictionaryTypeName)
+            .Append("<string, object?> ")
             .Append("DumpConfigurationObjectCore(")
             .Append(modelType)
-            .AppendLine(
-                " instance, bool considerWritablePropertiesOnly, string[] parentKeys, " +
-                "global::System.Collections.Generic.HashSet<object> visited)");
+            .Append(" instance, bool considerWritablePropertiesOnly, string[] parentKeys, ")
+            .Append(HashSetTypeName)
+            .AppendLine("<object> visited)");
         source.IndentByLevel(1).AppendLine("{");
         if (type.IsReferenceType)
         {
             source.IndentByLevel(2).AppendLine("if (instance is null)");
             source.IndentByLevel(2).AppendLine("{");
-            source.IndentByLevel(3).AppendLine("throw new global::System.ArgumentNullException(nameof(instance));");
+            source.IndentByLevel(3)
+                .Append("throw new ")
+                .Append(ArgumentNullExceptionTypeName)
+                .AppendLine("(nameof(instance));");
             source.IndentByLevel(2).AppendLine("}");
             source.AppendLine();
             source.IndentByLevel(2).AppendLine("if (!visited.Add(instance))");
             source.IndentByLevel(2).AppendLine("{");
             source.IndentByLevel(3)
-                .AppendLine("return new global::System.Collections.Generic.Dictionary<string, object?>(");
-            source.IndentByLevel(4).AppendLine("global::System.StringComparer.Ordinal);");
+                .Append("return new ")
+                .Append(DictionaryTypeName)
+                .AppendLine("<string, object?>(");
+            source.IndentByLevel(4)
+                .Append(StringComparerOrdinalProperty)
+                .AppendLine(");");
             source.IndentByLevel(2).AppendLine("}");
             source.AppendLine();
             source.IndentByLevel(2).AppendLine("try");

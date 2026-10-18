@@ -23,13 +23,37 @@ internal static class ConfigurationContextEmitter
     private const string ContextBaseType =
         "global::HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts.ConfigurationObjectContextBase";
 
+    /// <summary>The name of the source generator reported in generated code attributes.</summary>
     private const string GeneratorName = "HedgeCraft.Elements.SourceGenerators.ConfigurationPath";
 
+    /// <summary>The method name for readable configuration path extraction.</summary>
     private const string ReadablePathsMethodName = "GetReadableConfigurationPaths";
 
+    /// <summary>The method name for writable configuration path extraction.</summary>
     private const string WritablePathsMethodName = "GetWritableConfigurationPaths";
 
+    /// <summary>The C# global namespace prefix.</summary>
     private const string GlobalPrefix = "global::";
+
+    /// <summary>The fully qualified type name of GeneratedCodeAttribute.</summary>
+    private static readonly string GeneratedCodeAttributeName =
+        $"global::{typeof(System.CodeDom.Compiler.GeneratedCodeAttribute).FullName}";
+
+    /// <summary>The fully qualified method name of Array.Copy.</summary>
+    private static readonly string ArrayCopyMethod =
+        $"global::{typeof(Array).FullName}.{nameof(Array.Copy)}";
+
+    /// <summary>The fully qualified generic type name of IEqualityComparer.</summary>
+    private static readonly string EqualityComparerTypeName =
+        $"global::{typeof(IEqualityComparer<object>).Namespace}.{nameof(IEqualityComparer<object>)}";
+
+    /// <summary>The fully qualified method name of Object.ReferenceEquals.</summary>
+    private static readonly string ObjectReferenceEqualsMethod =
+        $"global::{typeof(object).FullName}.{nameof(object.ReferenceEquals)}";
+
+    /// <summary>The fully qualified property name of StringComparer.Ordinal.</summary>
+    private static readonly string StringComparerOrdinalProperty =
+        $"global::{typeof(StringComparer).FullName}.{nameof(StringComparer.Ordinal)}";
 
     /// <summary>
     /// Formats symbols so generated declarations do not depend on the consumer's using directives.
@@ -58,7 +82,7 @@ internal static class ConfigurationContextEmitter
         }
 
         AppendContextDocumentation(source, type);
-        source.AppendLine("[global::System.CodeDom.Compiler.GeneratedCodeAttribute(");
+        source.Append('[').Append(GeneratedCodeAttributeName).AppendLine("(");
         source.IndentByLevel(1)
             .Append(SymbolDisplay.FormatLiteral(GeneratorName, true))
             .Append(", ")
@@ -371,9 +395,12 @@ internal static class ConfigurationContextEmitter
         source.IndentByLevel(2)
             .Append("string[] result = new string[parentKeys.Length + ")
             .AppendLine("nextKeys.Length];");
-        source.IndentByLevel(2).AppendLine("global::System.Array.Copy(parentKeys, result, parentKeys.Length);");
         source.IndentByLevel(2)
-            .Append("global::System.Array.Copy(nextKeys, 0, result, parentKeys.Length, ")
+            .Append(ArrayCopyMethod)
+            .AppendLine("(parentKeys, result, parentKeys.Length);");
+        source.IndentByLevel(2)
+            .Append(ArrayCopyMethod)
+            .Append("(nextKeys, 0, result, parentKeys.Length, ")
             .AppendLine("nextKeys.Length);");
         source.IndentByLevel(2).AppendLine("return result;");
         source.IndentByLevel(1).AppendLine("}");
@@ -388,11 +415,15 @@ internal static class ConfigurationContextEmitter
     {
         source.IndentByLevel(1)
             .Append("private sealed class ConfigurationPathComparer : ")
-            .AppendLine("global::System.Collections.Generic.IEqualityComparer<string[]>");
+            .Append(EqualityComparerTypeName)
+            .AppendLine("<string[]>");
         source.IndentByLevel(1).AppendLine("{");
         source.IndentByLevel(2).AppendLine("public bool Equals(string[]? left, string[]? right)");
         source.IndentByLevel(2).AppendLine("{");
-        source.IndentByLevel(3).AppendLine("if (global::System.Object.ReferenceEquals(left, right))");
+        source.IndentByLevel(3)
+            .Append("if (")
+            .Append(ObjectReferenceEqualsMethod)
+            .AppendLine("(left, right))");
         source.IndentByLevel(3).AppendLine("{");
         source.IndentByLevel(4).AppendLine("return true;");
         source.IndentByLevel(3).AppendLine("}");
@@ -405,8 +436,11 @@ internal static class ConfigurationContextEmitter
         source.IndentByLevel(3).AppendLine("for (int index = 0; index < left.Length; index++)");
         source.IndentByLevel(3).AppendLine("{");
         source.IndentByLevel(4)
-            .Append("if (!global::System.StringComparer.Ordinal.Equals(")
-            .AppendLine("left[index], right[index]))");
+            .Append("if (!")
+            .Append(StringComparerOrdinalProperty)
+            .Append('.')
+            .Append(nameof(StringComparer.Ordinal.Equals))
+            .AppendLine("(left[index], right[index]))");
         source.IndentByLevel(4).AppendLine("{");
         source.IndentByLevel(5).AppendLine("return false;");
         source.IndentByLevel(4).AppendLine("}");
@@ -424,7 +458,10 @@ internal static class ConfigurationContextEmitter
         source.IndentByLevel(4).AppendLine("{");
         source.IndentByLevel(5)
             .Append("hash = (hash * 31) + ")
-            .AppendLine("global::System.StringComparer.Ordinal.GetHashCode(key);");
+            .Append(StringComparerOrdinalProperty)
+            .Append('.')
+            .Append(nameof(StringComparer.Ordinal.GetHashCode))
+            .AppendLine("(key);");
         source.IndentByLevel(5).AppendLine("}");
         source.AppendLine();
         source.IndentByLevel(4).AppendLine("return hash;");

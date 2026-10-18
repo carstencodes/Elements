@@ -9,6 +9,9 @@ namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters.Option
 
 // AI GENERATED START - model: gemini-3.7-flash
 /// <summary>Shared mutable state for one generated configuration dump.</summary>
+/// <param name="source">The string builder receiving generated source statements.</param>
+/// <param name="valuesName">The variable name holding the flattened result dictionary.</param>
+/// <param name="visitedName">The variable name holding visited object references for cycle prevention.</param>
 internal sealed class DumpEmissionContext(StringBuilder source, string valuesName, string visitedName)
 {
     /// <summary>

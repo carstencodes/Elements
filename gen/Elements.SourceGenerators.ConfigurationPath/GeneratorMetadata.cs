@@ -8,13 +8,15 @@ using System.Reflection;
 
 namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
 
-// AI GENERATED START - model: gpt-luna 5.6
+// AI GENERATED START - model: gemini-3.7-flash
 /// <summary>Metadata shared by source files emitted from this generator assembly.</summary>
 internal static class GeneratorMetadata
 {
     /// <summary>The assembly informational version, file version, or documented fallback.</summary>
     internal static readonly string Version = GetVersion();
 
+    /// <summary>Retrieves the assembly informational version or file version.</summary>
+    /// <returns>A string representation of the assembly version.</returns>
     private static string GetVersion()
     {
         Assembly assembly = typeof(ConfigurationPathGenerator).Assembly;

@@ -3,6 +3,7 @@
 // (C) 2023-2026 Carsten Igel.
 // Published under MIT License
 
+using System;
 using System.Text;
 using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.CodeGeneration;
 using HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters.Options;
@@ -14,7 +15,13 @@ namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Emitters;
 /// <summary>Emits indexed and dictionary loops used to flatten collection values.</summary>
 internal static class ConfigurationDumpCollectionEmitter
 {
-    private const string InvariantCulture = "global::System.Globalization.CultureInfo.InvariantCulture";
+    /// <summary>The fully qualified property name of CultureInfo.InvariantCulture.</summary>
+    private static readonly string InvariantCulture =
+        $"global::{typeof(System.Globalization.CultureInfo).FullName}.{nameof(System.Globalization.CultureInfo.InvariantCulture)}";
+
+    /// <summary>The fully qualified method name of Convert.ToString.</summary>
+    private static readonly string ConvertToStringMethod =
+        $"global::{typeof(Convert).FullName}.{nameof(Convert.ToString)}";
 
     /// <summary>Emits a collection traversal loop, choosing indexed keys or dictionary-entry keys.</summary>
     /// <param name="context">Shared source and traversal state for the dump.</param>
@@ -132,7 +139,9 @@ internal static class ConfigurationDumpCollectionEmitter
                 itemKeysName,
                 " = AppendKeys(",
                 options.KeysExpression,
-                ", global::System.Convert.ToString(",
+                ", ",
+                ConvertToStringMethod,
+                "(",
                 entryName,
                 ".Key, ",
                 InvariantCulture,
@@ -192,6 +201,9 @@ internal static class ConfigurationDumpCollectionEmitter
         AppendLine(context.Source, options.Indent, "}");
     }
 
+    /// <summary>Checks whether a nullable underlying type is a scalar rather than a nested model.</summary>
+    /// <param name="underlyingType">The type symbol wrapped in <see cref="Nullable{T}"/>.</param>
+    /// <returns><see langword="true"/> if the underlying type is a scalar or type parameter; otherwise, <see langword="false"/>.</returns>
     private static bool IsNullableScalar(ITypeSymbol underlyingType)
     {
         return underlyingType.TypeKind == TypeKind.TypeParameter ||
