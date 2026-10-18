@@ -3,6 +3,7 @@
 // (C) 2023-2026 Carsten Igel.
 // Published under MIT License
 
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
@@ -25,6 +26,7 @@ public static class UnixOnlyZipFileExtensions
     /// <returns>The created <see cref="ZipArchiveEntry"/> representing the symbolic link.</returns>
     public static ZipArchiveEntry CreateSymbolicLink(this ZipArchive archive, string entryName, FileInfo targetFile, Encoding? currentEncoding = null, CompressionLevel level = default)
     {
+        ArgumentNullException.ThrowIfNull(targetFile);
         return archive.CreateSymbolicLink(targetFile.FullName, entryName, currentEncoding, level);
     }
 
@@ -39,6 +41,7 @@ public static class UnixOnlyZipFileExtensions
     /// <returns>The created <see cref="ZipArchiveEntry"/> representing the symbolic link.</returns>
     public static ZipArchiveEntry CreateSymbolicLink(this ZipArchive archive, string entryName, string targetFilePath, Encoding? currentEncoding = null, CompressionLevel level = default)
     {
+        ArgumentNullException.ThrowIfNull(archive);
         ZipArchiveEntry entry = archive.CreateEntry(entryName, level);
         entry.MakeSymbolicLinkTo(targetFilePath, currentEncoding);
         return entry;

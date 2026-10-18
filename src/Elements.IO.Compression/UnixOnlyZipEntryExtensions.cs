@@ -25,6 +25,7 @@ public static class UnixOnlyZipEntryExtensions
     /// <returns><see langword="true"/> if the entry is a symbolic link; otherwise, <see langword="false"/>.</returns>
     public static bool IsSymbolicLink(this ZipArchiveEntry entry)
     {
+        ArgumentNullException.ThrowIfNull(entry);
         int attributes = entry.ExternalAttributes;
         attributes >>= ByteShiftToShort;
 
@@ -39,6 +40,7 @@ public static class UnixOnlyZipEntryExtensions
     /// <param name="currentEncoding">The encoding used for writing the target path, or <see langword="null"/> for default encoding.</param>
     public static void MakeSymbolicLinkTo(this ZipArchiveEntry entry, FileInfo targetFile, Encoding? currentEncoding = null)
     {
+        ArgumentNullException.ThrowIfNull(targetFile);
         entry.MakeSymbolicLinkTo(targetFile.FullName, currentEncoding);
     }
 
@@ -50,6 +52,7 @@ public static class UnixOnlyZipEntryExtensions
     /// <param name="currentEncoding">The encoding used for writing the target path, or <see langword="null"/> for default encoding.</param>
     public static void MakeSymbolicLinkTo(this ZipArchiveEntry entry, string targetFilePath, Encoding? currentEncoding = null)
     {
+        ArgumentNullException.ThrowIfNull(entry);
         UnixFileMode fileMode = UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute
                                 | UnixFileMode.GroupRead | UnixFileMode.GroupWrite | UnixFileMode.GroupExecute
                                 | UnixFileMode.OtherRead | UnixFileMode.OtherWrite | UnixFileMode.OtherExecute;
