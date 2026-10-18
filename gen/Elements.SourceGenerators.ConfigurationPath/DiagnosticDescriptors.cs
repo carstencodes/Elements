@@ -30,5 +30,25 @@ public static class DiagnosticDescriptors
         defaultSeverity: DiagnosticSeverity.Warning,
         isEnabledByDefault: true,
         description: "Configuration dictionaries should use string-compatible key types.");
+
+    /// <summary>Reported when an extension member name collides with an existing member on the target model type.</summary>
+    public static readonly DiagnosticDescriptor ExtensionMemberCollision = new(
+        id: "HC_CP003",
+        title: "Extension member collision",
+        messageFormat: "Extension member '{0}' collides with an existing member on model type '{1}' and will not be generated",
+        category: "ConfigurationPathGenerator",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Model types should not define members that collide with generated context extension members.");
+
+    /// <summary>Reported when a model type contains unbound generic type parameters preventing extension generation.</summary>
+    public static readonly DiagnosticDescriptor UnboundGenericModel = new(
+        id: "HC_CP004",
+        title: "Unbound generic model type parameter",
+        messageFormat: "Model type '{0}' has unbound generic type parameters and context extensions will not be generated",
+        category: "ConfigurationPathGenerator",
+        defaultSeverity: DiagnosticSeverity.Warning,
+        isEnabledByDefault: true,
+        description: "Extension members can only be generated for fully bound configuration model types.");
 }
 // AI GENERATED END

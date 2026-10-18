@@ -37,5 +37,13 @@ internal static class Expectations
     public const string ReadOnlyPropertyTerm = $"<dt>{nameof(TestRootModel.ReadOnlyName)}</dt>";
 
     public const string ChildContextReference = "<see cref=";
+
+    public const string BoundTypeExtensionsClass = "internal static class BoundTypeContextExtensions";
+
+    public const string GetConfigurationContextMethod = "GetConfigurationContext(this global::Demo.Settings.Root instance)";
+
+    public const string ConfigurationContextMethod = "ConfigurationContext(this global::Demo.Settings.Root instance)";
+
+    public const string LazyCachedField = "private static readonly global::System.Lazy<";
 }
 // AI GENERATED END

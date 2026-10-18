@@ -35,6 +35,10 @@ namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Tests;
     "Major Code Smell",
     "S2325:Methods and properties that don't access instance data should be static",
     Justification = "TUnit test methods must be instance methods.")]
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Major Code Smell",
+    "S3011:Reflection should not be used to increase accessibility of classes, methods, or fields",
+    Justification = "Test suite validates generated internal extension methods and context types.")]
 internal sealed class ConfigurationPathGeneratorTests
 {
     private static readonly ImmutableArray<MetadataReference> PlatformReferences =
@@ -499,6 +503,170 @@ internal sealed class ConfigurationPathGeneratorTests
                 .IsFalse()
                 .Because(
                     "context classes should inherit AppendNestedPaths from base instead of emitting private duplicates");
+        }
+    }
+
+    [Test]
+    [DisplayName("Emits BoundTypeContextExtensions with lazy caching and extension methods")]
+    [Description(
+        "Verifies that BoundTypeContextExtensions is generated with lazy cached context instances and extension methods for bound model types.")]
+    public async Task EmitsBoundTypeContextExtensionsWithLazyCaching()
+    {
+        GeneratorRun run = RunGenerator(Input.NestedModels, "Demo.Settings.Attributes");
+        string? extensionsSource = run.GeneratedSources.FirstOrDefault(static s =>
+            s.Contains(Expectations.BoundTypeExtensionsClass, StringComparison.Ordinal));
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(extensionsSource)
+                .IsNotNull()
+                .Because("the generator should emit BoundTypeContextExtensions class");
+
+            await Assert.That(extensionsSource!.Contains(Expectations.GetConfigurationContextMethod, StringComparison.Ordinal))
+                .IsTrue()
+                .Because("BoundTypeContextExtensions should include GetConfigurationContext extension method for Root");
+
+            await Assert.That(extensionsSource.Contains(Expectations.ConfigurationContextMethod, StringComparison.Ordinal))
+                .IsTrue()
+                .Because("BoundTypeContextExtensions should include ConfigurationContext extension method for Root");
+
+            await Assert.That(extensionsSource.Contains(Expectations.LazyCachedField, StringComparison.Ordinal))
+                .IsTrue()
+                .Because("BoundTypeContextExtensions should declare lazy cached context fields");
+
+            await Assert.That(run.CompilationErrors)
+                .IsEqualTo(string.Empty)
+                .Because("generator run with extensions should compile cleanly");
+        }
+    }
+
+    [Test]
+    [DisplayName("BoundTypeContextExtensions extension methods return cached singleton instances")]
+    [Description(
+        "Verifies at runtime that invoking GetConfigurationContext and ConfigurationContext extension methods on a model instance returns the same cached context singleton.")]
+    public async Task BoundTypeContextExtensionsReturnsCachedInstance()
+    {
+        GeneratorRun run = RunGenerator(Input.NestedModels, "Demo.Settings.Attributes");
+        System.Reflection.Assembly assembly = System.Reflection.Assembly.Load(run.AssemblyImage);
+        Type rootType = assembly.GetType("Demo.Settings.Root")!;
+        Type extensionsType = assembly.GetType("Demo.Settings.BoundTypeContextExtensions")!;
+        object rootInstance = Activator.CreateInstance(rootType)!;
+
+        System.Reflection.MethodInfo getContextMethod = extensionsType.GetMethod(
+            "GetConfigurationContext",
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public,
+            null,
+            [rootType],
+            null)!;
+
+        System.Reflection.MethodInfo contextMethod = extensionsType.GetMethod(
+            "ConfigurationContext",
+            System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public,
+            null,
+            [rootType],
+            null)!;
+
+        object? first = getContextMethod.Invoke(null, [rootInstance]);
+        object? second = getContextMethod.Invoke(null, [rootInstance]);
+        object? third = contextMethod.Invoke(null, [rootInstance]);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(first)
+                .IsNotNull()
+                .Because("extension method should return a non-null context instance");
+
+            await Assert.That(ReferenceEquals(first, second))
+                .IsTrue()
+                .Because("subsequent calls to GetConfigurationContext should return the same cached singleton instance");
+
+            await Assert.That(ReferenceEquals(first, third))
+                .IsTrue()
+                .Because("ConfigurationContext should return the same cached singleton instance as GetConfigurationContext");
+        }
+    }
+
+    [Test]
+    [DisplayName("Reports HC_CP003 diagnostic and suppresses extension generation on member collision")]
+    [Description(
+        "Verifies that HC_CP003 is reported when a model defines a member colliding with candidate extension names, and extension generation is suppressed for that model.")]
+    public async Task ReportsDiagnosticAndSuppressesExtensionOnMemberCollision()
+    {
+        GeneratorRun run = RunGenerator(Input.CollidingMemberScenario, "Collision.Settings.Attributes");
+        Diagnostic? collisionDiagnostic = run.Diagnostics.FirstOrDefault(static d =>
+            string.Equals(d.Id, "HC_CP003", StringComparison.Ordinal));
+        string? extensionsSource = run.GeneratedSources.FirstOrDefault(static s =>
+            s.Contains(Expectations.BoundTypeExtensionsClass, StringComparison.Ordinal));
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(collisionDiagnostic)
+                .IsNotNull()
+                .Because("generator should report HC_CP003 when a candidate model member collides with extension member names");
+
+            await Assert.That(extensionsSource)
+                .IsNull()
+                .Because("BoundTypeContextExtensions should not be emitted when all models in the namespace have collisions");
+        }
+    }
+
+    [Test]
+    [DisplayName("Reports HC_CP004 diagnostic and suppresses extension generation on unbound generic models")]
+    [Description(
+        "Verifies that HC_CP004 is reported when a model has unbound generic type parameters, and extension generation is suppressed for that model.")]
+    public async Task ReportsDiagnosticAndSuppressesExtensionOnUnboundGenericModel()
+    {
+        GeneratorRun run = RunGenerator(Input.UnboundGenericScenario, "Generics.Settings.Attributes");
+        Diagnostic? genericDiagnostic = run.Diagnostics.FirstOrDefault(static d =>
+            string.Equals(d.Id, "HC_CP004", StringComparison.Ordinal));
+        string? extensionsSource = run.GeneratedSources.FirstOrDefault(static s =>
+            s.Contains(Expectations.BoundTypeExtensionsClass, StringComparison.Ordinal));
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(genericDiagnostic)
+                .IsNotNull()
+                .Because("generator should report HC_CP004 when a model has unbound generic type parameters");
+
+            await Assert.That(extensionsSource)
+                .IsNull()
+                .Because("BoundTypeContextExtensions should not be emitted when all models in the namespace are unbound generics");
+        }
+    }
+
+    [Test]
+    [DisplayName("Emits BoundTypeContextExtensions per namespace containing bound models")]
+    [Description(
+        "Verifies that BoundTypeContextExtensions is generated independently for each namespace that contains valid bound configuration models.")]
+    public async Task EmitsBoundTypeContextExtensionsPerNamespace()
+    {
+        GeneratorRun run = RunGenerator(Input.MultiNamespaceScenario, "NamespaceA.Settings.Attributes");
+
+        string[] extensionSources = run.GeneratedSources
+            .Where(static s => s.Contains(Expectations.BoundTypeExtensionsClass, StringComparison.Ordinal))
+            .ToArray();
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(extensionSources.Length)
+                .IsEqualTo(2)
+                .Because("BoundTypeContextExtensions should be emitted for each distinct namespace containing valid models");
+
+            await Assert.That(extensionSources.Any(static s =>
+                    s.Contains("namespace NamespaceA.Settings;", StringComparison.Ordinal) &&
+                    s.Contains("GetConfigurationContext(this global::NamespaceA.Settings.ModelA instance)", StringComparison.Ordinal)))
+                .IsTrue()
+                .Because("NamespaceA.Settings should have its own BoundTypeContextExtensions class with ModelA extensions");
+
+            await Assert.That(extensionSources.Any(static s =>
+                    s.Contains("namespace NamespaceB.Settings;", StringComparison.Ordinal) &&
+                    s.Contains("GetConfigurationContext(this global::NamespaceB.Settings.ModelB instance)", StringComparison.Ordinal)))
+                .IsTrue()
+                .Because("NamespaceB.Settings should have its own BoundTypeContextExtensions class with ModelB extensions");
+
+            await Assert.That(run.CompilationErrors)
+                .IsEqualTo(string.Empty)
+                .Because("multi-namespace generator run should compile without errors");
         }
     }
 

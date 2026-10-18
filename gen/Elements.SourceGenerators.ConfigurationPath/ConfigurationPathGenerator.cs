@@ -154,11 +154,29 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
             VisitType(markedType, contextTypes, activeTypes);
         }
 
+        HashSet<INamedTypeSymbol> extensionValidModels = new(SymbolEqualityComparer.Default);
+        EmitContextClasses(context, contextTypes, extensionValidModels);
+        EmitBoundTypeExtensions(context, extensionValidModels);
+    }
+
+    /// <summary>Validates models, reports diagnostics, and emits context classes.</summary>
+    /// <param name="context">The source-production context.</param>
+    /// <param name="contextTypes">The discovered context model types.</param>
+    /// <param name="extensionValidModels">The destination set receiving models valid for extension generation.</param>
+    private static void EmitContextClasses(
+        SourceProductionContext context,
+        IEnumerable<INamedTypeSymbol> contextTypes,
+        ISet<INamedTypeSymbol> extensionValidModels)
+    {
         foreach (INamedTypeSymbol type in contextTypes.OrderBy(
                      static type => type.ToDisplayString(FullyQualifiedFormat),
                      StringComparer.Ordinal))
         {
             ValidateModel(context, type);
+            if (ValidateExtensionCandidate(context, type))
+            {
+                extensionValidModels.Add(type);
+            }
 
             if (FindExistingContext(type) is not null)
             {
@@ -170,6 +188,68 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
                 ConfigurationContextEmitter.CreateHintName(type),
                 SourceText.From(source, Encoding.UTF8));
         }
+    }
+
+    /// <summary>Emits BoundTypeContextExtensions classes grouped by namespace.</summary>
+    /// <param name="context">The source-production context.</param>
+    /// <param name="extensionValidModels">The set of models valid for extensions.</param>
+    private static void EmitBoundTypeExtensions(
+        SourceProductionContext context,
+        IEnumerable<INamedTypeSymbol> extensionValidModels)
+    {
+        foreach (IGrouping<string, INamedTypeSymbol> group in extensionValidModels
+                     .GroupBy(static type => GetNamespaceName(type), StringComparer.Ordinal)
+                     .OrderBy(static group => group.Key, StringComparer.Ordinal))
+        {
+            string namespaceName = group.Key;
+            string source = BoundTypeContextExtensionsEmitter.CreateSource(namespaceName, group);
+            context.AddSource(
+                BoundTypeContextExtensionsEmitter.CreateHintName(namespaceName),
+                SourceText.From(source, Encoding.UTF8));
+        }
+    }
+
+    /// <summary>Validates whether a model is eligible for extension generation, reporting diagnostics when invalid.</summary>
+    /// <param name="context">The source-production context.</param>
+    /// <param name="type">The model symbol to validate.</param>
+    /// <returns><see langword="true"/> when the model is valid for extensions; otherwise, <see langword="false"/>.</returns>
+    private static bool ValidateExtensionCandidate(SourceProductionContext context, INamedTypeSymbol type)
+    {
+        bool isValid = true;
+        if (HasUnboundGenericParameters(type))
+        {
+            Location location = type.Locations.FirstOrDefault() ?? Location.None;
+            context.ReportDiagnostic(
+                Diagnostic.Create(
+                    DiagnosticDescriptors.UnboundGenericModel,
+                    location,
+                    type.ToDisplayString(FullyQualifiedFormat)));
+            isValid = false;
+        }
+
+        if (HasExtensionMemberCollision(type, out string? collidingMember))
+        {
+            Location location = type.Locations.FirstOrDefault() ?? Location.None;
+            context.ReportDiagnostic(
+                Diagnostic.Create(
+                    DiagnosticDescriptors.ExtensionMemberCollision,
+                    location,
+                    collidingMember,
+                    type.ToDisplayString(FullyQualifiedFormat)));
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    /// <summary>Returns a namespace without the global:: prefix for generated declarations.</summary>
+    /// <param name="type">The type whose containing namespace is requested.</param>
+    /// <returns>An empty string for the global namespace, otherwise the namespace's C# name.</returns>
+    internal static string GetNamespaceName(INamedTypeSymbol type)
+    {
+        return type.ContainingNamespace.IsGlobalNamespace
+            ? string.Empty
+            : type.ContainingNamespace.ToDisplayString(FullyQualifiedFormat).Substring("global::".Length);
     }
 
     /// <summary>Validates a model symbol and reports diagnostic warnings for unsupported configurations.</summary>
@@ -215,6 +295,60 @@ public sealed class ConfigurationPathGenerator : IIncrementalGenerator
                 }
             }
         }
+    }
+
+    /// <summary>Checks whether a candidate model symbol has any unbound generic type parameters.</summary>
+    /// <param name="type">The model symbol to inspect.</param>
+    /// <returns><see langword="true"/> when the type has unbound generic parameters; otherwise, <see langword="false"/>.</returns>
+    internal static bool HasUnboundGenericParameters(INamedTypeSymbol type)
+    {
+        if (!type.IsGenericType)
+        {
+            return false;
+        }
+
+        if (type.IsUnboundGenericType)
+        {
+            return true;
+        }
+
+        if (type.TypeParameters.Length > 0 &&
+            (type.TypeArguments.Length == 0 ||
+             type.TypeArguments.Any(static arg => arg.TypeKind == TypeKind.TypeParameter)))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Checks whether any member of the target model collides with candidate extension member names.</summary>
+    /// <param name="type">The model symbol to inspect.</param>
+    /// <param name="collidingMember">The name of the colliding member if found.</param>
+    /// <returns><see langword="true"/> when a collision is found; otherwise, <see langword="false"/>.</returns>
+    internal static bool HasExtensionMemberCollision(INamedTypeSymbol type, out string? collidingMember)
+    {
+        string[] candidateNames = ["GetConfigurationContext", "ConfigurationContext"];
+        for (INamedTypeSymbol? current = type;
+             current is not null &&
+             current.SpecialType != SpecialType.System_Object &&
+             current.SpecialType != SpecialType.System_ValueType;
+             current = current.BaseType)
+        {
+            foreach (ISymbol member in current.GetMembers())
+            {
+                string? match = candidateNames.FirstOrDefault(name =>
+                    string.Equals(member.Name, name, StringComparison.Ordinal));
+                if (match is not null)
+                {
+                    collidingMember = match;
+                    return true;
+                }
+            }
+        }
+
+        collidingMember = null;
+        return false;
     }
 
     /// <summary>Adds non-scalar model types reachable through properties, arrays, and collection values.</summary>

@@ -331,5 +331,110 @@ internal static class Input
                                               }
                                           }
                                           """;
+
+    public const string CollidingMemberScenario = """
+                                                  namespace Collision.Settings
+                                                  {
+                                                      using Collision.Settings.Attributes;
+
+                                                      [ConfigurationObject]
+                                                      public class CollidingModel
+                                                      {
+                                                          public string Name { get; set; } = string.Empty;
+                                                          public string GetConfigurationContext { get; set; } = string.Empty;
+                                                      }
+                                                  }
+
+                                                  namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts
+                                                  {
+                                                      using System;
+                                                      using System.Collections.Generic;
+
+                                                      public abstract class ConfigurationObjectContextBase<T>
+                                                      {
+                                                          public abstract IReadOnlySet<string[]> GetReadableConfigurationPaths();
+
+                                                          public abstract IReadOnlySet<string[]> GetWritableConfigurationPaths();
+
+                                                          public abstract IReadOnlyDictionary<string, object?> DumpConfigurationObject(
+                                                              T instance,
+                                                              bool considerWritablePropertiesOnly = true,
+                                                              params string[] parentKeys);
+                                                      }
+                                                  }
+                                                  """;
+
+    public const string UnboundGenericScenario = """
+                                                 namespace Generics.Settings
+                                                 {
+                                                     using Generics.Settings.Attributes;
+
+                                                     [ConfigurationObject]
+                                                     public class UnboundContainer<T>
+                                                     {
+                                                         public T? Value { get; set; }
+                                                     }
+                                                 }
+
+                                                 namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts
+                                                 {
+                                                     using System;
+                                                     using System.Collections.Generic;
+
+                                                     public abstract class ConfigurationObjectContextBase<T>
+                                                     {
+                                                         public abstract IReadOnlySet<string[]> GetReadableConfigurationPaths();
+
+                                                         public abstract IReadOnlySet<string[]> GetWritableConfigurationPaths();
+
+                                                         public abstract IReadOnlyDictionary<string, object?> DumpConfigurationObject(
+                                                             T instance,
+                                                             bool considerWritablePropertiesOnly = true,
+                                                             params string[] parentKeys);
+                                                     }
+                                                 }
+                                                 """;
+
+    public const string MultiNamespaceScenario = """
+                                                 namespace NamespaceA.Settings
+                                                 {
+                                                     using NamespaceA.Settings.Attributes;
+
+                                                     [ConfigurationObject]
+                                                     public class ModelA
+                                                     {
+                                                         public string Title { get; set; } = string.Empty;
+                                                     }
+                                                 }
+
+                                                 namespace NamespaceB.Settings
+                                                 {
+                                                     using NamespaceA.Settings.Attributes;
+
+                                                     [ConfigurationObject]
+                                                     public class ModelB
+                                                     {
+                                                         public int Count { get; set; }
+                                                     }
+                                                 }
+
+                                                 namespace HedgeCraft.Elements.Extensions.Configuration.UserSettings.Contexts
+                                                 {
+                                                     using System;
+                                                     using System.Collections.Generic;
+
+                                                     public abstract class ConfigurationObjectContextBase<T>
+                                                     {
+                                                         public abstract IReadOnlySet<string[]> GetReadableConfigurationPaths();
+
+                                                         public abstract IReadOnlySet<string[]> GetWritableConfigurationPaths();
+
+                                                         public abstract IReadOnlyDictionary<string, object?> DumpConfigurationObject(
+                                                             T instance,
+                                                             bool considerWritablePropertiesOnly = true,
+                                                             params string[] parentKeys);
+                                                     }
+                                                 }
+                                                 """;
 }
 // AI GENERATED END
