@@ -7,15 +7,15 @@
           "src": "./src",
           "files": [
             "**/*.csproj"
-	  ],
-	  "exclude": ["**/*.msbuildproj"]
-	},
+          ],
+          "exclude": ["**/*.msbuildproj"]
+        },
         {
           "src": "./gen",
           "files": [
             "**/*.csproj"
           ]
-	}
+        }
       ],
       "dest": "api"
     }
@@ -33,12 +33,12 @@
         ]
       },
       {
-	"files": [
-	  "*.{md,yml}"
-	],
-	"exclude": [
-	  "ReadMe.md"
-	]
+        "files": [
+          "*.{md,yml}"
+        ],
+        "exclude": [
+          "ReadMe.md"
+        ]
       }
     ],
     "resource": [
