@@ -67,7 +67,7 @@ public readonly struct HandlerChainLink<TResult> : IHandler<HandlerChainLink<TRe
             return this.handleRequest();
         }
 
-        if (!HandlerChainLink<TResult>.None.Equals(this.NextHandler))
+        if (!this.NextHandler.IsNone())
         {
             return this.NextHandler.HandleCurrentRequest();
         }
@@ -79,7 +79,7 @@ public readonly struct HandlerChainLink<TResult> : IHandler<HandlerChainLink<TRe
     /// <summary>
     /// Gets the next handler link in the chain.
     /// </summary>
-    public IHandler<HandlerChainLink<TResult>, TResult> NextHandler { get; } = None;
+    public IHandler<HandlerChainLink<TResult>, TResult> NextHandler { get; } = new HandlerChainLink<TResult>();
 
     /// <summary>
     /// Indicates whether the current link is equal to another link.
@@ -135,5 +135,17 @@ public readonly struct HandlerChainLink<TResult> : IHandler<HandlerChainLink<TRe
     public static bool operator !=(HandlerChainLink<TResult> left, HandlerChainLink<TResult> right)
     {
         return !(left == right);
+    }
+
+    /// <summary>
+    /// Determines whether the current handler link represents a terminal or uninitialized state in the chain.
+    /// </summary>
+    /// <returns>
+    /// A boolean value indicating whether the current handler link is considered "none."
+    /// </returns>
+    private bool IsNone()
+    {
+        HandlerChainLink<TResult> none = new();
+        return this.Equals(none);
     }
 }
