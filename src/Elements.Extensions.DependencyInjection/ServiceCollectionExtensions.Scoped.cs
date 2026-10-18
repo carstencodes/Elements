@@ -25,7 +25,7 @@ public static partial class ServiceCollectionExtensions
     {
         return services
             .AddSingleton(factory)
-            .AddScoped<IServiceFactory<TService, T1>, ServiceFactory1<TService, T1>>();
+            .AddScoped<IServiceFactory<TService, T1>, ServiceFactory<TService, T1>>();
     }
 
     /// <summary>
