@@ -9,7 +9,7 @@ namespace HedgeCraft.Elements.SourceGenerators.ConfigurationPath;
 
 // AI GENERATED START - model: gemini-3.7-flash
 /// <summary>Provides diagnostic descriptors for configuration path generation issues.</summary>
-internal static class DiagnosticDescriptors
+public static class DiagnosticDescriptors
 {
     /// <summary>Reported when multiple properties in the same model resolve to identical configuration keys.</summary>
     public static readonly DiagnosticDescriptor DuplicateConfigurationKey = new(

@@ -1,6 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
-    <InternalsVisibleTo Include="HedgeCraft.Elements.SourceGenerators.ConfigurationPath.Tests" />
     <None Update="buildTransitive/HedgeCraft.Elements.SourceGenerators.ConfigurationPath.props"
           Pack="true"
           PackagePath="buildTransitive/HedgeCraft.Elements.SourceGenerators.ConfigurationPath.props"
