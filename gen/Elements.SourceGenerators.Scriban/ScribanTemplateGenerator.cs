@@ -21,6 +21,9 @@ using Scriban.Parsing;
 
 namespace HedgeCraft.Elements.SourceGenerators.Scriban;
 
+/// <summary>
+/// An incremental source generator that transforms Scriban templates paired with JSON configuration files into C# source code.
+/// </summary>
 [Generator]
 public class ScribanTemplateGenerator : IIncrementalGenerator
 {
@@ -92,6 +95,7 @@ public class ScribanTemplateGenerator : IIncrementalGenerator
 
     private const string GeneratedFileExtension = ".g.cs";
 
+    /// <inheritdoc />
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         IncrementalValuesProvider<AdditionalText> configFileProviders = context.AdditionalTextsProvider.Where(

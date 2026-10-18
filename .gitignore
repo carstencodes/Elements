@@ -410,3 +410,8 @@ FodyWeavers.xsd
 # Added by cargo
 
 /target
+
+# docfx related folders
+api/
+_site/
+

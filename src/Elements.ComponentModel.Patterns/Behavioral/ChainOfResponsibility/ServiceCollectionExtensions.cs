@@ -10,8 +10,22 @@ using HedgeCraft.Elements.ComponentModel.Patterns.Behavioral.ChainOfResponsibili
 
 namespace Microsoft.Extensions.DependencyInjection;
 
+/// <summary>
+/// Provides extension methods for configuring chain of responsibility handlers in an <see cref="IServiceCollection"/>.
+/// </summary>
 public static class ServiceCollectionExtensions
 {
+    /// <summary>
+    /// Registers a service implementation that dispatches requests across a chain of responsibility without a return value.
+    /// </summary>
+    /// <typeparam name="TService">The base service type represented by chain members.</typeparam>
+    /// <typeparam name="TServiceHandlerImpl">The implementation type created from the chain handler.</typeparam>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="handlerFunctionFactory">A factory extracting the execution action from each service instance.</param>
+    /// <param name="canHandleFunctionFactory">A factory extracting the predicate determining whether a service can handle the request.</param>
+    /// <param name="serviceFromHandlerFactory">A factory creating the implementation instance given the coordinated handler.</param>
+    /// <param name="lifetime">The service lifetime for the registered implementation.</param>
+    /// <returns>The service collection instance.</returns>
     public static IServiceCollection UseChainOfResponsibility<TService, TServiceHandlerImpl>(this IServiceCollection services,
         Func<TService, Action> handlerFunctionFactory,
         Func<TService, Func<bool>> canHandleFunctionFactory,
@@ -49,6 +63,18 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
+    /// <summary>
+    /// Registers a service implementation that dispatches requests across a chain of responsibility, returning a result.
+    /// </summary>
+    /// <typeparam name="TService">The base service type represented by chain members.</typeparam>
+    /// <typeparam name="TServiceHandlerImpl">The implementation type created from the chain handler.</typeparam>
+    /// <typeparam name="TResult">The result type produced by handling the request.</typeparam>
+    /// <param name="services">The service collection to configure.</param>
+    /// <param name="handlerFunctionFactory">A factory extracting the result-producing function from each service instance.</param>
+    /// <param name="canHandleFunctionFactory">A factory extracting the predicate determining whether a service can handle the request.</param>
+    /// <param name="serviceFromHandlerFactory">A factory creating the implementation instance given the coordinated handler.</param>
+    /// <param name="lifetime">The service lifetime for the registered implementation.</param>
+    /// <returns>The service collection instance.</returns>
     public static IServiceCollection UseChainOfResponsibility<TService, TServiceHandlerImpl, TResult>(this IServiceCollection services,
         Func<TService, Func<TResult>> handlerFunctionFactory,
         Func<TService, Func<bool>> canHandleFunctionFactory,

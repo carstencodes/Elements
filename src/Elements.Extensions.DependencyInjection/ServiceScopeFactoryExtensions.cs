@@ -7,6 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace HedgeCraft.Elements.Extensions.DependencyInjection;
 
+/// <summary>
+/// Provides extension methods for <see cref="IServiceScopeFactory"/>.
+/// </summary>
 public static class ServiceScopeFactoryExtensions
 {
 }
