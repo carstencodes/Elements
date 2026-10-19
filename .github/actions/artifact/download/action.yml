@@ -14,7 +14,7 @@ runs:
   using: "composite"
   steps:
     - name: Download artifact
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
       with:
         name: ${{ inputs.name }}.tar.gz
         path: ${{ runner.temp }}/artifacts/${{ inputs.path }}
