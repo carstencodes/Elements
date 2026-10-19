@@ -33,7 +33,9 @@ pub unsafe extern "C" fn proc_get_process_ids(
         return CallResult::NullParameter.into();
     }
 
-    let (current_user_id, current_group_id, elevated_user_id, elevated_group_id) = proc::get_current_user_ids();
+    let (current_user_id, current_group_id, elevated_user_id, elevated_group_id) =
+        proc::get_current_user_ids();
+``
 
     let tmp_current_user_id = current_user_id;
     let tmp_current_group_id = current_group_id;
