@@ -13,6 +13,8 @@ on:
 env:
   NUGET_PACKAGES: ${{ github.workspace }}/deps/nuget/
 
+permissions: read-all
+
 jobs:
 
 #####################################################################
