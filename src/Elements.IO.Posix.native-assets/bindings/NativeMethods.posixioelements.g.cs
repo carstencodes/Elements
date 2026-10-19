@@ -31,7 +31,7 @@ namespace HedgeCraft.Elements.IO.Posix.Internal
         ///  The caller must ensure that all pointer arguments are valid and non-null.
         /// </summary>
         [DllImport(__DllName, EntryPoint = "proc_get_process_ids", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-        internal static extern ushort proc_get_process_ids(uint* p_uid, uint* p_gid, uint* p_euid, uint* p_egid);
+        internal static extern ushort proc_get_process_ids(uint* ptr_user_id, uint* ptr_group_id, uint* ptr_elevated_user_id, uint* ptr_elevated_group_id);
 
 
     }
