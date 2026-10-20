@@ -37,8 +37,8 @@ public static partial class ServiceCollectionExtensions
     {
         Func<IReadOnlyCollection<KeyValuePair<object, Type>>> serviceKeyFactory = services
             .Where(descriptor =>
-                descriptor.IsKeyedService 
-                && descriptor.ServiceType.IsAssignableTo(typeof(TService)) 
+                descriptor.IsKeyedService
+                && descriptor.ServiceType.IsAssignableTo(typeof(TService))
                 && descriptor.ServiceKey != null)
             .Select(descriptor => new KeyValuePair<object, Type>(descriptor.ServiceKey!,
                 descriptor.KeyedImplementationType
