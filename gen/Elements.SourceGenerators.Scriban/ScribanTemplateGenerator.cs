@@ -96,7 +96,7 @@ public class ScribanTemplateGenerator : IIncrementalGenerator
                 messageFormat: Localizables.Messages.EmptyTemplate,
                 category: TemplateCategory,
                 defaultSeverity: DiagnosticSeverity.Error,
-                isEnabledByDefault: true, 
+                isEnabledByDefault: true,
                 description: "The template is empty."
             );
 
