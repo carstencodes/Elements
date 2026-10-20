@@ -18,14 +18,14 @@ namespace HedgeCraft.Elements.Extensions.Configuration.CommandLine;
 /// Represents a configuration source that binds command-line options to configuration keys.
 /// </summary>
 /// <param name="command">The root command containing options.</param>
-public sealed partial class CommandLineConfigurationSource(RootCommand command) : IConfigurationSource, IFormatProviderSource
+public sealed class CommandLineConfigurationSource(RootCommand command) : IConfigurationSource, IFormatProviderSource
 {
     private readonly Dictionary<string, OptionHolderBase> commandLineBindings = new(StringComparer.Ordinal);
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CommandLineConfigurationSource"/> class.
     /// </summary>
-    public CommandLineConfigurationSource() : this(new())
+    public CommandLineConfigurationSource() : this([])
     {
     }
 
