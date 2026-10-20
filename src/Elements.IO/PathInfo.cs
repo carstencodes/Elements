@@ -120,7 +120,7 @@ public sealed class PathInfo : FileSystemInfo
     {
         List<string> parts =
         [
-            this.FullName
+            this.FullName,
         ];
         parts.AddRange(pathParts);
         string finalPath = Path.Combine(parts.ToArray());

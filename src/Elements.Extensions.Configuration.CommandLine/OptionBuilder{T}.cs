@@ -19,7 +19,7 @@ namespace HedgeCraft.Elements.Extensions.Configuration.CommandLine;
 /// <param name="name">The name of the option.</param>
 internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T : notnull
 {
-    private readonly List<Action<Option<T>>> configureOptions = new();
+    private readonly List<Action<Option<T>>> configureOptions = [];
 
     /// <inheritdoc />
     public IOptionBuilder<T> AsGlobal()
