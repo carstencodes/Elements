@@ -59,6 +59,7 @@
       <_DotnetSarifToolCliArgs>$(_DotnetSarifToolCliArgs) run</_DotnetSarifToolCliArgs>
       <_DotnetSarifToolCliArgs>$(_DotnetSarifToolCliArgs) sarif</_DotnetSarifToolCliArgs>
       <_DotnetSarifToolCliArgs>$(_DotnetSarifToolCliArgs) merge</_DotnetSarifToolCliArgs>
+      <_DotnetSarifToolCliArgs>$(_DotnetSarifToolCliArgs) --merge-empty-logs</_DotnetSarifToolCliArgs>
       <_DotnetSarifToolCliArgs>$(_DotnetSarifToolCliArgs) --output-file &quot;$(ArtifactsPath)/$(SolutionName).sarif&quot;</_DotnetSarifToolCliArgs>
       <_DotnetSarifToolCliArgs>$(_DotnetSarifToolCliArgs) &quot;@(SarifResultsFile, '&quot; &quot;')&quot;</_DotnetSarifToolCliArgs>
     </PropertyGroup>
