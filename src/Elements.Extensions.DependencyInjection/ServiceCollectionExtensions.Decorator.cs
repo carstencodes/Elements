@@ -57,7 +57,7 @@ public static partial class ServiceCollectionExtensions
             typeof(TInterface),
             sp => objectFactory(sp, new[]
             {
-                sp.CreateInstance(existingDescriptor)
+                sp.CreateInstance(existingDescriptor),
             }),
             existingDescriptor.Lifetime)
         );
