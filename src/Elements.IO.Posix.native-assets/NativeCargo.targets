@@ -11,8 +11,8 @@
       RunNativeCargoClean
     </CoreCleanDependsOn>
     <GenerateCycloneDxDocumentDependsOn>
-        CycloneDxSetToolConfigurationRustProj;
-        $(GenerateCycloneDxDocumentDependsOn)
+      CycloneDxSetToolConfigurationRustProj;
+      $(GenerateCycloneDxDocumentDependsOn)
     </GenerateCycloneDxDocumentDependsOn>
     <PackCycloneDxFileDependsOn>
       MoveCycloneDxFileToResultsFolder;
@@ -121,9 +121,14 @@
   </Target>
 
   <Target Name="RunNativeCargoBuild" DependsOnTargets="CargoGetTargetDirectories;CargoCreateSarifFileWithClippy;CreateSbomCycloneDxUsingCargo" Inputs="@(RustSourceFile);@(RustBuildFile)" Outputs="@(CargoOutputFiles)" Returns="@(CreatedFilesByCargoBuild)">
+    <ItemGroup>
+      <_CargoBuildLocalEnvironment Include="@(CargoEnvironment)" />
+      <_CargoBuildLocalEnvironment Include="RUSTFLAGS" Value="-D warnings" Condition="'$(TreatWarningsAsErrors)' == 'true'" />
+    </ItemGroup>
+
     <Exec
         Command="cargo %(BuildIdentifiers.CargoBuildCommand) $(CargoConfiguration) --target-dir &quot;$(CargoTargetDirectory)&quot; --target &quot;%(BuildIdentifiers.CargoRustTarget)&quot;"
-        EnvironmentVariables="@(CargoEnvironment->'%(Identity)=%(Value)')"
+        EnvironmentVariables="@(_CargoBuildLocalEnvironment->'%(Identity)=%(Value)')"
         />
 
     <ItemGroup>
