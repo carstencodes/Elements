@@ -32,7 +32,7 @@ internal sealed class ReconfigureConfigurationValueAction(CommandLineConfigurati
         {
             SynchronousCommandLineAction synchronousAction => synchronousAction.Invoke(parseResult),
             AsynchronousCommandLineAction asynchronousAction => await asynchronousAction.InvokeAsync(parseResult, cancellationToken).ConfigureAwait(false),
-            _ => 0
+            _ => 0,
         };
 
         string key = binding.Key;
