@@ -82,7 +82,9 @@
   "packageRules": [
     {
       "matchManagers": ["nuget"],
-      "postUpdateOptions": ["nugetUpdateLockFiles"],
+      "lockFileMaintenance": {
+        "enabled": true
+      },
       "minimumReleaseAge": "3 days"
     },
     {
