@@ -116,6 +116,10 @@
     {
       "matchUpdateTypes": ["lockFileMaintenance"],
       "minimumReleaseAge": "0"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "minimumReleaseAge": "0"
     }
   ]
 }
