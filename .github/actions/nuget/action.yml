@@ -1,12 +1,20 @@
 name: Publish packages
 description: Packages from artifacts/packages will be published
 
+inputs:
+  publish-to-nuget:
+    description: Publish tagged packages to NuGet.org instead of GitHub Packages
+    required: false
+    default: 'false'
+
 runs:
   using: composite
   steps:
     - name: Determine publishing mode
       id: mode
       shell: sh
+      env:
+        PUBLISH_TO_NUGET: ${{ inputs.publish-to-nuget }}
       run: |
         github_source="${{ github.server_url }}/_registry/nuget/${{ github.repository_owner }}/index.json"
         nuget_source="https://api.nuget.org/v3/index.json"
@@ -21,9 +29,15 @@ runs:
 
           *:refs/tags/*)
             publish=true
-            destination=nuget
-            source="$nuget_source"
-            echo "::notice title=Target-Feed::The packages shall be stored ad nuget.org"
+            if [ "$PUBLISH_TO_NUGET" = "true" ]; then
+              destination=nuget
+              source="$nuget_source"
+              echo "::notice title=Target-Feed::The packages shall be stored at nuget.org"
+            else
+              destination=github
+              source="$github_source"
+              echo "::notice title=Target-Feed::The packages shall be stored at github.com"
+            fi
             ;;
 
           workflow_dispatch:*|*:refs/heads/main)
@@ -88,7 +102,7 @@ runs:
           [ -f "$package" ] || continue
 
           dotnet nuget push "$package" \
-            --source "${{ steps.nuget.outputs.source }}" \
+            --source "${{ steps.mode.outputs.source }}" \
             --api-key "$api_key" \
             $symbols_store_arguments \
             --skip-duplicate
