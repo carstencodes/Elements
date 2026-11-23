@@ -138,7 +138,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
     /// <inheritdoc />
     public IOptionBuilder<T> WithAlias(string aliasName)
     {
-        static void ConfigureOption(Option<T> option)
+        void ConfigureOption(Option<T> option)
         {
             option.Aliases.Add(aliasName);
         }
@@ -150,7 +150,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
     /// <inheritdoc />
     public IOptionBuilder<T> WithAliases(string[] aliases)
     {
-        static void ConfigureOption(Option<T> option)
+        void ConfigureOption(Option<T> option)
         {
             foreach (string alias in aliases)
             {
@@ -165,7 +165,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
     /// <inheritdoc />
     public IOptionBuilder<T> WithAllowedValues(IEnumerable<string> allowedValues)
     {
-        static void ConfigureOption(Option<T> option)
+        void ConfigureOption(Option<T> option)
         {
             option.AcceptOnlyFromAmong(allowedValues.ToArray());
         }
@@ -177,7 +177,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
     /// <inheritdoc />
     public IOptionBuilder<T> WithArity(ArgumentArity arity)
     {
-        static void ConfigureOption(Option<T> option)
+        void ConfigureOption(Option<T> option)
         {
             option.Arity = arity;
         }
@@ -189,7 +189,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
     /// <inheritdoc />
     public IOptionBuilder<T> WithCommandLineAction(CommandLineAction action)
     {
-        static void ConfigureOption(Option<T> option)
+        void ConfigureOption(Option<T> option)
         {
             option.Action = action;
         }
@@ -201,7 +201,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
     /// <inheritdoc />
     public IOptionBuilder<T> WithCustomParser(Func<ArgumentResult, T> parser)
     {
-        static void ConfigureOption(Option<T> option)
+        void ConfigureOption(Option<T> option)
         {
             option.CustomParser = parser;
         }
@@ -219,7 +219,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
     /// <inheritdoc />
     public IOptionBuilder<T> WithDefaultValueFactory(Func<ArgumentResult, T> factory)
     {
-        static void ConfigureOption(Option<T> option)
+        void ConfigureOption(Option<T> option)
         {
             option.DefaultValueFactory = factory;
         }
@@ -231,7 +231,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
     /// <inheritdoc />
     public IOptionBuilder<T> WithDescription(string description)
     {
-        static void ConfigureOption(Option<T> option)
+        void ConfigureOption(Option<T> option)
         {
             option.Description = description;
         }
@@ -243,7 +243,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
     /// <inheritdoc />
     public IOptionBuilder<T> WithHelpText(string helpText)
     {
-        static void ConfigureOption(Option<T> option)
+        void ConfigureOption(Option<T> option)
         {
             option.HelpName = helpText;
         }
@@ -255,7 +255,7 @@ internal sealed class OptionBuilder<T>(string name) : IOptionBuilder<T> where T 
     /// <inheritdoc />
     public IOptionBuilder<T> WithValidator(Action<OptionResult> validator)
     {
-        static void ConfigureOption(Option<T> option)
+        void ConfigureOption(Option<T> option)
         {
             option.Validators.Add(validator);
         }
